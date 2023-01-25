@@ -1,0 +1,54 @@
+{
+    "notes": [
+        {
+            "id": "b3924ff1-51f8-44f0-97ee-14141083b23c",
+            "context": "context1",
+            "role": "role1",
+            "clientId": "clientId1",
+            "partyId": "a37b06cc-edda-459d-860c-9f8cd1e24b00",
+            "subject": "subject3",
+            "body": "body3",
+            "caseId": "caseId3",
+            "caseType": "caseType3",
+            "caseLink": "caseLink3",
+            "externalCaseId": "externalCaseId3",
+            "createdBy": "createdBy3",
+            "modifiedBy": "updatedBy3",
+            "created": "2022-03-01T12:14:32.234+01:00",
+            "modified": "2022-03-03T12:14:32.234+01:00"
+        },
+        {
+            "id": "3f253188-7dc2-479f-8872-619ad2d71b5c",
+            "context": "context1",
+            "role": "role1",
+            "clientId": "clientId1",
+            "partyId": "a37b06cc-edda-459d-860c-9f8cd1e24b00",
+            "subject": "subject2",
+            "body": "body2",
+            "createdBy": "createdBy2",
+            "modifiedBy": "updatedBy2",
+            "created": "2022-02-01T12:14:32.234+01:00",
+            "modified": "2022-02-03T12:14:32.234+01:00"
+        },
+        {
+            "id": "134aedef-2d33-410b-8654-207e9644fc3d",
+            "context": "context1",
+            "role": "role1",
+            "clientId": "clientId1",
+            "partyId": "a37b06cc-edda-459d-860c-9f8cd1e24b00",
+            "subject": "subject1",
+            "body": "body1",
+            "createdBy": "createdBy1",
+            "modifiedBy": "updatedBy1",
+            "created": "2022-01-01T12:14:32.234+01:00",
+            "modified": "2022-01-03T12:14:32.234+01:00"
+        }
+    ],
+    "_meta": {
+        "page": 1,
+        "limit": 100,
+        "count": 3,
+        "totalRecords": 3,
+        "totalPages": 1
+    }
+}

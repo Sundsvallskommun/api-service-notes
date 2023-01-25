@@ -1,0 +1,13 @@
+{
+	"partyId": "ffd20e9d-5987-417a-b8cd-a4617ac83a88",
+	"subject": "This is a subject",
+	"body": "This is a note",
+	"context": "Context for note",
+	"role": "Role of note creator",
+	"clientId": "clientId",
+	"createdBy": "John Doe",
+	"caseId": "12345",
+	"caseType": "caseType",
+	"caseLink": "http://caselink.com/12345",
+	"externalCaseId": "54321"
+}
