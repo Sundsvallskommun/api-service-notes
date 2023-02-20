@@ -141,6 +141,64 @@ class NoteMapperTest {
 	}
 
 	@Test
+	void updateNoteEntityFromUpdateNoteRequestOnlyModifiedBySet() {
+
+		final var body = "body";
+		final var context = "context";
+		final var role = "role";
+		final var clientId = "clientId";
+		final var created = OffsetDateTime.now();
+		final var createdBy = "createdBy";
+		final var id = "id";
+		final var partyId = "partyId";
+		final var subject = "subject";
+		final var modifiedBy = "modifiedBy";
+		final var caseId = "caseId";
+		final var caseType = "caseType";
+		final var caseLink = "caseLink";
+		final var externalCaseId = "externalCaseId";
+
+		// Setup
+		final var noteEntity = NoteEntity.create()
+			.withBody(body)
+			.withContext(context)
+			.withRole(role)
+			.withClientId(clientId)
+			.withCreated(created)
+			.withCreatedBy(createdBy)
+			.withId(id)
+			.withPartyId(partyId)
+			.withSubject(subject)
+			.withCaseId(caseId)
+			.withCaseType(caseType)
+			.withCaseLink(caseLink)
+			.withExternalCaseId(externalCaseId);
+
+		final var updateNoteRequest = UpdateNoteRequest.create()
+			.withModifiedBy("updated");
+
+		// Call
+		final var updatedNoteEntity = NoteMapper.toNoteEntity(noteEntity, updateNoteRequest);
+
+		// Verification
+		assertThat(updatedNoteEntity.getId()).isEqualTo(id);
+		assertThat(updatedNoteEntity.getBody()).isEqualTo(body);
+		assertThat(updatedNoteEntity.getContext()).isEqualTo(context);
+		assertThat(updatedNoteEntity.getRole()).isEqualTo(role);
+		assertThat(updatedNoteEntity.getClientId()).isEqualTo(clientId);
+		assertThat(updatedNoteEntity.getCreated()).isEqualTo(created);
+		assertThat(updatedNoteEntity.getCreatedBy()).isEqualTo(createdBy);
+		assertThat(updatedNoteEntity.getPartyId()).isEqualTo(partyId);
+		assertThat(updatedNoteEntity.getSubject()).isEqualTo(subject);
+		assertThat(updatedNoteEntity.getModified()).isNull();
+		assertThat(updatedNoteEntity.getModifiedBy()).isEqualTo("updated");
+		assertThat(updatedNoteEntity.getCaseId()).isEqualTo(caseId);
+		assertThat(updatedNoteEntity.getCaseType()).isEqualTo(caseType);
+		assertThat(updatedNoteEntity.getCaseLink()).isEqualTo(caseLink);
+		assertThat(updatedNoteEntity.getExternalCaseId()).isEqualTo(externalCaseId);
+	}
+
+	@Test
 	void updateNoteEntityFromNull() {
 
 		final var body = "body";

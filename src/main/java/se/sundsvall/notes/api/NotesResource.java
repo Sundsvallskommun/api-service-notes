@@ -97,7 +97,7 @@ public class NotesResource {
 		return ok(noteService.getNotes(searchParams));
 	}
 
-	@DeleteMapping(path = "/{id}", produces = { APPLICATION_PROBLEM_JSON_VALUE })
+	@DeleteMapping(path = "/{id}", produces = { ALL_VALUE, APPLICATION_PROBLEM_JSON_VALUE })
 	@Operation(summary = "Delete note by ID")
 	@ApiResponse(responseCode = "204", description = "Successful operation", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = Void.class)))
 	@ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(oneOf = { Problem.class, ConstraintViolationProblem.class })))
