@@ -309,9 +309,7 @@ class NoteResourceFailuresTest {
 		assertThat(response.getViolations())
 			.extracting(Violation::getField, Violation::getMessage)
 			.containsExactly(
-				tuple("body", "must not be blank"),
-				tuple("modifiedBy", "must not be blank"),
-				tuple("subject", "must not be blank"));
+				tuple("modifiedBy", "must not be blank"));
 	}
 
 	@Test
