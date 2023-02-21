@@ -13,12 +13,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class UpdateNoteRequest {
 
 	@Schema(description = "The note subject", example = "This is a subject", maximum = "255")
-	@NotBlank
 	@Size(min = 1, max = 255)
 	private String subject;
 
 	@Schema(description = "The note nody", example = "This is a note", maximum = "2048")
-	@NotBlank
 	@Size(min = 1, max = 2048)
 	private String body;
 

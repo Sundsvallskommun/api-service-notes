@@ -6,10 +6,10 @@ import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
 
 public class NoteMapper {
 
@@ -39,15 +39,15 @@ public class NoteMapper {
 		if (isNull(updateNoteRequest)) {
 			return noteEntity;
 		}
+		ofNullable(updateNoteRequest.getBody()).ifPresent(noteEntity::setBody);
+		ofNullable(updateNoteRequest.getModifiedBy()).ifPresent(noteEntity::setModifiedBy);
+		ofNullable(updateNoteRequest.getSubject()).ifPresent(noteEntity::setSubject);
+		ofNullable(updateNoteRequest.getCaseId()).ifPresent(noteEntity::setCaseId);
+		ofNullable(updateNoteRequest.getCaseType()).ifPresent(noteEntity::setCaseType);
+		ofNullable(updateNoteRequest.getCaseLink()).ifPresent(noteEntity::setCaseLink);
+		ofNullable(updateNoteRequest.getExternalCaseId()).ifPresent(noteEntity::setExternalCaseId);
 
-		return noteEntity
-			.withBody(updateNoteRequest.getBody())
-			.withModifiedBy(updateNoteRequest.getModifiedBy())
-			.withSubject(updateNoteRequest.getSubject())
-			.withCaseId(updateNoteRequest.getCaseId())
-			.withCaseType(updateNoteRequest.getCaseType())
-			.withCaseLink(updateNoteRequest.getCaseLink())
-			.withExternalCaseId(updateNoteRequest.getExternalCaseId());
+		return noteEntity;
 	}
 
 	public static Note toNote(NoteEntity noteEntity) {
@@ -74,7 +74,7 @@ public class NoteMapper {
 	}
 
 	public static List<Note> toNotes(List<NoteEntity> noteEntities) {
-		return Optional.ofNullable(noteEntities).orElse(emptyList()).stream()
+		return ofNullable(noteEntities).orElse(emptyList()).stream()
 			.map(NoteMapper::toNote)
 			.toList();
 	}
