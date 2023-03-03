@@ -1,16 +1,17 @@
 package se.sundsvall.notes.service.mapper;
 
-import org.junit.jupiter.api.Test;
-import se.sundsvall.notes.api.model.CreateNoteRequest;
-import se.sundsvall.notes.api.model.Note;
-import se.sundsvall.notes.api.model.UpdateNoteRequest;
-import se.sundsvall.notes.integration.db.model.NoteEntity;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
+import org.junit.jupiter.api.Test;
+
+import se.sundsvall.notes.api.model.CreateNoteRequest;
+import se.sundsvall.notes.api.model.Note;
+import se.sundsvall.notes.api.model.UpdateNoteRequest;
+import se.sundsvall.notes.integration.db.model.NoteEntity;
 
 class NoteMapperTest {
 
@@ -175,7 +176,7 @@ class NoteMapperTest {
 			.withExternalCaseId(externalCaseId);
 
 		final var updateNoteRequest = UpdateNoteRequest.create()
-			.withModifiedBy("updated");
+			.withModifiedBy(modifiedBy);
 
 		// Call
 		final var updatedNoteEntity = NoteMapper.toNoteEntity(noteEntity, updateNoteRequest);
@@ -191,7 +192,7 @@ class NoteMapperTest {
 		assertThat(updatedNoteEntity.getPartyId()).isEqualTo(partyId);
 		assertThat(updatedNoteEntity.getSubject()).isEqualTo(subject);
 		assertThat(updatedNoteEntity.getModified()).isNull();
-		assertThat(updatedNoteEntity.getModifiedBy()).isEqualTo("updated");
+		assertThat(updatedNoteEntity.getModifiedBy()).isEqualTo(modifiedBy);
 		assertThat(updatedNoteEntity.getCaseId()).isEqualTo(caseId);
 		assertThat(updatedNoteEntity.getCaseType()).isEqualTo(caseType);
 		assertThat(updatedNoteEntity.getCaseLink()).isEqualTo(caseLink);

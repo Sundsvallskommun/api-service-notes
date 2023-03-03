@@ -4,6 +4,7 @@ import static java.time.OffsetDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -278,12 +279,12 @@ public class NoteEntity {
 
 	@PrePersist
 	void prePersist() {
-		created = now().truncatedTo(MILLIS);
+		created = now(ZoneId.systemDefault()).truncatedTo(MILLIS);
 	}
 
 	@PreUpdate
 	void preUpdate() {
-		modified = now().truncatedTo(MILLIS);
+		modified = now(ZoneId.systemDefault()).truncatedTo(MILLIS);
 	}
 
 	@Override

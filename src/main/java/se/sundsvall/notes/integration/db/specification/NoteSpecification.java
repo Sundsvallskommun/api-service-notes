@@ -1,9 +1,10 @@
 package se.sundsvall.notes.integration.db.specification;
 
-import org.springframework.data.jpa.domain.Specification;
-import se.sundsvall.notes.integration.db.model.NoteEntity;
-
 import static java.util.Objects.nonNull;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import se.sundsvall.notes.integration.db.model.NoteEntity;
 
 public interface NoteSpecification {
 
@@ -33,7 +34,7 @@ public interface NoteSpecification {
 	 *
 	 * @param attribute name that will be used in filter
 	 * @param value     value (or null) to compare against
-	 * @return Specification<NoteEntity> matching sent in comparison
+	 * @return {@code Specification<NoteEntity>} matching sent in comparison
 	 */
 	private static Specification<NoteEntity> buildEqualFilter(String attribute, Object value) {
 		return (noteEntity, cq, cb) -> nonNull(value) ? cb.equal(noteEntity.get(attribute), value) : cb.and();
