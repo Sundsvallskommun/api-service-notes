@@ -31,7 +31,7 @@ class DeleteNoteIT extends AbstractAppTest {
 	private NoteRepository noteRepository;
 
 	@Test
-	void test1_deleteById() throws Exception {
+	void test01_deleteById() throws Exception {
 
 		final var id = "2103ac13-1691-4017-b6c6-78fa75ff68fb";
 
@@ -47,7 +47,7 @@ class DeleteNoteIT extends AbstractAppTest {
 	}
 
 	@Test
-	void test2_deleteByIdNotFound() throws Exception {
+	void test02_deleteByIdNotFound() throws Exception {
 
 		final var id = "33305f2f-59a4-44bc-b77d-64d99725f416"; // Id does not exist in DB.
 		assertThat(noteRepository.findById(id)).isNotPresent();

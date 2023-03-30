@@ -103,40 +103,6 @@ class NoteResourceFailuresTest {
 	}
 
 	@Test
-	void createNoteMissingPartyId() {
-
-		// Parameter values
-		final var createNoteRequest = CreateNoteRequest.create()
-			.withBody("Test note")
-			.withContext("context")
-			.withRole("role")
-			.withClientId("clientId")
-			.withCreatedBy("createdBy")
-			.withPartyId(null) // Missing partyId
-			.withSubject("subject")
-			.withCaseId("caseId")
-			.withCaseType("caseType")
-			.withCaseLink("caseLink")
-			.withExternalCaseId("externalCaseId");
-
-		final var response = webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
-			.bodyValue(createNoteRequest)
-			.exchange()
-			.expectStatus().isBadRequest()
-			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
-			.expectBody(ConstraintViolationProblem.class)
-			.returnResult()
-			.getResponseBody();
-
-		assertThat(response).isNotNull();
-		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
-		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
-		assertThat(response.getViolations())
-			.extracting(Violation::getField, Violation::getMessage)
-			.containsExactly(tuple("partyId", "not a valid UUID"));
-	}
-
-	@Test
 	void createNoteInvalidPartyId() {
 
 		// Parameter values
@@ -239,7 +205,6 @@ class NoteResourceFailuresTest {
 				tuple("role", "must not be blank"),
 				tuple("clientId", "must not be blank"),
 				tuple("createdBy", "must not be blank"),
-				tuple("partyId", "not a valid UUID"),
 				tuple("subject", "must not be blank"));
 	}
 

@@ -1,5 +1,18 @@
 package se.sundsvall.notes.api;
 
+import static java.util.Optional.ofNullable;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.ALL;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -11,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
@@ -18,19 +32,6 @@ import se.sundsvall.notes.api.model.FindNotesResponse;
 import se.sundsvall.notes.api.model.Note;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.service.NoteService;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static java.util.Optional.ofNullable;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.ALL;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")
@@ -49,7 +50,7 @@ class NoteResourceTest {
 	private ArgumentCaptor<FindNotesRequest> parametersCaptor;
 	
 	@Test
-	void createNote() {
+	void createNoteWithPartyId() {
 		final var id = UUID.randomUUID().toString();
 
 		// Parameter values
@@ -63,6 +64,37 @@ class NoteResourceTest {
 			.withCreatedBy("createdBy")
 			.withExternalCaseId("externalCaseId")
 			.withPartyId(UUID.randomUUID().toString())
+			.withSubject("Test subject")
+			.withRole("role");
+
+		// Mock
+		when(noteService.createNote(any())).thenReturn(id);
+
+		webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+			.bodyValue(createNoteRequest)
+			.exchange()
+			.expectStatus().isCreated()
+			.expectHeader().contentType(ALL)
+			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
+
+		// Verification
+		verify(noteService).createNote(createNoteRequest);
+	}
+
+	@Test
+	void createNoteWithoutPartyId() {
+		final var id = UUID.randomUUID().toString();
+
+		// Parameter values
+		final var createNoteRequest = CreateNoteRequest.create()
+			.withBody("Test note")
+			.withCaseId("caseId")
+			.withCaseType("caseType")
+			.withCaseLink("caseLink")
+			.withClientId("clientId")
+			.withContext("context")
+			.withCreatedBy("createdBy")
+			.withExternalCaseId("externalCaseId")
 			.withSubject("Test subject")
 			.withRole("role");
 

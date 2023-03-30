@@ -24,7 +24,7 @@ import se.sundsvall.notes.Application;
 class UpdateNoteIT extends AbstractAppTest {
 
 	@Test
-	void test1_updateById() throws Exception {
+	void test01_updateById() throws Exception {
 
 		setupCall()
 			.withServicePath("/notes/8825bfae-11bc-4436-b1be-e4f0f225c048")
@@ -36,7 +36,7 @@ class UpdateNoteIT extends AbstractAppTest {
 	}
 
 	@Test
-	void test2_updateByIdNotFound() throws Exception {
+	void test02_updateByIdNotFound() throws Exception {
 		setupCall()
 			.withServicePath("/notes/9eceeeb1-f939-441c-858f-da3deb05e578") // Id does not exist in DB.
 			.withHttpMethod(HttpMethod.PATCH)

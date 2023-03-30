@@ -13,31 +13,31 @@ import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
 @Schema(description = "CreateNoteRequest model")
 public class CreateNoteRequest {
 
-	@Schema(description = "Context for note", example = "SUPPORT")
+	@Schema(description = "Context for note", example = "SUPPORT", requiredMode = REQUIRED)
 	@NotBlank
 	@Size(min = 1, max = 255)
 	private String context;
 
-	@Schema(description = "Role of note creator", example = "FIRST_LINE_SUPPORT")
+	@Schema(description = "Role of note creator", example = "FIRST_LINE_SUPPORT", requiredMode = REQUIRED)
 	@NotBlank
 	@Size(min = 1, max = 255)
 	private String role;
 
-	@Schema(description = "Id of the client who is the owner of the note", example = "SUPPORT_MGMT")
+	@Schema(description = "Id of the client who is the owner of the note", example = "SUPPORT_MGMT", requiredMode = REQUIRED)
 	@NotBlank
 	@Size(min = 1, max = 255)
 	private String clientId;
 
 	@Schema(description = "Party id (e.g. a personId or an organizationId)", example = "81471222-5798-11e9-ae24-57fa13b361e1")
-	@ValidUuid
+	@ValidUuid(nullable = true)
 	private String partyId;
 
-	@Schema(description = "The note subject", example = "This is a subject", maximum = "255")
+	@Schema(description = "The note subject", example = "This is a subject", maximum = "255", requiredMode = REQUIRED)
 	@NotBlank
 	@Size(min = 1, max = 255)
 	private String subject;
 
-	@Schema(description = "The note body", example = "This is a note", maximum = "2048")
+	@Schema(description = "The note body", example = "This is a note", maximum = "2048", requiredMode = REQUIRED)
 	@NotBlank
 	@Size(min = 1, max = 2048)
 	private String body;
