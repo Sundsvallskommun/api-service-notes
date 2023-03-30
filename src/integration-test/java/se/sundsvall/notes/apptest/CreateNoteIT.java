@@ -31,7 +31,7 @@ class CreateNoteIT extends AbstractAppTest {
 	private NoteRepository noteRepository;
 
 	@Test
-	void test1_createNote() throws Exception {
+	void test01_createNoteWithPartyId() throws Exception {
 
 		final var partyId = "ffd20e9d-5987-417a-b8cd-a4617ac83a88";
 
@@ -64,5 +64,41 @@ class CreateNoteIT extends AbstractAppTest {
 				"54321",
 				"ffd20e9d-5987-417a-b8cd-a4617ac83a88",
 				"This is a subject"));
+	}
+
+	@Test
+	void test02_createNoteWithoutPartyId() throws Exception {
+
+		final var client = "MyGreatClient";
+
+		assertThat(noteRepository.findAllByParameters(FindNotesRequest.create().withClientId(client), PageRequest.of(0, 100))).isEmpty();
+
+		setupCall()
+			.withServicePath("/notes")
+			.withHttpMethod(HttpMethod.POST)
+			.withRequest("request.json")
+			.withExpectedResponseStatus(HttpStatus.CREATED)
+			.withExpectedResponseHeader(LOCATION, List.of("^http://(.*)/notes/(.*)$"))
+			.sendRequestAndVerifyResponse();
+
+		assertThat(noteRepository.findAllByParameters(FindNotesRequest.create().withClientId(client), PageRequest.of(0, 100))).hasSize(1)
+			.extracting(
+				NoteEntity::getBody,
+				NoteEntity::getCaseId,
+				NoteEntity::getCaseLink,
+				NoteEntity::getCaseType,
+				NoteEntity::getCreatedBy,
+				NoteEntity::getExternalCaseId,
+				NoteEntity::getPartyId,
+				NoteEntity::getSubject)
+			.containsExactly(tuple(
+				"This is another note",
+				"54321",
+				"http://caselink.com/54321",
+				"caseType",
+				"Jane Doe",
+				"12345",
+				null,
+				"Lets make Notes great again"));
 	}
 }
