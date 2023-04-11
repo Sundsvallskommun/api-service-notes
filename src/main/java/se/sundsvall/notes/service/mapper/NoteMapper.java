@@ -16,7 +16,7 @@ public class NoteMapper {
 	private NoteMapper() {
 	}
 
-	public static NoteEntity toNoteEntity(CreateNoteRequest createNoteRequest) {
+	public static NoteEntity toNoteEntity(String municipalityId, CreateNoteRequest createNoteRequest) {
 		if (isNull(createNoteRequest)) {
 			return null;
 		}
@@ -32,10 +32,11 @@ public class NoteMapper {
 			.withCaseId(createNoteRequest.getCaseId())
 			.withCaseType(createNoteRequest.getCaseType())
 			.withCaseLink(createNoteRequest.getCaseLink())
-			.withExternalCaseId(createNoteRequest.getExternalCaseId());
+			.withExternalCaseId(createNoteRequest.getExternalCaseId())
+			.withMunicipalityId(municipalityId);
 	}
 
-	public static NoteEntity toNoteEntity(NoteEntity noteEntity, UpdateNoteRequest updateNoteRequest) {
+	public static NoteEntity toNoteEntity(String municipalityId, NoteEntity noteEntity, UpdateNoteRequest updateNoteRequest) {
 		if (isNull(updateNoteRequest)) {
 			return noteEntity;
 		}
@@ -46,6 +47,7 @@ public class NoteMapper {
 		ofNullable(updateNoteRequest.getCaseType()).ifPresent(noteEntity::setCaseType);
 		ofNullable(updateNoteRequest.getCaseLink()).ifPresent(noteEntity::setCaseLink);
 		ofNullable(updateNoteRequest.getExternalCaseId()).ifPresent(noteEntity::setExternalCaseId);
+		noteEntity.setMunicipalityId(municipalityId);
 
 		return noteEntity;
 	}

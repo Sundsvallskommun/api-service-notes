@@ -1,19 +1,5 @@
 package se.sundsvall.notes.service;
 
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
-
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.api.model.Note;
@@ -34,6 +19,21 @@ import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.service.mapper.NoteMapper;
+
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 class NoteServiceTest {
@@ -49,19 +49,20 @@ class NoteServiceTest {
 		final var id = UUID.randomUUID().toString();
 		final var createNoteRequestMock = Mockito.mock(CreateNoteRequest.class);
 		final var noteEntityMock = Mockito.mock(NoteEntity.class);
+		final var municipalityId = "municipalityId";
 
 		// Mock
 		when(noteEntityMock.getId()).thenReturn(id);
 		when(noteRepositoryMock.save(any())).thenReturn(noteEntityMock);
 
 		try (MockedStatic<NoteMapper> mapperMock = Mockito.mockStatic(NoteMapper.class)) {
-			mapperMock.when(() -> NoteMapper.toNoteEntity(any())).thenReturn(noteEntityMock);
+			mapperMock.when(() -> NoteMapper.toNoteEntity(anyString(), any())).thenReturn(noteEntityMock);
 
 			// Call
-			final var result = noteService.createNote(createNoteRequestMock);
+			final var result = noteService.createNote(municipalityId, createNoteRequestMock);
 
 			// Verification
-			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(createNoteRequestMock)));
+			mapperMock.verify(() -> NoteMapper.toNoteEntity(eq(municipalityId), same(createNoteRequestMock)));
 			verify(noteRepositoryMock).save(same(noteEntityMock));
 			verify(noteEntityMock).getId();
 			assertThat(result).isEqualTo(id);
@@ -75,21 +76,25 @@ class NoteServiceTest {
 		final var updateNoteRequestMock = Mockito.mock(UpdateNoteRequest.class);
 		final var noteEntityMock = Mockito.mock(NoteEntity.class);
 		final var noteMock = Mockito.mock(Note.class);
+		final var municipalityId = "municipalityId";
 
 		// Mock
-		when(noteRepositoryMock.findById(id)).thenReturn(Optional.of(noteEntityMock));
+		when(noteRepositoryMock.existsByIdAndMunicipalityId(id, municipalityId)).thenReturn(true);
+		when(noteRepositoryMock.getReferenceById(id)).thenReturn(noteEntityMock);
+		when(noteRepositoryMock.save(any())).thenReturn(noteEntityMock);
 
 		try (MockedStatic<NoteMapper> mapperMock = Mockito.mockStatic(NoteMapper.class)) {
-			mapperMock.when(() -> NoteMapper.toNoteEntity(any(), any())).thenReturn(noteEntityMock);
+			mapperMock.when(() -> NoteMapper.toNoteEntity(anyString(), any(), any())).thenReturn(noteEntityMock);
 			mapperMock.when(() -> NoteMapper.toNote(any())).thenReturn(noteMock);
 
 			// Call
-			final var result = noteService.updateNote(id, updateNoteRequestMock);
+			final var result = noteService.updateNote(id, municipalityId, updateNoteRequestMock);
 
 			// Verification
+			verify(noteRepositoryMock).existsByIdAndMunicipalityId(id, municipalityId);
 			verify(noteRepositoryMock).save(same(noteEntityMock));
-			verify(noteRepositoryMock).findById(id);
-			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(noteEntityMock), same(updateNoteRequestMock)));
+			verify(noteRepositoryMock).getReferenceById(id);
+			mapperMock.verify(() -> NoteMapper.toNoteEntity(eq(municipalityId), same(noteEntityMock), same(updateNoteRequestMock)));
 			mapperMock.verify(() -> NoteMapper.toNote(same(noteEntityMock)));
 
 			assertThat(result).isSameAs(noteMock);
@@ -102,73 +107,78 @@ class NoteServiceTest {
 		// Setup
 		final var id = UUID.randomUUID().toString();
 		final var request = UpdateNoteRequest.create();
+		final var municipalityId = "municipalityId";
 
 		// Mock
-		when(noteRepositoryMock.findById(id)).thenReturn(Optional.empty());
+		when(noteRepositoryMock.existsByIdAndMunicipalityId(id, municipalityId)).thenReturn(false);
 
 		// Call
-		final var problem = assertThrows(ThrowableProblem.class, () -> noteService.updateNote(id, request));
+		final var problem = assertThrows(ThrowableProblem.class, () -> noteService.updateNote(id, municipalityId, request));
 
 		// Verification
 		assertThat(problem).isNotNull();
 		assertThat(problem.getTitle()).isEqualTo(Status.NOT_FOUND.getReasonPhrase());
 		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
-		verify(noteRepositoryMock).findById(id);
+		verify(noteRepositoryMock).existsByIdAndMunicipalityId(id, municipalityId);
 	}
 
 	@Test
-	void deleteNoteById() {
+	void deleteNote() {
 
 		// Setup
 		final var id = UUID.randomUUID().toString();
+		final var municipalityId = "2281";
 
 		// Mock
-		when(noteRepositoryMock.existsById(id)).thenReturn(true);
+		when(noteRepositoryMock.existsByIdAndMunicipalityId(id, municipalityId)).thenReturn(true);
 
 		// Call
-		noteService.deleteNoteById(id);
+		noteService.deleteNote(id, municipalityId);
 
 		// Verification
-		verify(noteRepositoryMock).existsById(id);
+		verify(noteRepositoryMock).existsByIdAndMunicipalityId(id, municipalityId);
 		verify(noteRepositoryMock).deleteById(id);
 	}
 
 	@Test
-	void deleteNoteByIdNotFound() {
+	void deleteNoteNotFound() {
 
 		// Setup
 		final var id = UUID.randomUUID().toString();
+		final var municipalityId = "2281";
 
 		// Call
-		final var problem = assertThrows(ThrowableProblem.class, () -> noteService.deleteNoteById(id));
+		final var problem = assertThrows(ThrowableProblem.class, () -> noteService.deleteNote(id, municipalityId));
 
 		// Verification
 		assertThat(problem).isNotNull();
 		assertThat(problem.getTitle()).isEqualTo(Status.NOT_FOUND.getReasonPhrase());
 		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
-		verify(noteRepositoryMock).existsById(id);
+		verify(noteRepositoryMock).existsByIdAndMunicipalityId(id, municipalityId);
 	}
 
 	@Test
-	void getNoteById() {
+	void getNote() {
 
 		final var id = UUID.randomUUID().toString();
+		final var municipalityId = "municipalityId";
 		final var noteEntityMock = Mockito.mock(NoteEntity.class);
 		final var noteMock = Mockito.mock(Note.class);
 
 		// Mock
-		when(noteRepositoryMock.findById(id)).thenReturn(Optional.of(noteEntityMock));
+		when(noteRepositoryMock.existsByIdAndMunicipalityId(id, municipalityId)).thenReturn(true);
+		when(noteRepositoryMock.getReferenceById(id)).thenReturn(noteEntityMock);
 
 		try (MockedStatic<NoteMapper> mapperMock = Mockito.mockStatic(NoteMapper.class)) {
 			mapperMock.when(() -> NoteMapper.toNote(any())).thenReturn(noteMock);
 
 			// Call
-			final var result = noteService.getNoteById(id);
+			final var result = noteService.getNote(id, municipalityId);
 
 			// Verification
-			verify(noteRepositoryMock).findById(id);
+			verify(noteRepositoryMock).existsByIdAndMunicipalityId(id, municipalityId);
 			mapperMock.verify(() -> NoteMapper.toNote(same(noteEntityMock)));
 
 			assertThat(result).isSameAs(noteMock);
@@ -176,23 +186,24 @@ class NoteServiceTest {
 	}
 
 	@Test
-	void getNoteByIdNotFound() {
+	void getNoteNotFound() {
 
 		// Setup
 		final var id = UUID.randomUUID().toString();
+		final var municipalityId = "municipalityId";
 
 		// Mock
-		when(noteRepositoryMock.findById(id)).thenReturn(Optional.empty());
+		when(noteRepositoryMock.existsByIdAndMunicipalityId(id, municipalityId)).thenReturn(false);
 
 		// Call
-		final var problem = assertThrows(ThrowableProblem.class, () -> noteService.getNoteById(id));
+		final var problem = assertThrows(ThrowableProblem.class, () -> noteService.getNote(id, municipalityId));
 
 		// Verification
 		assertThat(problem).isNotNull();
 		assertThat(problem.getTitle()).isEqualTo(Status.NOT_FOUND.getReasonPhrase());
 		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
-		verify(noteRepositoryMock).findById(id);
+		verify(noteRepositoryMock).existsByIdAndMunicipalityId(id, municipalityId);
 	}
 
 	@Test
@@ -202,13 +213,14 @@ class NoteServiceTest {
 		final var id = UUID.randomUUID().toString();
 		final var partyId = UUID.randomUUID().toString();
 		final var findNotesRequest = FindNotesRequest.create().withPartyId(partyId).withPage(1).withLimit(100);
+		final var municipalityId = "municipalityId";
 
 		// Mock
-		when(noteRepositoryMock.findAllByParameters(findNotesRequest, PageRequest.of(findNotesRequest.getPage() - 1, findNotesRequest.getLimit(), Sort.by("created").descending()))).thenReturn(new PageImpl<>(List.of(NoteEntity.create().withId(id)
+		when(noteRepositoryMock.findAllByParameters(municipalityId, findNotesRequest, PageRequest.of(findNotesRequest.getPage() - 1, findNotesRequest.getLimit(), Sort.by("created").descending()))).thenReturn(new PageImpl<>(List.of(NoteEntity.create().withId(id)
 			.withPartyId(partyId))));
 
 		// Call
-		final var result = noteService.getNotes(findNotesRequest);
+		final var result = noteService.getNotes(municipalityId, findNotesRequest);
 
 		// Verification
 		assertThat(result).isNotNull();
@@ -217,6 +229,6 @@ class NoteServiceTest {
 			Note::getPartyId)
 			.containsExactly(tuple(id, partyId));
 
-		verify(noteRepositoryMock).findAllByParameters(any(), any());
+		verify(noteRepositoryMock).findAllByParameters(anyString(), any(), any());
 	}
 }

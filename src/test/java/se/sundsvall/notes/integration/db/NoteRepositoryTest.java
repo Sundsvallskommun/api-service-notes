@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.within;
 @Transactional
 class NoteRepositoryTest {
 
+	private static final String MUNICIPALITY_ID = "municipalityId1";
 	private static final String ENTITY_1_ID = "a2f40fc7-7d70-404b-a294-85e4f7eff55e";
 	private static final String ENTITY_1_PARTY_ID = "fbfbd90c-4c47-11ec-81d3-0242ac130003";
 	private static final String ENTITY_2_ID = "2569abe8-eed4-46b6-9502-4cad428f9068";
@@ -58,7 +59,7 @@ class NoteRepositoryTest {
 	@Test
 	void findByPartyId() {
 		final var findNotesRequest = FindNotesRequest.create().withPartyId(ENTITY_1_PARTY_ID);
-		final var page = noteRepository.findAllByParameters(findNotesRequest, PageRequest.of(0, 100));
+		final var page = noteRepository.findAllByParameters(MUNICIPALITY_ID, findNotesRequest, PageRequest.of(0, 100));
 
 		final var noteEntities = page.getContent();
 
@@ -68,14 +69,30 @@ class NoteRepositoryTest {
 		assertThat(page.getTotalElements()).isEqualTo(1);
 		assertThat(noteEntities.get(0).getId()).isEqualTo(ENTITY_1_ID);
 		assertThat(noteEntities.get(0).getPartyId()).isEqualTo(ENTITY_1_PARTY_ID);
+		assertThat(noteEntities.get(0).getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
 	}
 
 	@Test
 	void findByPartyIdNotFound() {
 		final var findNotesRequest = FindNotesRequest.create().withPartyId("does-not-exist");
-		final var page = noteRepository.findAllByParameters(findNotesRequest, PageRequest.of(0, 100));
+		final var page = noteRepository.findAllByParameters(MUNICIPALITY_ID, findNotesRequest, PageRequest.of(0, 100));
 
 		assertThat(page.getContent()).isNotNull().isEmpty();
+	}
+
+	@Test
+	void existsByIdAndMunicipalityId() {
+		final var exists = noteRepository.existsByIdAndMunicipalityId(ENTITY_1_ID, MUNICIPALITY_ID);
+
+
+		assertThat(exists).isTrue();
+	}
+
+	@Test
+	void existsByIdAndMunicipalityIdNotFound() {
+		final var exists = noteRepository.existsByIdAndMunicipalityId("does-not-exist", MUNICIPALITY_ID);
+
+		assertThat(exists).isFalse();
 	}
 
 	@Test
@@ -89,7 +106,8 @@ class NoteRepositoryTest {
 				.withCaseId("caseId")
 				.withCaseType("caseType")
 				.withCaseLink("caseLink")
-				.withExternalCaseId("externalCaseId");
+				.withExternalCaseId("externalCaseId")
+				.withMunicipalityId(MUNICIPALITY_ID);
 
 		final var persistedEntity = noteRepository.saveAndFlush(noteEntity);
 
@@ -110,7 +128,8 @@ class NoteRepositoryTest {
 				.withCaseId("caseId")
 				.withCaseType("caseType")
 				.withCaseLink("caseLink")
-				.withExternalCaseId("externalCaseId");
+				.withExternalCaseId("externalCaseId")
+				.withMunicipalityId(MUNICIPALITY_ID);
 
 		var persistedEntity = noteRepository.saveAndFlush(noteEntity);
 
@@ -132,6 +151,7 @@ class NoteRepositoryTest {
 		assertThat(updatedEntity.getModified()).isCloseTo(OffsetDateTime.now(), within(2, SECONDS));
 		assertThat(updatedEntity.getModifiedBy()).isEqualTo("modifiedBy");
 		assertThat(updatedEntity.getSubject()).isEqualTo("modifiedSubject");
+		assertThat(updatedEntity.getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
 	}
 
 	@Test

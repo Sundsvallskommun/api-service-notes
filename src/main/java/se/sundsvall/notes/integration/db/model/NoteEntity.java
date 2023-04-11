@@ -1,11 +1,6 @@
 package se.sundsvall.notes.integration.db.model;
 
-import static java.time.OffsetDateTime.now;
-import static java.time.temporal.ChronoUnit.MILLIS;
-
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Objects;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,8 +11,12 @@ import javax.persistence.Lob;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Objects;
 
-import org.hibernate.annotations.GenericGenerator;
+import static java.time.OffsetDateTime.now;
+import static java.time.temporal.ChronoUnit.MILLIS;
 
 @Entity
 @Table(name = "note",
@@ -26,6 +25,7 @@ import org.hibernate.annotations.GenericGenerator;
 		@Index(name = "note_context_index", columnList = "context"),
 		@Index(name = "note_client_id_index", columnList = "client_id"),
 		@Index(name = "note_role_index", columnList = "role"),
+		@Index(name = "note_municipality_id_index", columnList = "municipality_id")
 	})
 public class NoteEntity {
 
@@ -77,6 +77,9 @@ public class NoteEntity {
 
 	@Column(name = "external_case_id")
 	private String externalCaseId;
+
+	@Column(name = "municipality_id", nullable = false)
+	private String municipalityId;
 
 	public static NoteEntity create() {
 		return new NoteEntity();
@@ -277,6 +280,19 @@ public class NoteEntity {
 		return this;
 	}
 
+	public String getMunicipalityId() {
+		return municipalityId;
+	}
+
+	public void setMunicipalityId(final String municipalityId) {
+		this.municipalityId = municipalityId;
+	}
+
+	public NoteEntity withMunicipalityId(final String municipalityId) {
+		this.municipalityId = municipalityId;
+		return this;
+	}
+
 	@PrePersist
 	void prePersist() {
 		created = now(ZoneId.systemDefault()).truncatedTo(MILLIS);
@@ -289,7 +305,7 @@ public class NoteEntity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(body, caseId, caseLink, caseType, clientId, context, created, createdBy, externalCaseId, id, modified, modifiedBy, partyId, role, subject);
+		return Objects.hash(body, caseId, caseLink, caseType, clientId, context, created, createdBy, externalCaseId, id, modified, modifiedBy, partyId, role, subject, municipalityId);
 	}
 
 	@Override
@@ -303,7 +319,7 @@ public class NoteEntity {
 		final var other = (NoteEntity) obj;
 		return Objects.equals(body, other.body) && Objects.equals(caseId, other.caseId) && Objects.equals(caseLink, other.caseLink) && Objects.equals(caseType, other.caseType) && Objects.equals(clientId, other.clientId) && Objects.equals(context,
 			other.context) && Objects.equals(created, other.created) && Objects.equals(createdBy, other.createdBy) && Objects.equals(externalCaseId, other.externalCaseId) && Objects.equals(id, other.id) && Objects.equals(modified, other.modified)
-			&& Objects.equals(modifiedBy, other.modifiedBy) && Objects.equals(partyId, other.partyId) && Objects.equals(role, other.role) && Objects.equals(subject, other.subject);
+			&& Objects.equals(modifiedBy, other.modifiedBy) && Objects.equals(partyId, other.partyId) && Objects.equals(role, other.role) && Objects.equals(subject, other.subject) && Objects.equals(municipalityId, other.municipalityId);
 	}
 
 	@Override
@@ -311,7 +327,7 @@ public class NoteEntity {
 		final var builder = new StringBuilder();
 		builder.append("NoteEntity [id=").append(id).append(", partyId=").append(partyId).append(", context=").append(context).append(", clientId=").append(clientId).append(", role=").append(role).append(", createdBy=").append(createdBy).append(
 			", created=").append(created).append(", modifiedBy=").append(modifiedBy).append(", modified=").append(modified).append(", subject=").append(subject).append(", body=").append(body).append(", caseId=").append(caseId).append(", caseType=").append(
-				caseType).append(", caseLink=").append(caseLink).append(", externalCaseId=").append(externalCaseId).append("]");
+				caseType).append(", caseLink=").append(caseLink).append(", externalCaseId=").append(externalCaseId).append(", municipalityId=").append(municipalityId).append("]");
 		return builder.toString();
 	}
 }

@@ -23,11 +23,13 @@ import se.sundsvall.notes.Application;
 })
 class UpdateNoteIT extends AbstractAppTest {
 
+	final static String MUNICIPALITY_ID = "/2281";
+
 	@Test
 	void test01_updateById() throws Exception {
 
 		setupCall()
-			.withServicePath("/notes/8825bfae-11bc-4436-b1be-e4f0f225c048")
+			.withServicePath("/" + MUNICIPALITY_ID + "/notes/8825bfae-11bc-4436-b1be-e4f0f225c048")
 			.withHttpMethod(HttpMethod.PATCH)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.OK)
@@ -38,7 +40,7 @@ class UpdateNoteIT extends AbstractAppTest {
 	@Test
 	void test02_updateByIdNotFound() throws Exception {
 		setupCall()
-			.withServicePath("/notes/9eceeeb1-f939-441c-858f-da3deb05e578") // Id does not exist in DB.
+			.withServicePath("/" + MUNICIPALITY_ID + "/notes/9eceeeb1-f939-441c-858f-da3deb05e578") // Id does not exist in DB.
 			.withHttpMethod(HttpMethod.PATCH)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.NOT_FOUND)

@@ -1,5 +1,12 @@
 package se.sundsvall.notes.integration.db.model;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.time.OffsetDateTime;
+import java.util.Random;
+import java.util.UUID;
+
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanConstructor;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanEquals;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanHashCode;
@@ -10,13 +17,6 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
-
-import java.time.OffsetDateTime;
-import java.util.Random;
-import java.util.UUID;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 class NoteEntityTest {
 
@@ -53,6 +53,7 @@ class NoteEntityTest {
 		final var caseType = "caseType";
 		final var caseLink = "caseLink";
 		final var externalCaseId = "externalCaseId";
+		final var municipalityId = "municipalityId";
 
 		final var noteEntity = NoteEntity.create()
 			.withId(id)
@@ -69,7 +70,8 @@ class NoteEntityTest {
 			.withCaseId(caseId)
 			.withCaseType(caseType)
 			.withCaseLink(caseLink)
-			.withExternalCaseId(externalCaseId);
+			.withExternalCaseId(externalCaseId)
+			.withMunicipalityId(municipalityId);
 
 		assertThat(noteEntity).isNotNull().hasNoNullFieldsOrProperties();
 		assertThat(noteEntity.getId()).isEqualTo(id);
@@ -87,6 +89,7 @@ class NoteEntityTest {
 		assertThat(noteEntity.getCaseType()).isEqualTo(caseType);
 		assertThat(noteEntity.getCaseLink()).isEqualTo(caseLink);
 		assertThat(noteEntity.getExternalCaseId()).isEqualTo(externalCaseId);
+		assertThat(noteEntity.getMunicipalityId()).isEqualTo(municipalityId);
 	}
 
 	@Test

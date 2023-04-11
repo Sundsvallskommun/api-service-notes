@@ -1,10 +1,9 @@
 package se.sundsvall.notes.integration.db.specification;
 
-import static java.util.Objects.nonNull;
-
 import org.springframework.data.jpa.domain.Specification;
-
 import se.sundsvall.notes.integration.db.model.NoteEntity;
+
+import static java.util.Objects.nonNull;
 
 public interface NoteSpecification {
 
@@ -24,9 +23,9 @@ public interface NoteSpecification {
 		return buildEqualFilter("partyId", partyId);
 	}
 
-	static Specification<NoteEntity> withCaseId(String caseId) {
-		return buildEqualFilter("caseId", caseId);
-	}
+	static Specification<NoteEntity> withCaseId(String caseId) { return buildEqualFilter("caseId", caseId); }
+
+	static Specification<NoteEntity> withMunicipalityId(String municipalityId) { return buildEqualFilter("municipalityId", municipalityId); }
 
 	/**
 	 * Method builds an equal filter if value is not null. If value is null, method returns

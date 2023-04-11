@@ -26,7 +26,7 @@ import se.sundsvall.notes.integration.db.model.NoteEntity;
 @WireMockAppTestSuite(files = "classpath:/CreateNoteIT/", classes = Application.class)
 @ActiveProfiles("junit")
 class CreateNoteIT extends AbstractAppTest {
-
+	final static String MUNICIPALITY_ID = "2281";
 	@Autowired
 	private NoteRepository noteRepository;
 
@@ -35,17 +35,17 @@ class CreateNoteIT extends AbstractAppTest {
 
 		final var partyId = "ffd20e9d-5987-417a-b8cd-a4617ac83a88";
 
-		assertThat(noteRepository.findAllByParameters(FindNotesRequest.create().withPartyId(partyId), PageRequest.of(0, 100))).isEmpty();
+		assertThat(noteRepository.findAllByParameters(MUNICIPALITY_ID, FindNotesRequest.create().withPartyId(partyId), PageRequest.of(0, 100))).isEmpty();
 
 		setupCall()
-			.withServicePath("/notes")
+			.withServicePath("/" + MUNICIPALITY_ID + "/notes")
 			.withHttpMethod(HttpMethod.POST)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.CREATED)
 			.withExpectedResponseHeader(LOCATION, List.of("^http://(.*)/notes/(.*)$"))
 			.sendRequestAndVerifyResponse();
 
-		assertThat(noteRepository.findAllByParameters(FindNotesRequest.create().withPartyId(partyId), PageRequest.of(0, 100))).hasSize(1)
+		assertThat(noteRepository.findAllByParameters(MUNICIPALITY_ID, FindNotesRequest.create().withPartyId(partyId), PageRequest.of(0, 100))).hasSize(1)
 			.extracting(
 				NoteEntity::getBody,
 				NoteEntity::getCaseId,
@@ -54,7 +54,8 @@ class CreateNoteIT extends AbstractAppTest {
 				NoteEntity::getCreatedBy,
 				NoteEntity::getExternalCaseId,
 				NoteEntity::getPartyId,
-				NoteEntity::getSubject)
+				NoteEntity::getSubject,
+				NoteEntity::getMunicipalityId)
 			.containsExactly(tuple(
 				"This is a note",
 				"12345",
@@ -63,7 +64,8 @@ class CreateNoteIT extends AbstractAppTest {
 				"John Doe",
 				"54321",
 				"ffd20e9d-5987-417a-b8cd-a4617ac83a88",
-				"This is a subject"));
+				"This is a subject",
+				"2281"));
 	}
 
 	@Test
@@ -71,17 +73,17 @@ class CreateNoteIT extends AbstractAppTest {
 
 		final var client = "MyGreatClient";
 
-		assertThat(noteRepository.findAllByParameters(FindNotesRequest.create().withClientId(client), PageRequest.of(0, 100))).isEmpty();
+		assertThat(noteRepository.findAllByParameters(MUNICIPALITY_ID, FindNotesRequest.create().withClientId(client), PageRequest.of(0, 100))).isEmpty();
 
 		setupCall()
-			.withServicePath("/notes")
+			.withServicePath("/" + MUNICIPALITY_ID + "/notes")
 			.withHttpMethod(HttpMethod.POST)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.CREATED)
 			.withExpectedResponseHeader(LOCATION, List.of("^http://(.*)/notes/(.*)$"))
 			.sendRequestAndVerifyResponse();
 
-		assertThat(noteRepository.findAllByParameters(FindNotesRequest.create().withClientId(client), PageRequest.of(0, 100))).hasSize(1)
+		assertThat(noteRepository.findAllByParameters(MUNICIPALITY_ID, FindNotesRequest.create().withClientId(client), PageRequest.of(0, 100))).hasSize(1)
 			.extracting(
 				NoteEntity::getBody,
 				NoteEntity::getCaseId,
@@ -90,7 +92,8 @@ class CreateNoteIT extends AbstractAppTest {
 				NoteEntity::getCreatedBy,
 				NoteEntity::getExternalCaseId,
 				NoteEntity::getPartyId,
-				NoteEntity::getSubject)
+				NoteEntity::getSubject,
+				NoteEntity::getMunicipalityId)
 			.containsExactly(tuple(
 				"This is another note",
 				"54321",
@@ -99,6 +102,7 @@ class CreateNoteIT extends AbstractAppTest {
 				"Jane Doe",
 				"12345",
 				null,
-				"Lets make Notes great again"));
+				"Lets make Notes great again",
+				"2281"));
 	}
 }

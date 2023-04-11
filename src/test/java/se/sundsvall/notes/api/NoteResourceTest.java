@@ -1,18 +1,5 @@
 package se.sundsvall.notes.api;
 
-import static java.util.Optional.ofNullable;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.ALL;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -24,7 +11,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
@@ -33,10 +19,27 @@ import se.sundsvall.notes.api.model.Note;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.service.NoteService;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static java.util.Optional.ofNullable;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.ALL;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")
 class NoteResourceTest {
 
+	private static final String PATH = "/{municipalityId}/notes";
+	private static final String MUNICIPALITY_ID = "2281";
 	@MockBean
 	private NoteService noteService;
 
@@ -68,17 +71,18 @@ class NoteResourceTest {
 			.withRole("role");
 
 		// Mock
-		when(noteService.createNote(any())).thenReturn(id);
+		when(noteService.createNote(anyString(), any())).thenReturn(id);
 
-		webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+		webTestClient.post().uri(builder -> builder.path(PATH).build(Map.of("municipalityId", MUNICIPALITY_ID)))
+			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isCreated()
 			.expectHeader().contentType(ALL)
-			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
+			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/").concat(MUNICIPALITY_ID).concat("/notes/").concat(id));
 
 		// Verification
-		verify(noteService).createNote(createNoteRequest);
+		verify(noteService).createNote(MUNICIPALITY_ID, createNoteRequest);
 	}
 
 	@Test
@@ -99,17 +103,17 @@ class NoteResourceTest {
 			.withRole("role");
 
 		// Mock
-		when(noteService.createNote(any())).thenReturn(id);
+		when(noteService.createNote(anyString(), any())).thenReturn(id);
 
-		webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+		webTestClient.post().uri(builder -> builder.path(PATH).build(Map.of("municipalityId", MUNICIPALITY_ID))).contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isCreated()
 			.expectHeader().contentType(ALL)
-			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
+			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/").concat(MUNICIPALITY_ID).concat("/notes/").concat(id));
 
 		// Verification
-		verify(noteService).createNote(createNoteRequest);
+		verify(noteService).createNote(MUNICIPALITY_ID, createNoteRequest);
 	}
 
 	@Test
@@ -128,9 +132,10 @@ class NoteResourceTest {
 
 		// Mock
 		Note note = Note.create().withId(id);
-		when(noteService.updateNote(id, updateNoteRequest)).thenReturn(note);
+		when(noteService.updateNote(id, MUNICIPALITY_ID, updateNoteRequest)).thenReturn(note);
 
-		final var response = webTestClient.patch().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id))).contentType(APPLICATION_JSON)
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID, "id", id)))
+			.contentType(APPLICATION_JSON)
 			.bodyValue(updateNoteRequest)
 			.exchange()
 			.expectStatus().isOk()
@@ -141,7 +146,7 @@ class NoteResourceTest {
 
 		// Verification
 		assertThat(response).isNotNull().isEqualTo(note);
-		verify(noteService).updateNote(id, updateNoteRequest);
+		verify(noteService).updateNote(id, MUNICIPALITY_ID, updateNoteRequest);
 	}
 
 	@Test
@@ -150,26 +155,26 @@ class NoteResourceTest {
 		// Parameter values
 		final var id = UUID.randomUUID().toString();
 
-		webTestClient.delete().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id)))
+		webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID,"id", id)))
 			.exchange()
 			.expectStatus().isNoContent()
 			.expectHeader().doesNotExist(CONTENT_TYPE);
 
 		// Verification
-		verify(noteService).deleteNoteById(id);
+		verify(noteService).deleteNote(id, MUNICIPALITY_ID);
 	}
 
 	@Test
-	void getNoteById() {
+	void getNote() {
 
 		// Parameter values
 		final var id = UUID.randomUUID().toString();
 
 		// Mock
 		Note note = Note.create().withId(id);
-		when(noteService.getNoteById(id)).thenReturn(note);
+		when(noteService.getNote(id, MUNICIPALITY_ID)).thenReturn(note);
 
-		final var response = webTestClient.get().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id)))
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID,"id", id)))
 			.exchange()
 			.expectStatus().isOk()
 			.expectHeader().contentType(APPLICATION_JSON)
@@ -179,7 +184,7 @@ class NoteResourceTest {
 
 		// Verification
 		assertThat(response).isNotNull().isEqualTo(note);
-		verify(noteService).getNoteById(id);
+		verify(noteService).getNote(id, MUNICIPALITY_ID);
 	}
 
 	@Test
@@ -197,9 +202,9 @@ class NoteResourceTest {
 		final var expectedResponse = FindNotesResponse.create().withNotes(List.of(Note.create()));
 
 		// Mock
-		when(noteService.getNotes(any())).thenReturn(FindNotesResponse.create().withNotes(List.of(Note.create())));
+		when(noteService.getNotes(anyString(), any())).thenReturn(FindNotesResponse.create().withNotes(List.of(Note.create())));
 
-		final var response = webTestClient.get().uri(builder -> builder.path("/notes").queryParams(inParams).build())
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH).queryParams(inParams).build(Map.of("municipalityId", MUNICIPALITY_ID)))
 			.exchange()
 			.expectStatus().isOk()
 			.expectHeader().contentType(APPLICATION_JSON)
@@ -209,7 +214,7 @@ class NoteResourceTest {
 
 		// Verification
 		assertThat(response).isNotNull().isEqualTo(expectedResponse);
-		verify(noteService).getNotes(parametersCaptor.capture());
+		verify(noteService).getNotes(eq(MUNICIPALITY_ID), parametersCaptor.capture());
 
 		FindNotesRequest findNotesRequest = parametersCaptor.getValue();
 		assertThat(findNotesRequest.getPage()).isEqualTo(page);

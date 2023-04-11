@@ -27,6 +27,7 @@ import se.sundsvall.notes.integration.db.NoteRepository;
 })
 class DeleteNoteIT extends AbstractAppTest {
 
+	final static String MUNICIPALITY_ID = "2281";
 	@Autowired
 	private NoteRepository noteRepository;
 
@@ -38,7 +39,7 @@ class DeleteNoteIT extends AbstractAppTest {
 		assertThat(noteRepository.findById(id)).isPresent();
 
 		setupCall()
-			.withServicePath("/notes/".concat(id))
+			.withServicePath("/".concat(MUNICIPALITY_ID).concat("/notes/").concat(id))
 			.withHttpMethod(HttpMethod.DELETE)
 			.withExpectedResponseStatus(HttpStatus.NO_CONTENT)
 			.sendRequestAndVerifyResponse();
@@ -53,7 +54,7 @@ class DeleteNoteIT extends AbstractAppTest {
 		assertThat(noteRepository.findById(id)).isNotPresent();
 
 		setupCall()
-			.withServicePath("/notes/".concat(id))
+			.withServicePath("/".concat(MUNICIPALITY_ID).concat("/notes/").concat(id))
 			.withHttpMethod(HttpMethod.DELETE)
 			.withExpectedResponseStatus(HttpStatus.NOT_FOUND)
 			.withExpectedResponse("response.json")
