@@ -5,7 +5,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.notes.Application;
@@ -23,13 +22,11 @@ import se.sundsvall.notes.Application;
 })
 class UpdateNoteIT extends AbstractAppTest {
 
-	final static String MUNICIPALITY_ID = "/2281";
-
 	@Test
 	void test01_updateById() throws Exception {
 
 		setupCall()
-			.withServicePath("/" + MUNICIPALITY_ID + "/notes/8825bfae-11bc-4436-b1be-e4f0f225c048")
+			.withServicePath("/notes/8825bfae-11bc-4436-b1be-e4f0f225c048")
 			.withHttpMethod(HttpMethod.PATCH)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.OK)
@@ -40,7 +37,7 @@ class UpdateNoteIT extends AbstractAppTest {
 	@Test
 	void test02_updateByIdNotFound() throws Exception {
 		setupCall()
-			.withServicePath("/" + MUNICIPALITY_ID + "/notes/9eceeeb1-f939-441c-858f-da3deb05e578") // Id does not exist in DB.
+			.withServicePath("/notes/9eceeeb1-f939-441c-858f-da3deb05e578") // Id does not exist in DB.
 			.withHttpMethod(HttpMethod.PATCH)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.NOT_FOUND)

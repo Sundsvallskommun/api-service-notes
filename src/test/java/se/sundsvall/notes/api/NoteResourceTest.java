@@ -26,8 +26,6 @@ import java.util.UUID;
 import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -38,7 +36,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @ActiveProfiles("junit")
 class NoteResourceTest {
 
-	private static final String PATH = "/{municipalityId}/notes";
+	private static final String PATH = "/notes";
 	private static final String MUNICIPALITY_ID = "2281";
 	@MockBean
 	private NoteService noteService;
@@ -68,21 +66,22 @@ class NoteResourceTest {
 			.withExternalCaseId("externalCaseId")
 			.withPartyId(UUID.randomUUID().toString())
 			.withSubject("Test subject")
-			.withRole("role");
+			.withRole("role")
+			.withMunicipalityId(MUNICIPALITY_ID)    ;
 
 		// Mock
-		when(noteService.createNote(anyString(), any())).thenReturn(id);
+		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(id);
 
-		webTestClient.post().uri(builder -> builder.path(PATH).build(Map.of("municipalityId", MUNICIPALITY_ID)))
+		webTestClient.post().uri(PATH)
 			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isCreated()
 			.expectHeader().contentType(ALL)
-			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/").concat(MUNICIPALITY_ID).concat("/notes/").concat(id));
+			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
 
 		// Verification
-		verify(noteService).createNote(MUNICIPALITY_ID, createNoteRequest);
+		verify(noteService).createNote(createNoteRequest);
 	}
 
 	@Test
@@ -100,20 +99,22 @@ class NoteResourceTest {
 			.withCreatedBy("createdBy")
 			.withExternalCaseId("externalCaseId")
 			.withSubject("Test subject")
-			.withRole("role");
+			.withRole("role")
+			.withMunicipalityId(MUNICIPALITY_ID);
 
 		// Mock
-		when(noteService.createNote(anyString(), any())).thenReturn(id);
+		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(id);
 
-		webTestClient.post().uri(builder -> builder.path(PATH).build(Map.of("municipalityId", MUNICIPALITY_ID))).contentType(APPLICATION_JSON)
+		webTestClient.post().uri(PATH)
+			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isCreated()
 			.expectHeader().contentType(ALL)
-			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/").concat(MUNICIPALITY_ID).concat("/notes/").concat(id));
+			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
 
 		// Verification
-		verify(noteService).createNote(MUNICIPALITY_ID, createNoteRequest);
+		verify(noteService).createNote(createNoteRequest);
 	}
 
 	@Test
@@ -132,9 +133,9 @@ class NoteResourceTest {
 
 		// Mock
 		Note note = Note.create().withId(id);
-		when(noteService.updateNote(id, MUNICIPALITY_ID, updateNoteRequest)).thenReturn(note);
+		when(noteService.updateNote(id, updateNoteRequest)).thenReturn(note);
 
-		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID, "id", id)))
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of( "id", id)))
 			.contentType(APPLICATION_JSON)
 			.bodyValue(updateNoteRequest)
 			.exchange()
@@ -146,7 +147,7 @@ class NoteResourceTest {
 
 		// Verification
 		assertThat(response).isNotNull().isEqualTo(note);
-		verify(noteService).updateNote(id, MUNICIPALITY_ID, updateNoteRequest);
+		verify(noteService).updateNote(id, updateNoteRequest);
 	}
 
 	@Test
@@ -155,13 +156,13 @@ class NoteResourceTest {
 		// Parameter values
 		final var id = UUID.randomUUID().toString();
 
-		webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID,"id", id)))
+		webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isNoContent()
 			.expectHeader().doesNotExist(CONTENT_TYPE);
 
 		// Verification
-		verify(noteService).deleteNote(id, MUNICIPALITY_ID);
+		verify(noteService).deleteNoteById(id);
 	}
 
 	@Test
@@ -172,9 +173,9 @@ class NoteResourceTest {
 
 		// Mock
 		Note note = Note.create().withId(id);
-		when(noteService.getNote(id, MUNICIPALITY_ID)).thenReturn(note);
+		when(noteService.getNoteById(id)).thenReturn(note);
 
-		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID,"id", id)))
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isOk()
 			.expectHeader().contentType(APPLICATION_JSON)
@@ -184,7 +185,7 @@ class NoteResourceTest {
 
 		// Verification
 		assertThat(response).isNotNull().isEqualTo(note);
-		verify(noteService).getNote(id, MUNICIPALITY_ID);
+		verify(noteService).getNoteById(id);
 	}
 
 	@Test
@@ -197,14 +198,14 @@ class NoteResourceTest {
 		final var role = "role";
 		final var clientId = "clientId";
 
-		final var inParams = createParameterMap(page, limit, partyId, null, context, role, clientId);
+		final var inParams = createParameterMap(page, limit, partyId, null, context, role, clientId, MUNICIPALITY_ID);
 
 		final var expectedResponse = FindNotesResponse.create().withNotes(List.of(Note.create()));
 
 		// Mock
-		when(noteService.getNotes(anyString(), any())).thenReturn(FindNotesResponse.create().withNotes(List.of(Note.create())));
+		when(noteService.getNotes(any())).thenReturn(FindNotesResponse.create().withNotes(List.of(Note.create())));
 
-		final var response = webTestClient.get().uri(builder -> builder.path(PATH).queryParams(inParams).build(Map.of("municipalityId", MUNICIPALITY_ID)))
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH).queryParams(inParams).build())
 			.exchange()
 			.expectStatus().isOk()
 			.expectHeader().contentType(APPLICATION_JSON)
@@ -214,7 +215,7 @@ class NoteResourceTest {
 
 		// Verification
 		assertThat(response).isNotNull().isEqualTo(expectedResponse);
-		verify(noteService).getNotes(eq(MUNICIPALITY_ID), parametersCaptor.capture());
+		verify(noteService).getNotes(parametersCaptor.capture());
 
 		FindNotesRequest findNotesRequest = parametersCaptor.getValue();
 		assertThat(findNotesRequest.getPage()).isEqualTo(page);
@@ -224,9 +225,10 @@ class NoteResourceTest {
 		assertThat(findNotesRequest.getContext()).isEqualTo(context);
 		assertThat(findNotesRequest.getRole()).isEqualTo(role);
 		assertThat(findNotesRequest.getClientId()).isEqualTo(clientId);
+		assertThat(findNotesRequest.getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
 	}
 
-	private MultiValueMap<String, String> createParameterMap(Integer page, Integer limit, String partyId, String caseId, String context, String role, String clientId) {
+	private MultiValueMap<String, String> createParameterMap(Integer page, Integer limit, String partyId, String caseId, String context, String role, String clientId, String municipalityId) {
 		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
 		ofNullable(page).ifPresent(p -> parameters.add("page", p.toString()));
@@ -236,6 +238,7 @@ class NoteResourceTest {
 		ofNullable(context).ifPresent(p -> parameters.add("context", p));
 		ofNullable(role).ifPresent(p -> parameters.add("role", p));
 		ofNullable(clientId).ifPresent(p -> parameters.add("clientId", p));
+		ofNullable(municipalityId).ifPresent(p -> parameters.add("municipalityId", p));
 
 		return parameters;
 	}

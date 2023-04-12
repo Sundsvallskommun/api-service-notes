@@ -59,7 +59,7 @@ class NoteRepositoryTest {
 	@Test
 	void findByPartyId() {
 		final var findNotesRequest = FindNotesRequest.create().withPartyId(ENTITY_1_PARTY_ID);
-		final var page = noteRepository.findAllByParameters(MUNICIPALITY_ID, findNotesRequest, PageRequest.of(0, 100));
+		final var page = noteRepository.findAllByParameters(findNotesRequest, PageRequest.of(0, 100));
 
 		final var noteEntities = page.getContent();
 
@@ -74,8 +74,8 @@ class NoteRepositoryTest {
 
 	@Test
 	void findByPartyIdNotFound() {
-		final var findNotesRequest = FindNotesRequest.create().withPartyId("does-not-exist");
-		final var page = noteRepository.findAllByParameters(MUNICIPALITY_ID, findNotesRequest, PageRequest.of(0, 100));
+		final var findNotesRequest = FindNotesRequest.create().withPartyId("does-not-exist").withMunicipalityId(MUNICIPALITY_ID);
+		final var page = noteRepository.findAllByParameters(findNotesRequest, PageRequest.of(0, 100));
 
 		assertThat(page.getContent()).isNotNull().isEmpty();
 	}
@@ -83,7 +83,6 @@ class NoteRepositoryTest {
 	@Test
 	void existsByIdAndMunicipalityId() {
 		final var exists = noteRepository.existsByIdAndMunicipalityId(ENTITY_1_ID, MUNICIPALITY_ID);
-
 
 		assertThat(exists).isTrue();
 	}
@@ -93,6 +92,23 @@ class NoteRepositoryTest {
 		final var exists = noteRepository.existsByIdAndMunicipalityId("does-not-exist", MUNICIPALITY_ID);
 
 		assertThat(exists).isFalse();
+	}
+
+	@Test
+	void findByIdAndMunicipalityId() {
+		final var noteEntity = noteRepository.findByIdAndMunicipalityId(ENTITY_1_ID, MUNICIPALITY_ID);
+
+		assertThat(noteEntity).isNotNull();
+		assertThat(noteEntity.get().getId()).isEqualTo(ENTITY_1_ID);
+		assertThat(noteEntity.get().getPartyId()).isEqualTo(ENTITY_1_PARTY_ID);
+		assertThat(noteEntity.get().getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
+	}
+
+	@Test
+	void findByIdAndMunicipalityIdNotFound() {
+		final var noteEntity = noteRepository.findByIdAndMunicipalityId("does-not-exist", MUNICIPALITY_ID);
+
+		assertThat(noteEntity).isNotPresent();
 	}
 
 	@Test

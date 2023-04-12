@@ -1,5 +1,7 @@
 package se.sundsvall.notes.api.model;
 
+import org.junit.jupiter.api.Test;
+
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanConstructor;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanEquals;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanHashCode;
@@ -9,8 +11,6 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-
-import org.junit.jupiter.api.Test;
 
 class CreateNoteRequestTest {
 
@@ -38,6 +38,7 @@ class CreateNoteRequestTest {
 		final var partyId = randomUUID().toString();
 		final var role = "role";
 		final var subject = "subject";
+		final var municipalityId = "municipalityId";
 
 		final var createNoteRequest = CreateNoteRequest.create()
 			.withBody(body)
@@ -50,7 +51,8 @@ class CreateNoteRequestTest {
 			.withExternalCaseId(externalCaseId)
 			.withPartyId(partyId)
 			.withRole(role)
-			.withSubject(subject);
+			.withSubject(subject)
+			.withMunicipalityId(municipalityId);
 
 		assertThat(createNoteRequest).isNotNull().hasNoNullFieldsOrProperties();
 		assertThat(createNoteRequest.getBody()).isEqualTo(body);
@@ -64,6 +66,7 @@ class CreateNoteRequestTest {
 		assertThat(createNoteRequest.getPartyId()).isEqualTo(partyId);
 		assertThat(createNoteRequest.getRole()).isEqualTo(role);
 		assertThat(createNoteRequest.getSubject()).isEqualTo(subject);
+		assertThat(createNoteRequest.getMunicipalityId()).isEqualTo(municipalityId);
 	}
 
 	@Test

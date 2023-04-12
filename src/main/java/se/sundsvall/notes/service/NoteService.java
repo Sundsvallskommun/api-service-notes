@@ -30,29 +30,26 @@ public class NoteService {
 	@Autowired
 	private NoteRepository noteRepository;
 
-	public String createNote(String municipalityId, CreateNoteRequest createNoteRequest) {
-		return noteRepository.save(toNoteEntity(municipalityId, createNoteRequest)).getId();
+	public String createNote(CreateNoteRequest createNoteRequest) {
+		return noteRepository.save(toNoteEntity(createNoteRequest)).getId();
 	}
 
-	public Note updateNote(String id, String municipalityId, UpdateNoteRequest updateNoteRequest) {
-		if (isNotTrue(noteRepository.existsByIdAndMunicipalityId(id, municipalityId))) {
-			throw Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id));
-		}
+	public Note updateNote(String id, UpdateNoteRequest updateNoteRequest) {
+		final var noteEntity = noteRepository.findById(id).orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
 
-		final var noteEntity = noteRepository.save(toNoteEntity(municipalityId, noteRepository.getReferenceById(id), updateNoteRequest));
+		noteRepository.save(toNoteEntity(noteEntity, updateNoteRequest));
+
 		return toNote(noteEntity);
 	}
 
-	public Note getNote(String id, String municipalityId) {
-		if (isNotTrue(noteRepository.existsByIdAndMunicipalityId(id, municipalityId))) {
-			throw Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id));
-		}
+	public Note getNoteById(String id) {
+		final var noteEntity = noteRepository.findById(id).orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
 
-		return toNote(noteRepository.getReferenceById(id));
+		return toNote(noteEntity);
 	}
 
-	public FindNotesResponse getNotes(String municipalityId, FindNotesRequest findNotesRequest) {
-		final var matches = noteRepository.findAllByParameters(municipalityId, findNotesRequest, PageRequest.of(findNotesRequest.getPage() - 1,
+	public FindNotesResponse getNotes(FindNotesRequest findNotesRequest) {
+		final var matches = noteRepository.findAllByParameters(findNotesRequest, PageRequest.of(findNotesRequest.getPage() - 1,
 			findNotesRequest.getLimit(), Sort.by("created").descending()));
 
 		// If page larger than last page is requested, a empty list is returned otherwise the current page
@@ -68,8 +65,8 @@ public class NoteService {
 			.withNotes(notes);
 	}
 
-	public void deleteNote(String id, String municipalityId) {
-		if (isNotTrue(noteRepository.existsByIdAndMunicipalityId(id, municipalityId))) {
+	public void deleteNoteById(String id) {
+		if (isNotTrue(noteRepository.existsById(id))) {
 			throw Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id));
 		}
 		noteRepository.deleteById(id);

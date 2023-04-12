@@ -9,6 +9,7 @@ import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 import static se.sundsvall.notes.integration.db.specification.NoteSpecification.withCaseId;
 import static se.sundsvall.notes.integration.db.specification.NoteSpecification.withClientId;
@@ -21,14 +22,16 @@ import static se.sundsvall.notes.integration.db.specification.NoteSpecification.
 @CircuitBreaker(name = "NoteRepository")
 public interface NoteRepository extends JpaRepository<NoteEntity, String>, JpaSpecificationExecutor<NoteEntity> {
 
-	default Page<NoteEntity> findAllByParameters(String municipalityId, FindNotesRequest findNotesRequest, Pageable pageable) {
+	default Page<NoteEntity> findAllByParameters(FindNotesRequest findNotesRequest, Pageable pageable) {
 		return this.findAll(withPartyId(findNotesRequest.getPartyId())
 			.and(withCaseId(findNotesRequest.getCaseId()))
 			.and(withContext(findNotesRequest.getContext())
 			.and(withRole(findNotesRequest.getRole()))
-			.and(withMunicipalityId(municipalityId))
+			.and(withMunicipalityId(findNotesRequest.getMunicipalityId()))
 			.and(withClientId(findNotesRequest.getClientId()))), pageable);
 	}
 
 	boolean existsByIdAndMunicipalityId(String id, String municipalityId);
+
+	Optional<NoteEntity> findByIdAndMunicipalityId(String id, String municipalityId);
 }

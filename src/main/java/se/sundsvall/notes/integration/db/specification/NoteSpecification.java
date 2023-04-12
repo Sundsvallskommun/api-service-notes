@@ -23,9 +23,13 @@ public interface NoteSpecification {
 		return buildEqualFilter("partyId", partyId);
 	}
 
-	static Specification<NoteEntity> withCaseId(String caseId) { return buildEqualFilter("caseId", caseId); }
+	static Specification<NoteEntity> withCaseId(String caseId) {
+		return buildEqualFilter("caseId", caseId);
+	}
 
-	static Specification<NoteEntity> withMunicipalityId(String municipalityId) { return buildEqualFilter("municipalityId", municipalityId); }
+	static Specification<NoteEntity> withMunicipalityId(String municipalityId) {
+		return buildEqualFilter("municipalityId", municipalityId);
+	}
 
 	/**
 	 * Method builds an equal filter if value is not null. If value is null, method returns

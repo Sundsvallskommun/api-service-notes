@@ -1,5 +1,9 @@
 package se.sundsvall.notes.api.model;
 
+import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
+
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanConstructor;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanEquals;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanHashCode;
@@ -8,10 +12,6 @@ import static com.google.code.beanmatchers.BeanMatchers.hasValidGettersAndSetter
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
 
 class FindNotesRequestTest {
 
@@ -35,6 +35,7 @@ class FindNotesRequestTest {
 		final var page = 37;
 		final var partyId = UUID.randomUUID().toString();
 		final var role = "role";
+		final var municipalityId = "municipalityId";
 
 		final var findNotesRequest = FindNotesRequest.create()
 			.withCaseId(caseId)
@@ -43,7 +44,8 @@ class FindNotesRequestTest {
 			.withLimit(limit)
 			.withPage(page)
 			.withPartyId(partyId)
-			.withRole(role);
+			.withRole(role)
+			.withMunicipalityId(municipalityId);
 
 		assertThat(findNotesRequest).isNotNull().hasNoNullFieldsOrProperties();
 		assertThat(findNotesRequest.getCaseId()).isEqualTo(caseId);
@@ -53,6 +55,7 @@ class FindNotesRequestTest {
 		assertThat(findNotesRequest.getPage()).isEqualTo(page);
 		assertThat(findNotesRequest.getPartyId()).isEqualTo(partyId);
 		assertThat(findNotesRequest.getRole()).isEqualTo(role);
+		assertThat(findNotesRequest.getMunicipalityId()).isEqualTo(municipalityId);
 	}
 
 	@Test
