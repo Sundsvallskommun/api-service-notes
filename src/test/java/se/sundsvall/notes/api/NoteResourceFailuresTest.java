@@ -266,7 +266,8 @@ class NoteResourceFailuresTest {
 		// Parameter values
 		final var createNoteRequest = "{}";
 
-		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build(Map.of("municipalityId", MUNICIPALITY_ID))).contentType(APPLICATION_JSON)
+		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build())
+			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -293,7 +294,8 @@ class NoteResourceFailuresTest {
 	@Test
 	void createNoteNullBody() {
 
-		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build(Map.of("municipalityId", MUNICIPALITY_ID))).contentType(APPLICATION_JSON)
+		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build())
+			.contentType(APPLICATION_JSON)
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -317,7 +319,7 @@ class NoteResourceFailuresTest {
 			.withSubject("subject")
 			.withModifiedBy("modifiedBy");
 
-		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID, "id", id)))
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.contentType(APPLICATION_JSON)
 			.bodyValue(updateNoteRequest)
 			.exchange()
@@ -342,7 +344,7 @@ class NoteResourceFailuresTest {
 		final var id = UUID.randomUUID().toString();
 		final var updateNoteRequest = UpdateNoteRequest.create();
 
-		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID, "id", id))).contentType(APPLICATION_JSON)
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id))).contentType(APPLICATION_JSON)
 			.bodyValue(updateNoteRequest)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -374,7 +376,7 @@ class NoteResourceFailuresTest {
 			.withCaseLink(repeat("*", 513))
 			.withExternalCaseId(repeat("*", 256));
 
-		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID, "id", id)))
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.contentType(APPLICATION_JSON)
 			.bodyValue(updateNoteRequest)
 			.exchange()
@@ -404,7 +406,7 @@ class NoteResourceFailuresTest {
 		// Parameter values
 		final var id = UUID.randomUUID().toString();
 
-		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID, "id", id)))
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.contentType(APPLICATION_JSON)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -425,7 +427,7 @@ class NoteResourceFailuresTest {
 		// Parameter values
 		final var id = "invalid";
 
-		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID, "id", id)))
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -464,12 +466,53 @@ class NoteResourceFailuresTest {
 	}
 
 	@Test
+	void getNotesByInvalidMunicipalityId() {
+
+		// Parameter values
+		final var municipalityId = "invalid";
+
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH).queryParam("municipalityId", municipalityId) .build())
+			.exchange()
+			.expectStatus().isBadRequest()
+			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
+			.expectBody(ConstraintViolationProblem.class)
+			.returnResult()
+			.getResponseBody();
+
+		assertThat(response).isNotNull();
+		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
+		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
+		assertThat(response.getViolations())
+			.extracting(Violation::getField, Violation::getMessage)
+			.containsExactly(tuple("municipalityId", "not a valid municipality ID"));
+	}
+
+	@Test
+	void getNotesNullInMunicipalityId() {
+
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH).build())
+			.exchange()
+			.expectStatus().isBadRequest()
+			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
+			.expectBody(ConstraintViolationProblem.class)
+			.returnResult()
+			.getResponseBody();
+
+		assertThat(response).isNotNull();
+		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
+		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
+		assertThat(response.getViolations())
+			.extracting(Violation::getField, Violation::getMessage)
+			.containsExactly(tuple("municipalityId", "not a valid municipality ID"));
+	}
+
+	@Test
 	void deleteNoteByIdInvalidId() {
 
 		// Parameter values
 		final var id = "invalid";
 
-		final var response = webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID, "id", id)))
+		final var response = webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -491,7 +534,7 @@ class NoteResourceFailuresTest {
 		// Parameter values
 		final var id = "";
 
-		final var response = webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("municipalityId", MUNICIPALITY_ID, "id", id)))
+		final var response = webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 				.exchange()
 				.expectStatus().isEqualTo(METHOD_NOT_ALLOWED)
 				.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
