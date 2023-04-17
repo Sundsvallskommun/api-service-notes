@@ -1,17 +1,16 @@
 package se.sundsvall.notes.service.mapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-
-import java.time.OffsetDateTime;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
-
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.Note;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 
 class NoteMapperTest {
 
@@ -29,6 +28,7 @@ class NoteMapperTest {
 		final var caseType = "caseType";
 		final var caseLink = "caseLink";
 		final var externalCaseId = "externalCaseId";
+		final var municipalityId = "municipalityId";
 
 		// Setup
 		final var createNoteRequest = CreateNoteRequest.create()
@@ -42,7 +42,8 @@ class NoteMapperTest {
 			.withCaseId(caseId)
 			.withCaseType(caseType)
 			.withCaseLink(caseLink)
-			.withExternalCaseId(externalCaseId);
+			.withExternalCaseId(externalCaseId)
+			.withMunicipalityId(municipalityId);
 
 		// Call
 		final var noteEntity = NoteMapper.toNoteEntity(createNoteRequest);
@@ -59,6 +60,7 @@ class NoteMapperTest {
 		assertThat(noteEntity.getCaseType()).isEqualTo(caseType);
 		assertThat(noteEntity.getCaseLink()).isEqualTo(caseLink);
 		assertThat(noteEntity.getExternalCaseId()).isEqualTo(externalCaseId);
+		assertThat(noteEntity.getMunicipalityId()).isEqualTo(municipalityId);
 
 		assertThat(noteEntity).extracting(
 			NoteEntity::getCreated,
@@ -69,7 +71,6 @@ class NoteMapperTest {
 
 	@Test
 	void toNoteEntityFromNull() {
-
 		// Call
 		final var webMessageEntity = NoteMapper.toNoteEntity(null);
 
@@ -215,6 +216,7 @@ class NoteMapperTest {
 		final var caseType = "caseType";
 		final var caseLink = "caseLink";
 		final var externalCaseId = "externalCaseId";
+		final var municipalityId = "municipalityId";
 
 		// Setup
 		final var noteEntity = NoteEntity.create()
@@ -230,7 +232,8 @@ class NoteMapperTest {
 			.withCaseId(caseId)
 			.withCaseType(caseType)
 			.withCaseLink(caseLink)
-			.withExternalCaseId(externalCaseId);
+			.withExternalCaseId(externalCaseId)
+			.withMunicipalityId(municipalityId);
 
 		// Call
 		final var updatedNoteEntity = NoteMapper.toNoteEntity(noteEntity, null);
@@ -251,6 +254,7 @@ class NoteMapperTest {
 		assertThat(updatedNoteEntity.getCaseType()).isEqualTo(caseType);
 		assertThat(updatedNoteEntity.getCaseLink()).isEqualTo(caseLink);
 		assertThat(updatedNoteEntity.getExternalCaseId()).isEqualTo(externalCaseId);
+		assertThat(updatedNoteEntity.getMunicipalityId()).isEqualTo(municipalityId);
 	}
 
 	@Test

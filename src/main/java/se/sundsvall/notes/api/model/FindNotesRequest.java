@@ -1,12 +1,15 @@
 package se.sundsvall.notes.api.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import se.sundsvall.dept44.common.validators.annotation.ValidMunicipalityId;
 import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 import static java.lang.Integer.parseInt;
 
 @Schema(description = "FindNotesRequest model")
@@ -29,6 +32,11 @@ public class FindNotesRequest {
 
 	@Schema(description = "Id for the case", example = "12345")
 	private String caseId;
+
+	@Schema(description = "Municipality id for the case", example = "2229", requiredMode = REQUIRED)
+	@Size(min = 1, max = 255)
+	@ValidMunicipalityId
+	private String municipalityId;
 
 	@Schema(description = "Page number", example = DEFAULT_PAGE, defaultValue = DEFAULT_PAGE)
 	@Min(1)
@@ -108,6 +116,19 @@ public class FindNotesRequest {
 		return this;
 	}
 
+	public String getMunicipalityId() {
+		return municipalityId;
+	}
+
+	public void setMunicipalityId(String municipalityId) {
+		this.municipalityId = municipalityId;
+	}
+
+	public FindNotesRequest withMunicipalityId(String municipalityId) {
+		this.municipalityId = municipalityId;
+		return this;
+	}
+
 	public int getPage() {
 		return page;
 	}
@@ -136,7 +157,7 @@ public class FindNotesRequest {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(caseId, clientId, context, limit, page, partyId, role);
+		return Objects.hash(caseId, clientId, context, limit, page, partyId, role, municipalityId);
 	}
 
 	@Override
@@ -152,7 +173,7 @@ public class FindNotesRequest {
 		}
 		FindNotesRequest other = (FindNotesRequest) obj;
 		return Objects.equals(caseId, other.caseId) && Objects.equals(clientId, other.clientId) && Objects.equals(context, other.context) && limit == other.limit && page == other.page && Objects.equals(partyId, other.partyId) && Objects.equals(role,
-			other.role);
+			other.role) && Objects.equals(municipalityId, other.municipalityId);
 	}
 
 	@Override
@@ -164,6 +185,7 @@ public class FindNotesRequest {
 			.append(", caseId=").append(caseId)
 			.append(", page=").append(page)
 			.append(", limit=").append(limit)
+			.append(", municipalityId=").append(municipalityId)
 			.append("]").toString();
 	}
 }

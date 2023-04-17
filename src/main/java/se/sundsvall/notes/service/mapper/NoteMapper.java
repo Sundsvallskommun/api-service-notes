@@ -32,7 +32,8 @@ public class NoteMapper {
 			.withCaseId(createNoteRequest.getCaseId())
 			.withCaseType(createNoteRequest.getCaseType())
 			.withCaseLink(createNoteRequest.getCaseLink())
-			.withExternalCaseId(createNoteRequest.getExternalCaseId());
+			.withExternalCaseId(createNoteRequest.getExternalCaseId())
+			.withMunicipalityId(createNoteRequest.getMunicipalityId());
 	}
 
 	public static NoteEntity toNoteEntity(NoteEntity noteEntity, UpdateNoteRequest updateNoteRequest) {

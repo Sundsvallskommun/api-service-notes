@@ -1,5 +1,20 @@
 package se.sundsvall.notes.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.zalando.problem.Problem;
+import se.sundsvall.notes.api.model.CreateNoteRequest;
+import se.sundsvall.notes.api.model.FindNotesRequest;
+import se.sundsvall.notes.api.model.FindNotesResponse;
+import se.sundsvall.notes.api.model.MetaData;
+import se.sundsvall.notes.api.model.Note;
+import se.sundsvall.notes.api.model.UpdateNoteRequest;
+import se.sundsvall.notes.integration.db.NoteRepository;
+
+import java.util.List;
+
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.BooleanUtils.isNotTrue;
@@ -8,23 +23,6 @@ import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
 import static se.sundsvall.notes.service.mapper.NoteMapper.toNote;
 import static se.sundsvall.notes.service.mapper.NoteMapper.toNoteEntity;
 import static se.sundsvall.notes.service.mapper.NoteMapper.toNotes;
-
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.zalando.problem.Problem;
-
-import se.sundsvall.notes.api.model.CreateNoteRequest;
-import se.sundsvall.notes.api.model.FindNotesRequest;
-import se.sundsvall.notes.api.model.FindNotesResponse;
-import se.sundsvall.notes.api.model.MetaData;
-import se.sundsvall.notes.api.model.Note;
-import se.sundsvall.notes.api.model.UpdateNoteRequest;
-import se.sundsvall.notes.integration.db.NoteRepository;
-import se.sundsvall.notes.integration.db.model.NoteEntity;
 
 @Service
 public class NoteService {
@@ -37,16 +35,15 @@ public class NoteService {
 	}
 
 	public Note updateNote(String id, UpdateNoteRequest updateNoteRequest) {
-		NoteEntity noteEntity = noteRepository.findById(id)
-			.orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
+		final var noteEntity = noteRepository.findById(id).orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
 
 		noteRepository.save(toNoteEntity(noteEntity, updateNoteRequest));
+
 		return toNote(noteEntity);
 	}
 
 	public Note getNoteById(String id) {
-		NoteEntity noteEntity = noteRepository.findById(id)
-			.orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
+		final var noteEntity = noteRepository.findById(id).orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
 
 		return toNote(noteEntity);
 	}

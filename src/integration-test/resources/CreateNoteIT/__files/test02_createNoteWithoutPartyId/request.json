@@ -8,5 +8,6 @@
 	"caseId": "54321",
 	"caseType": "caseType",
 	"caseLink": "http://caselink.com/54321",
-	"externalCaseId": "12345"
+	"externalCaseId": "12345",
+	"municipalityId": "2281"
 }
