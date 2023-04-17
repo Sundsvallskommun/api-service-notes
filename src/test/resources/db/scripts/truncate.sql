@@ -1,1 +1,2 @@
- TRUNCATE table note;
+TRUNCATE table note;
+TRUNCATE table revision;
