@@ -25,8 +25,7 @@ public interface RevisionRepository extends JpaRepository<RevisionEntity, String
 	/**
 	 * Find the last revision by entityId.
 	 *
-	 * @param entityId   the entityId to find revisions for.
-	 * @param entityType the entityType to find revisions for.
+	 * @param entityId the entityId to find revisions for.
 	 * @return an optional entity that matches the provided parameters (i.e. last created revision for an entity).
 	 */
 	Optional<RevisionEntity> findFirstByEntityIdOrderByVersionDesc(String entityId);
