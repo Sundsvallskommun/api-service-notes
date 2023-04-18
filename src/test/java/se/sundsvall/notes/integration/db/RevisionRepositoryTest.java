@@ -4,6 +4,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.assertj.core.groups.Tuple.tuple;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -97,6 +98,27 @@ class RevisionRepositoryTest {
 		assertThat(revision).isEmpty();
 	}
 
+	@Test
+	void findByVersionIn() {
+
+		final var revisionList = repository.findByVersionIn(2, 4);
+
+		assertThat(revisionList)
+			.hasSize(2)
+			.extracting(RevisionEntity::getId, RevisionEntity::getVersion)
+			.containsExactlyInAnyOrder(
+				tuple("5ac0398d-67d7-4267-b7b1-d9983b51758b", 2),
+				tuple("f9e222f3-2476-4ead-bb1a-3e7e25f9c6ee", 4));
+	}
+
+	@Test
+	void findByVersionInNotFound() {
+
+		final var revisionList = repository.findByVersionIn(666, 667);
+
+		assertThat(revisionList).isNotNull().isEmpty();
+	}
+	
 	private boolean isValidUUID(final String value) {
 		try {
 			UUID.fromString(String.valueOf(value));

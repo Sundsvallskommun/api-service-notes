@@ -1,22 +1,21 @@
 package se.sundsvall.notes.service.mapper;
 
+import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
+
+import java.util.List;
+
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.Note;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 
-import java.util.List;
-
-import static java.util.Collections.emptyList;
-import static java.util.Objects.isNull;
-import static java.util.Optional.ofNullable;
-
 public class NoteMapper {
 
-	private NoteMapper() {
-	}
+	private NoteMapper() {}
 
-	public static NoteEntity toNoteEntity(CreateNoteRequest createNoteRequest) {
+	public static NoteEntity toNoteEntity(final CreateNoteRequest createNoteRequest) {
 		if (isNull(createNoteRequest)) {
 			return null;
 		}
@@ -36,7 +35,7 @@ public class NoteMapper {
 			.withMunicipalityId(createNoteRequest.getMunicipalityId());
 	}
 
-	public static NoteEntity toNoteEntity(NoteEntity noteEntity, UpdateNoteRequest updateNoteRequest) {
+	public static NoteEntity toNoteEntity(final NoteEntity noteEntity, final UpdateNoteRequest updateNoteRequest) {
 		if (isNull(updateNoteRequest)) {
 			return noteEntity;
 		}
@@ -51,7 +50,7 @@ public class NoteMapper {
 		return noteEntity;
 	}
 
-	public static Note toNote(NoteEntity noteEntity) {
+	public static Note toNote(final NoteEntity noteEntity) {
 		if (isNull(noteEntity)) {
 			return null;
 		}
@@ -74,7 +73,7 @@ public class NoteMapper {
 			.withExternalCaseId(noteEntity.getExternalCaseId());
 	}
 
-	public static List<Note> toNotes(List<NoteEntity> noteEntities) {
+	public static List<Note> toNotes(final List<NoteEntity> noteEntities) {
 		return ofNullable(noteEntities).orElse(emptyList()).stream()
 			.map(NoteMapper::toNote)
 			.toList();
