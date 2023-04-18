@@ -1,12 +1,5 @@
 package se.sundsvall.notes.integration.db.model;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import java.time.OffsetDateTime;
-import java.util.Random;
-import java.util.UUID;
-
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanConstructor;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanEquals;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanHashCode;
@@ -17,6 +10,13 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
+
+import java.time.OffsetDateTime;
+import java.util.Random;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 class NoteEntityTest {
 
@@ -95,5 +95,6 @@ class NoteEntityTest {
 	@Test
 	void testNoDirtOnCreatedBean() {
 		assertThat(NoteEntity.create()).hasAllNullFieldsOrProperties();
+		assertThat(new NoteEntity()).hasAllNullFieldsOrProperties();
 	}
 }
