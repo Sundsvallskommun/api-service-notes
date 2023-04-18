@@ -24,10 +24,10 @@ public interface NoteRepository extends JpaRepository<NoteEntity, String>, JpaSp
 	default Page<NoteEntity> findAllByParameters(final FindNotesRequest findNotesRequest, final Pageable pageable) {
 		return this.findAll(withPartyId(findNotesRequest.getPartyId())
 			.and(withCaseId(findNotesRequest.getCaseId()))
-			.and(withContext(findNotesRequest.getContext())
-				.and(withRole(findNotesRequest.getRole()))
-				.and(withMunicipalityId(findNotesRequest.getMunicipalityId()))
-				.and(withClientId(findNotesRequest.getClientId()))), pageable);
+			.and(withContext(findNotesRequest.getContext()))
+			.and(withRole(findNotesRequest.getRole()))
+			.and(withMunicipalityId(findNotesRequest.getMunicipalityId()))
+			.and(withClientId(findNotesRequest.getClientId())), pageable);
 	}
 
 	boolean existsByIdAndMunicipalityId(String id, String municipalityId);
