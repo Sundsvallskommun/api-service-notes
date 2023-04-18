@@ -13,6 +13,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.api.model.CreateNoteRequest;
+import se.sundsvall.notes.api.model.DifferenceResponse;
 import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.api.model.FindNotesResponse;
 import se.sundsvall.notes.api.model.Note;
@@ -226,6 +227,45 @@ class NoteResourceTest {
 		assertThat(findNotesRequest.getRole()).isEqualTo(role);
 		assertThat(findNotesRequest.getClientId()).isEqualTo(clientId);
 		assertThat(findNotesRequest.getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
+	}
+
+	@Test
+	void getDifference() {
+		// Parameter values
+		final var id = UUID.randomUUID().toString();
+		final var from = 1;
+		final var to = 2;
+
+
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}/difference").queryParam("from", 1).queryParam("to", 2).build(Map.of("id", id)))
+			.exchange()
+			.expectStatus().isOk()
+			.expectHeader().contentType(APPLICATION_JSON)
+			.expectBody(DifferenceResponse.class)
+			.returnResult()
+			.getResponseBody();
+
+		// Verification
+		assertThat(response).isNotNull();
+		//TODO: Add verification for response
+	}
+
+	@Test
+	void getDifferenceNoParameters() {
+		// Parameter values
+		final var id = UUID.randomUUID().toString();
+
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}/difference").build(Map.of("id", id)))
+			.exchange()
+			.expectStatus().isOk()
+			.expectHeader().contentType(APPLICATION_JSON)
+			.expectBody(DifferenceResponse.class)
+			.returnResult()
+			.getResponseBody();
+
+		// Verification
+		assertThat(response).isNotNull();
+		//TODO: Add verification for response
 	}
 
 	private MultiValueMap<String, String> createParameterMap(Integer page, Integer limit, String partyId, String caseId, String context, String role, String clientId, String municipalityId) {

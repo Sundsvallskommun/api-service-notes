@@ -547,4 +547,26 @@ class NoteResourceFailuresTest {
 		assertThat(response.getStatus().getStatusCode()).isEqualTo(METHOD_NOT_ALLOWED.value());
 		assertThat(response.getViolations()).isEmpty();
 	}
+
+	@Test
+	void getDifferenceInvalidId() {
+
+		// Parameter values
+		final var id = "invalid";
+
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}" + "/difference").queryParam("from", 1).queryParam("to", 2).build(Map.of("id", id)))
+			.exchange()
+			.expectStatus().isBadRequest()
+			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
+			.expectBody(ConstraintViolationProblem.class)
+			.returnResult()
+			.getResponseBody();
+
+		assertThat(response).isNotNull();
+		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
+		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
+		assertThat(response.getViolations())
+			.extracting(Violation::getField, Violation::getMessage)
+			.containsExactly(tuple("getDifferenceByVersions.id", "not a valid UUID"));
+	}
 }
