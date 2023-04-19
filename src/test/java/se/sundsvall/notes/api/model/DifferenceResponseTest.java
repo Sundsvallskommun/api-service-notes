@@ -27,7 +27,7 @@ class DifferenceResponseTest {
 
 	@Test
 	void testBuilderMethods() {
-		final var events = List.of(Event.create().withOp("op").withPath("path").withValue("value").withFromValue("fromValue"));
+		final var events = List.of(Operation.create().withOp("op").withPath("path").withValue("value").withFromValue("fromValue"));
 
 		final var bean = DifferenceResponse.create()
 				.withEvents(events);

@@ -4,24 +4,22 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Objects;
 
-import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+public class Operation {
 
-public class Event {
-
-	@Schema(description = "Operation in event", example = "replace", requiredMode = REQUIRED)
+	@Schema(description = "Type of operation", example = "replace")
 	private String op;
 
-	@Schema(description = "Path to attribute", example = "/name/firstName", requiredMode = REQUIRED)
+	@Schema(description = "Path to attribute", example = "/name/firstName")
 	private String path;
 
-	@Schema(description = "Value of attribute", example = "John", requiredMode = REQUIRED)
+	@Schema(description = "Value of attribute", example = "John")
 	private String value;
 
-	@Schema(description = "Previous value of attribute", example = "John", requiredMode = REQUIRED)
+	@Schema(description = "Previous value of attribute", example = "John")
 	private String fromValue;
 
-	public static Event create() {
-		return new Event();
+	public static Operation create() {
+		return new Operation();
 	}
 
 	public String getOp() {
@@ -32,7 +30,7 @@ public class Event {
 		this.op = op;
 	}
 
-	public Event withOp(String op) {
+	public Operation withOp(String op) {
 		this.op = op;
 		return this;
 	}
@@ -45,7 +43,7 @@ public class Event {
 		this.path = path;
 	}
 
-	public Event withPath(String path) {
+	public Operation withPath(String path) {
 		this.path = path;
 		return this;
 	}
@@ -58,7 +56,7 @@ public class Event {
 		this.value = value;
 	}
 
-	public Event withValue(String value) {
+	public Operation withValue(String value) {
 		this.value = value;
 		return this;
 	}
@@ -71,7 +69,7 @@ public class Event {
 		this.fromValue = fromValue;
 	}
 
-	public Event withFromValue(String fromValue) {
+	public Operation withFromValue(String fromValue) {
 		this.fromValue = fromValue;
 		return this;
 	}
@@ -91,14 +89,14 @@ public class Event {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		Event other = (Event) obj;
+		Operation other = (Operation) obj;
 		return Objects.equals(op, other.op) && Objects.equals(path, other.path) && Objects.equals(value, other.value) && Objects.equals(fromValue, other.fromValue);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Event [op=");
+		builder.append("Operation [op=");
 		builder.append(op);
 		builder.append(", path=");
 		builder.append(path);

@@ -11,11 +11,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-class EventTest {
+class OperationTest {
 
 	@Test
 	void testBean() {
-		assertThat(Event.class, allOf(
+		assertThat(Operation.class, allOf(
 			hasValidBeanConstructor(),
 			hasValidGettersAndSetters(),
 			hasValidBeanHashCode(),
@@ -26,7 +26,7 @@ class EventTest {
 	@Test
 	void testBuilderMethods() {
 
-		final var bean = Event.create()
+		final var bean = Operation.create()
 			.withOp("op")
 			.withPath("path")
 			.withValue("value")
@@ -41,7 +41,7 @@ class EventTest {
 
 	@Test
 	void testNoDirtOnCreatedBean() {
-		assertThat(Event.create()).hasAllNullFieldsOrProperties();
-		assertThat(new Event()).hasAllNullFieldsOrProperties();
+		assertThat(Operation.create()).hasAllNullFieldsOrProperties();
+		assertThat(new Operation()).hasAllNullFieldsOrProperties();
 	}
 }

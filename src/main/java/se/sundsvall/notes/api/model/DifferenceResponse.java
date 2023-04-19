@@ -11,30 +11,29 @@ import static io.swagger.v3.oas.annotations.media.Schema.AccessMode.READ_ONLY;
 @Schema(description = "DifferenceResponse model")
 public class DifferenceResponse {
 
-
-	@ArraySchema(schema = @Schema(implementation = Event.class, accessMode = READ_ONLY))
-	private List<Event> events;
+	@ArraySchema(schema = @Schema(implementation = Operation.class, accessMode = READ_ONLY))
+	private List<Operation> operations;
 
 	public static DifferenceResponse create() {
 		return new DifferenceResponse();
 	}
 
-	public List<Event> getEvents() {
-		return events;
+	public List<Operation> getEvents() {
+		return operations;
 	}
 
-	public void setEvents(List<Event> events) {
-		this.events = events;
+	public void setEvents(List<Operation> operations) {
+		this.operations = operations;
 	}
 
-	public DifferenceResponse withEvents(List<Event> events) {
-		this.events = events;
+	public DifferenceResponse withEvents(List<Operation> operations) {
+		this.operations = operations;
 		return this;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(events);
+		return Objects.hash(operations);
 	}
 
 	@Override
@@ -49,13 +48,13 @@ public class DifferenceResponse {
 			return false;
 		}
 		DifferenceResponse other = (DifferenceResponse) obj;
-		return Objects.equals(events, other.events);
+		return Objects.equals(operations, other.operations);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("DifferenceResponse [events=").append(events).append("]");
+		builder.append("DifferenceResponse [events=").append(operations).append("]");
 		return builder.toString();
 	}
 }
