@@ -1,16 +1,32 @@
 package se.sundsvall.notes.service;
 
+import static com.flipkart.zjsonpatch.DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE;
+import static com.flipkart.zjsonpatch.DiffFlags.OMIT_VALUE_ON_REMOVE;
+import static java.lang.String.format;
 import static org.apache.commons.lang3.ObjectUtils.anyNull;
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
+import static org.zalando.problem.Status.NOT_FOUND;
+import static se.sundsvall.notes.service.ServiceConstants.PROBLEM_DURING_DIFF;
+import static se.sundsvall.notes.service.ServiceConstants.REVISION_NOT_FOUND_FOR_ID_AND_VERSION;
+import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionList;
+
+import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.zalando.problem.Problem;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.flipkart.zjsonpatch.JsonDiff;
 
+import se.sundsvall.notes.api.model.DifferenceResponse;
+import se.sundsvall.notes.api.model.Operation;
+import se.sundsvall.notes.api.model.Revision;
 import se.sundsvall.notes.integration.db.RevisionRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
@@ -20,13 +36,45 @@ public class RevisionService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RevisionService.class);
 
-	private final ObjectMapper objectMapper;
-
 	@Autowired
 	private RevisionRepository revisionRepository;
 
-	public RevisionService() {
-		objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	/**
+	 * Performs a diff between to versions of a NoteEtity.
+	 *
+	 * The diff will be performed and returned according to RFC6902.
+	 *
+	 * @see <a href="https://datatracker.ietf.org/doc/html/rfc6902">RFC6902</a>.
+	 * @param noteEntityId the NoteEntity id (uuid).
+	 * @param source       the diff source version.
+	 * @param target       the diff target version.
+	 * @return the difference result represented as a DifferenceResponse object.
+	 */
+	public DifferenceResponse diff(final String noteEntityId, final int source, final int target) {
+
+		try {
+			// Fetch revisions from DB.
+			final var revisionEntity1 = revisionRepository.findByEntityIdAndVersion(noteEntityId, source)
+				.orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(REVISION_NOT_FOUND_FOR_ID_AND_VERSION, noteEntityId, source)));
+			final var revisionEntity2 = revisionRepository.findByEntityIdAndVersion(noteEntityId, target)
+				.orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(REVISION_NOT_FOUND_FOR_ID_AND_VERSION, noteEntityId, target)));
+
+			// Deserialize revision JSON into a JsonNode.
+			final var sourceJson = objectMapper.readTree(revisionEntity1.getSerializedSnapshot());
+			final var targetJson = objectMapper.readTree(revisionEntity2.getSerializedSnapshot());
+
+			// Perform diff of the two JsonNodes.
+			final var diffResult = JsonDiff.asJson(sourceJson, targetJson, EnumSet.of(ADD_ORIGINAL_VALUE_ON_REPLACE, OMIT_VALUE_ON_REMOVE)).toString();
+
+			// Return result.
+			return DifferenceResponse.create().withOperations(List.of(objectMapper.readValue(diffResult, Operation[].class)));
+		} catch (final IOException e) {
+			LOG.error("Error occured during diff: ", e);
+			throw Problem.valueOf(INTERNAL_SERVER_ERROR, format(PROBLEM_DURING_DIFF, noteEntityId, source, target));
+		}
 	}
 
 	/**
@@ -56,6 +104,10 @@ public class RevisionService {
 
 		// No previous revisions exist. Create revision 0
 		return createRevision(entity, 0);
+	}
+
+	public List<Revision> getRevisions(final String noteEntityId) {
+		return toRevisionList(revisionRepository.findAllByEntityIdOrderByVersion(noteEntityId));
 	}
 
 	private String toJsonString(final NoteEntity entity) {

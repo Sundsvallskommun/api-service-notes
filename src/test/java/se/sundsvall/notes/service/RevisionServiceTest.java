@@ -3,14 +3,19 @@ package se.sundsvall.notes.service;
 import static java.time.OffsetDateTime.now;
 import static java.util.Optional.empty;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,12 +23,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.zalando.problem.ThrowableProblem;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import se.sundsvall.notes.api.model.Operation;
 import se.sundsvall.notes.integration.db.RevisionRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
@@ -34,23 +42,24 @@ class RevisionServiceTest {
 	@Mock
 	private RevisionRepository revisionRepositoryMock;
 
+	@Spy
+	private ObjectMapper objectMapperSpy;
+
 	@InjectMocks
 	private RevisionService revisionService;
 
 	@Captor
 	private ArgumentCaptor<RevisionEntity> revisionEntityCaptor;
 
-	private ObjectMapper objectMapper;
-
 	@BeforeEach
 	void setup() {
-		objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+		objectMapperSpy.registerModule(new JavaTimeModule());
 	}
 
 	@Test
 	void createRevision() throws JsonProcessingException {
 
-		// Setup
+		// Arrange
 		final var noteEntity = createNoteEntity();
 		final var revisionEntityId = UUID.randomUUID().toString();
 		final var lastRevisionVersion = 3;
@@ -59,10 +68,10 @@ class RevisionServiceTest {
 		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId()))
 			.thenReturn(Optional.of(RevisionEntity.create().withVersion(lastRevisionVersion)));
 
-		// Call
+		// Act
 		final var result = revisionService.createRevision(noteEntity);
 
-		// Verification
+		// Assert
 		assertThat(result).isEqualTo(revisionEntityId);
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
 		verify(revisionRepositoryMock).save(revisionEntityCaptor.capture());
@@ -70,23 +79,23 @@ class RevisionServiceTest {
 		final var capturedRevisionEntity = revisionEntityCaptor.getValue();
 		assertThat(capturedRevisionEntity).isNotNull();
 		assertThat(capturedRevisionEntity.getVersion()).isEqualTo(lastRevisionVersion + 1);
-		assertThat(capturedRevisionEntity.getSerializedSnapshot()).isEqualTo(objectMapper.writeValueAsString(noteEntity));
+		assertThat(capturedRevisionEntity.getSerializedSnapshot()).isEqualTo(objectMapperSpy.writeValueAsString(noteEntity));
 	}
 
 	@Test
-	void createRevisionNoPreviousRevisionExist() {
+	void createRevisionNoPreviousRevisionExist() throws JsonProcessingException {
 
-		// Setup
+		// Arrange
 		final var noteEntity = createNoteEntity();
 		final var revisionEntityId = UUID.randomUUID().toString();
 
 		when(revisionRepositoryMock.save(any())).thenReturn(RevisionEntity.create().withId(revisionEntityId));
 		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId())).thenReturn(empty());
 
-		// Call
+		// Act
 		final var result = revisionService.createRevision(noteEntity);
 
-		// Verification
+		// Assert
 		assertThat(result).isEqualTo(revisionEntityId);
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
 		verify(revisionRepositoryMock).save(revisionEntityCaptor.capture());
@@ -99,17 +108,17 @@ class RevisionServiceTest {
 	@Test
 	void createRevisionNoChangeFromPreviousVersionDetected() throws JsonProcessingException {
 
-		// Setup
+		// Arrange
 		final var noteEntity = createNoteEntity();
-		final var serializedSnapshot = objectMapper.writeValueAsString(noteEntity);
+		final var serializedSnapshot = objectMapperSpy.writeValueAsString(noteEntity);
 
 		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId()))
 			.thenReturn(Optional.of(RevisionEntity.create().withSerializedSnapshot(serializedSnapshot)));
 
-		// Call
+		// Act
 		final var result = revisionService.createRevision(noteEntity);
 
-		// Verification
+		// Assert
 		assertThat(result).isNull();
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
 		verify(revisionRepositoryMock, never()).save(any());
@@ -118,7 +127,7 @@ class RevisionServiceTest {
 	@Test
 	void createRevisionSnapshotIsInvalidJson() throws JsonProcessingException {
 
-		// Setup
+		// Arrange
 		final var noteEntity = createNoteEntity();
 		final var revisionEntityId = UUID.randomUUID().toString();
 		final var lastRevisionVersion = 3;
@@ -128,10 +137,10 @@ class RevisionServiceTest {
 		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId()))
 			.thenReturn(Optional.of(RevisionEntity.create().withVersion(lastRevisionVersion).withSerializedSnapshot(invalidJson)));
 
-		// Call
+		// Act
 		final var result = revisionService.createRevision(noteEntity);
 
-		// Verification
+		// Assert
 		assertThat(result).isEqualTo(revisionEntityId);
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
 		verify(revisionRepositoryMock).save(revisionEntityCaptor.capture());
@@ -139,7 +148,94 @@ class RevisionServiceTest {
 		final var capturedRevisionEntity = revisionEntityCaptor.getValue();
 		assertThat(capturedRevisionEntity).isNotNull();
 		assertThat(capturedRevisionEntity.getVersion()).isEqualTo(lastRevisionVersion + 1);
-		assertThat(capturedRevisionEntity.getSerializedSnapshot()).isEqualTo(objectMapper.writeValueAsString(noteEntity));
+		assertThat(capturedRevisionEntity.getSerializedSnapshot()).isEqualTo(objectMapperSpy.writeValueAsString(noteEntity));
+	}
+
+	@Test
+	void getRevisions() {
+
+		// Arrange
+		final var entityId = UUID.randomUUID().toString();
+		when(revisionRepositoryMock.findAllByEntityIdOrderByVersion(any())).thenReturn(List.of(RevisionEntity.create().withEntityId(entityId)));
+
+		// Act
+		final var result = revisionService.getRevisions(entityId);
+
+		// Assert
+		assertThat(result).isNotNull();
+		verify(revisionRepositoryMock).findAllByEntityIdOrderByVersion(entityId);
+	}
+
+	@Test
+	void diff() throws JsonProcessingException {
+
+		// Arrange
+		final var entityId = UUID.randomUUID().toString();
+		final var source = 1;
+		final var target = 2;
+		final var noteEntity1 = createNoteEntity();
+		final var noteEntity2 = SerializationUtils.clone(noteEntity1).withBody("changed body").withModifiedBy("user22");
+
+		when(revisionRepositoryMock.findByEntityIdAndVersion(entityId, source)).thenReturn(Optional.of(RevisionEntity.create()
+			.withEntityId(entityId)
+			.withVersion(source)
+			.withSerializedSnapshot(toJsonString(noteEntity1))));
+
+		when(revisionRepositoryMock.findByEntityIdAndVersion(entityId, target)).thenReturn(Optional.of(RevisionEntity.create()
+			.withEntityId(entityId)
+			.withVersion(target)
+			.withSerializedSnapshot(toJsonString(noteEntity2))));
+
+		// Act
+		final var result = revisionService.diff(entityId, source, target);
+
+		// Assert
+		assertThat(result).isNotNull();
+		assertThat(result.getOperations())
+			.hasSize(2)
+			.extracting(
+				Operation::getOp,
+				Operation::getPath,
+				Operation::getValue,
+				Operation::getFromValue)
+			.containsExactly(
+				tuple("replace", "/modifiedBy", "user22", null),
+				tuple("replace", "/body", "changed body", "body"));
+
+		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, source);
+		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, target);
+	}
+
+	@Test
+	void diffWhenErrorOccur() throws JsonProcessingException {
+
+		// Arrange
+		final var entityId = UUID.randomUUID().toString();
+		final var source = 1;
+		final var target = 2;
+		final var noteEntity1 = createNoteEntity();
+		SerializationUtils.clone(noteEntity1).withBody("changed body").withModifiedBy("user22");
+
+		when(revisionRepositoryMock.findByEntityIdAndVersion(entityId, source)).thenReturn(Optional.of(RevisionEntity.create()
+			.withEntityId(entityId)
+			.withVersion(source)
+			.withSerializedSnapshot("{}")));
+
+		when(revisionRepositoryMock.findByEntityIdAndVersion(entityId, target)).thenReturn(Optional.of(RevisionEntity.create()
+			.withEntityId(entityId)
+			.withVersion(target)
+			.withSerializedSnapshot("{"))); // Faulty json
+
+		// Act
+		final var problem = assertThrows(ThrowableProblem.class, () -> revisionService.diff(entityId, source, target));
+
+		// Assert
+		assertThat(problem).isNotNull();
+		assertThat(problem.getMessage()).isEqualTo(String.format("Internal Server Error: An error occured during diff of entityId '%s' looking at version '%s' and version '%s'!", entityId, source, target));
+		assertThat(problem.getStatus()).isEqualTo(INTERNAL_SERVER_ERROR);
+
+		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, source);
+		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, target);
 	}
 
 	private NoteEntity createNoteEntity() {
@@ -155,10 +251,16 @@ class RevisionServiceTest {
 			.withExternalCaseId("externalCaseId")
 			.withId("id")
 			.withModified(now())
-			.withModifiedBy("modifiedBy")
+			.withModifiedBy(null)
 			.withMunicipalityId("municipalityId")
 			.withPartyId("partyId")
 			.withRole("role")
 			.withSubject("subject");
+	}
+
+	private String toJsonString(final NoteEntity entity) throws JsonProcessingException {
+		return new ObjectMapper()
+			.registerModule(new JavaTimeModule())
+			.writeValueAsString(entity);
 	}
 }

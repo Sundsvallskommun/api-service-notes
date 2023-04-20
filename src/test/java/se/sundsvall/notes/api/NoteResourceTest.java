@@ -1,5 +1,18 @@
 package se.sundsvall.notes.api;
 
+import static java.util.Optional.ofNullable;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.ALL;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -11,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
@@ -18,19 +32,6 @@ import se.sundsvall.notes.api.model.FindNotesResponse;
 import se.sundsvall.notes.api.model.Note;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.service.NoteService;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static java.util.Optional.ofNullable;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.ALL;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")
@@ -49,12 +50,13 @@ class NoteResourceTest {
 
 	@Captor
 	private ArgumentCaptor<FindNotesRequest> parametersCaptor;
-	
+
 	@Test
 	void createNoteWithPartyId() {
+
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		// Parameter values
 		final var createNoteRequest = CreateNoteRequest.create()
 			.withBody("Test note")
 			.withCaseId("caseId")
@@ -67,11 +69,11 @@ class NoteResourceTest {
 			.withPartyId(UUID.randomUUID().toString())
 			.withSubject("Test subject")
 			.withRole("role")
-			.withMunicipalityId(MUNICIPALITY_ID)    ;
+			.withMunicipalityId(MUNICIPALITY_ID);
 
-		// Mock
 		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(id);
 
+		// Act
 		webTestClient.post().uri(PATH)
 			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
@@ -80,15 +82,16 @@ class NoteResourceTest {
 			.expectHeader().contentType(ALL)
 			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
 
-		// Verification
+		// Assert
 		verify(noteService).createNote(createNoteRequest);
 	}
 
 	@Test
 	void createNoteWithoutPartyId() {
+
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		// Parameter values
 		final var createNoteRequest = CreateNoteRequest.create()
 			.withBody("Test note")
 			.withCaseId("caseId")
@@ -102,9 +105,9 @@ class NoteResourceTest {
 			.withRole("role")
 			.withMunicipalityId(MUNICIPALITY_ID);
 
-		// Mock
 		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(id);
 
+		// Act
 		webTestClient.post().uri(PATH)
 			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
@@ -113,15 +116,16 @@ class NoteResourceTest {
 			.expectHeader().contentType(ALL)
 			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
 
-		// Verification
+		// Assert
 		verify(noteService).createNote(createNoteRequest);
 	}
 
 	@Test
 	void updateNote() {
+
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		// Parameter values
 		final var updateNoteRequest = UpdateNoteRequest.create()
 			.withBody("Test note")
 			.withModifiedBy("modifiedBy")
@@ -131,11 +135,11 @@ class NoteResourceTest {
 			.withCaseLink("caseLink")
 			.withExternalCaseId("externalCaseId");
 
-		// Mock
-		Note note = Note.create().withId(id);
+		final Note note = Note.create().withId(id);
 		when(noteService.updateNote(id, updateNoteRequest)).thenReturn(note);
 
-		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of( "id", id)))
+		// Act
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.contentType(APPLICATION_JSON)
 			.bodyValue(updateNoteRequest)
 			.exchange()
@@ -145,7 +149,7 @@ class NoteResourceTest {
 			.returnResult()
 			.getResponseBody();
 
-		// Verification
+		// Assert
 		assertThat(response).isNotNull().isEqualTo(note);
 		verify(noteService).updateNote(id, updateNoteRequest);
 	}
@@ -153,28 +157,29 @@ class NoteResourceTest {
 	@Test
 	void deleteNoteById() {
 
-		// Parameter values
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
+		// Act
 		webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isNoContent()
 			.expectHeader().doesNotExist(CONTENT_TYPE);
 
-		// Verification
+		// Assert
 		verify(noteService).deleteNoteById(id);
 	}
 
 	@Test
 	void getNote() {
 
-		// Parameter values
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		// Mock
-		Note note = Note.create().withId(id);
+		final Note note = Note.create().withId(id);
 		when(noteService.getNoteById(id)).thenReturn(note);
 
+		// Act
 		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isOk()
@@ -183,28 +188,27 @@ class NoteResourceTest {
 			.returnResult()
 			.getResponseBody();
 
-		// Verification
+		// Assert
 		assertThat(response).isNotNull().isEqualTo(note);
 		verify(noteService).getNoteById(id);
 	}
 
 	@Test
 	void findNotes() {
-		//Parameter values
+
+		// Arrange
 		final var page = 1;
 		final var limit = 10;
 		final var partyId = UUID.randomUUID().toString();
 		final var context = "context";
 		final var role = "role";
 		final var clientId = "clientId";
-
 		final var inParams = createParameterMap(page, limit, partyId, null, context, role, clientId, MUNICIPALITY_ID);
-
 		final var expectedResponse = FindNotesResponse.create().withNotes(List.of(Note.create()));
 
-		// Mock
 		when(noteService.getNotes(any())).thenReturn(FindNotesResponse.create().withNotes(List.of(Note.create())));
 
+		// Act
 		final var response = webTestClient.get().uri(builder -> builder.path(PATH).queryParams(inParams).build())
 			.exchange()
 			.expectStatus().isOk()
@@ -213,11 +217,11 @@ class NoteResourceTest {
 			.returnResult()
 			.getResponseBody();
 
-		// Verification
+		// Assert
 		assertThat(response).isNotNull().isEqualTo(expectedResponse);
 		verify(noteService).getNotes(parametersCaptor.capture());
 
-		FindNotesRequest findNotesRequest = parametersCaptor.getValue();
+		final FindNotesRequest findNotesRequest = parametersCaptor.getValue();
 		assertThat(findNotesRequest.getPage()).isEqualTo(page);
 		assertThat(findNotesRequest.getLimit()).isEqualTo(limit);
 		assertThat(findNotesRequest.getPartyId()).isEqualTo(partyId);
@@ -228,8 +232,8 @@ class NoteResourceTest {
 		assertThat(findNotesRequest.getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
 	}
 
-	private MultiValueMap<String, String> createParameterMap(Integer page, Integer limit, String partyId, String caseId, String context, String role, String clientId, String municipalityId) {
-		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+	private MultiValueMap<String, String> createParameterMap(final Integer page, final Integer limit, final String partyId, final String caseId, final String context, final String role, final String clientId, final String municipalityId) {
+		final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
 		ofNullable(page).ifPresent(p -> parameters.add("page", p.toString()));
 		ofNullable(limit).ifPresent(p -> parameters.add("limit", p.toString()));

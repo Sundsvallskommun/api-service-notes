@@ -1,0 +1,71 @@
+package se.sundsvall.notes.service.mapper;
+
+import static java.time.OffsetDateTime.now;
+import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+
+import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.integration.db.model.RevisionEntity;
+
+class RevisionMapperTest {
+
+	@Test
+	void toRevisionList() {
+
+		// Arrange
+		final var created = now();
+		final var entityId = UUID.randomUUID().toString();
+		final var entityType = RevisionEntity.class.getSimpleName();
+		final var id = UUID.randomUUID().toString();
+		final var version = 1;
+
+		final var revisionEntityList = List.of(
+			RevisionEntity.create()
+				.withCreated(created)
+				.withEntityId(entityId)
+				.withEntityType(entityType)
+				.withId(id)
+				.withVersion(version));
+
+		// Act
+		final var result = RevisionMapper.toRevisionList(revisionEntityList);
+
+		// Assert
+		assertThat(result)
+			.hasSize(1)
+			.extracting(
+				Revision::getCreated,
+				Revision::getEntityId,
+				Revision::getEntityType,
+				Revision::getId,
+				Revision::getVersion)
+			.containsExactly(
+				tuple(created, entityId, entityType, id, version));
+	}
+
+	@Test
+	void toRevisionListWithNullInput() {
+
+		// Act
+		final var result = RevisionMapper.toRevisionList(null);
+
+		// Assert
+		assertThat(result).isEmpty();
+	}
+
+	@Test
+	void toRevisionListWithEmptyInput() {
+
+		// Act
+		final var result = RevisionMapper.toRevisionList(emptyList());
+
+		// Assert
+		assertThat(result).isEmpty();
+	}
+}
