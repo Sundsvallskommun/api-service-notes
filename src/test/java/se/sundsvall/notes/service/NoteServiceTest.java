@@ -1,5 +1,20 @@
 package se.sundsvall.notes.service;
 
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
+
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.api.model.Note;
@@ -20,25 +36,14 @@ import se.sundsvall.notes.integration.db.NoteRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.service.mapper.NoteMapper;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
-
 @ExtendWith(MockitoExtension.class)
 class NoteServiceTest {
 
 	@Mock
 	private NoteRepository noteRepositoryMock;
+
+	@Mock
+	private RevisionService revisionServiceMock;
 
 	@InjectMocks
 	private NoteService noteService;
@@ -62,6 +67,7 @@ class NoteServiceTest {
 			// Verification
 			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(createNoteRequestMock)));
 			verify(noteRepositoryMock).save(same(noteEntityMock));
+			verify(revisionServiceMock).createRevision(same(noteEntityMock));
 			verify(noteEntityMock).getId();
 			assertThat(result).isEqualTo(id);
 		}
@@ -88,6 +94,7 @@ class NoteServiceTest {
 			// Verification
 			verify(noteRepositoryMock).findById(id);
 			verify(noteRepositoryMock).save(same(noteEntityMock));
+			verify(revisionServiceMock).createRevision(same(noteEntityMock));
 			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(noteEntityMock), same(updateNoteRequestMock)));
 			mapperMock.verify(() -> NoteMapper.toNote(same(noteEntityMock)));
 
@@ -114,6 +121,7 @@ class NoteServiceTest {
 		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
 		verify(noteRepositoryMock).findById(id);
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
@@ -131,6 +139,7 @@ class NoteServiceTest {
 		// Verification
 		verify(noteRepositoryMock).existsById(id);
 		verify(noteRepositoryMock).deleteById(id);
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
@@ -148,6 +157,7 @@ class NoteServiceTest {
 		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
 		verify(noteRepositoryMock).existsById(id);
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
