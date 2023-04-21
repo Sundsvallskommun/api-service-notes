@@ -31,7 +31,7 @@ import se.sundsvall.notes.service.RevisionService;
 
 @RestController
 @Validated
-@Tag(name = "Revisions", description = "Operations for revisions")
+@Tag(name = "Revisions", description = "Revision operations")
 public class RevisionResource {
 
 	@Autowired

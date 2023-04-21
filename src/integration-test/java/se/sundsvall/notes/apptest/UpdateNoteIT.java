@@ -3,19 +3,18 @@ package se.sundsvall.notes.apptest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.notes.Application;
 
 /**
  * Update note apptests.
- * 
+ *
  * @see src/test/resources/db/scripts/UpdateNoteAppTest.sql for data setup.
  */
 @WireMockAppTestSuite(files = "classpath:/UpdateNoteIT/", classes = Application.class)
-@ActiveProfiles("junit")
 @Sql(scripts = {
 	"/db/scripts/truncate.sql",
 	"/db/scripts/UpdateNoteAppTest.sql"

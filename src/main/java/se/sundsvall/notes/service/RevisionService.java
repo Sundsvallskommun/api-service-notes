@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
 
 @Service
+@Transactional
 public class RevisionService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RevisionService.class);
@@ -116,7 +119,7 @@ public class RevisionService {
 		try {
 			return objectMapper.writeValueAsString(entity);
 		} catch (final JsonProcessingException e) {
-			LOG.error("Error during serialization of entity into Json string", e);
+			LOG.error("Error during serialization of entity into JSON string!", e);
 		}
 
 		return null;
@@ -138,7 +141,7 @@ public class RevisionService {
 		try {
 			return objectMapper.readTree(json1).equals(objectMapper.readTree(json2));
 		} catch (final Exception e) {
-			LOG.error("Error during json compare", e);
+			LOG.error("Error during JSON compare!", e);
 			return false;
 		}
 	}

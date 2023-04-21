@@ -7,9 +7,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
 
 public class RevisionMapper {
+
+	private static final String ENTITY_TYPE = NoteEntity.class.getSimpleName();
 
 	private RevisionMapper() {}
 
@@ -25,7 +28,7 @@ public class RevisionMapper {
 			.map(entity -> Revision.create()
 				.withCreated(entity.getCreated())
 				.withEntityId(entity.getEntityId())
-				.withEntityType(entity.getClass().getSimpleName())
+				.withEntityType(ENTITY_TYPE)
 				.withId(entity.getId())
 				.withVersion(entity.getVersion()))
 			.orElse(null);

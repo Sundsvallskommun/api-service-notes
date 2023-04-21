@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
 
 class RevisionMapperTest {
@@ -22,7 +23,7 @@ class RevisionMapperTest {
 		// Arrange
 		final var created = now();
 		final var entityId = UUID.randomUUID().toString();
-		final var entityType = RevisionEntity.class.getSimpleName();
+		final var entityType = NoteEntity.class.getSimpleName();
 		final var id = UUID.randomUUID().toString();
 		final var version = 1;
 

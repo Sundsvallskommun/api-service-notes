@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
 
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
@@ -24,7 +23,6 @@ import se.sundsvall.notes.integration.db.model.NoteEntity;
  * Create note apptests.
  */
 @WireMockAppTestSuite(files = "classpath:/CreateNoteIT/", classes = Application.class)
-@ActiveProfiles("junit")
 class CreateNoteIT extends AbstractAppTest {
 
 	private final static String MUNICIPALITY_ID = "2281";
