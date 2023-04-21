@@ -213,8 +213,6 @@ class RevisionServiceTest {
 		final var entityId = UUID.randomUUID().toString();
 		final var source = 1;
 		final var target = 2;
-		final var noteEntity1 = createNoteEntity();
-		SerializationUtils.clone(noteEntity1).withBody("changed body").withModifiedBy("user22");
 
 		when(revisionRepositoryMock.findByEntityIdAndVersion(entityId, source)).thenReturn(Optional.of(RevisionEntity.create()
 			.withEntityId(entityId)

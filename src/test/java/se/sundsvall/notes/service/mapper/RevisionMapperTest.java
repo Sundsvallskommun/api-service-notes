@@ -5,6 +5,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -67,5 +68,15 @@ class RevisionMapperTest {
 
 		// Assert
 		assertThat(result).isEmpty();
+	}
+
+	@Test
+	void toRevisionListWithListContainingNulls() {
+
+		// Act
+		final var result = RevisionMapper.toRevisionList(Arrays.asList(RevisionEntity.create(), null, RevisionEntity.create()));
+
+		// Assert
+		assertThat(result).hasSize(2);
 	}
 }

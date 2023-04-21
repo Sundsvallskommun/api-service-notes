@@ -22,6 +22,7 @@ import org.zalando.problem.Problem;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flipkart.zjsonpatch.DiffFlags;
 import com.flipkart.zjsonpatch.JsonDiff;
 
 import se.sundsvall.notes.api.model.DifferenceResponse;
@@ -35,6 +36,7 @@ import se.sundsvall.notes.integration.db.model.RevisionEntity;
 public class RevisionService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RevisionService.class);
+	private static final EnumSet<DiffFlags> DIFF_FLAGS = EnumSet.of(ADD_ORIGINAL_VALUE_ON_REPLACE, OMIT_VALUE_ON_REMOVE);
 
 	@Autowired
 	private RevisionRepository revisionRepository;
@@ -67,7 +69,7 @@ public class RevisionService {
 			final var targetJson = objectMapper.readTree(revisionEntity2.getSerializedSnapshot());
 
 			// Perform diff of the two JsonNodes.
-			final var diffResult = JsonDiff.asJson(sourceJson, targetJson, EnumSet.of(ADD_ORIGINAL_VALUE_ON_REPLACE, OMIT_VALUE_ON_REMOVE)).toString();
+			final var diffResult = JsonDiff.asJson(sourceJson, targetJson, DIFF_FLAGS).toString();
 
 			// Return result.
 			return DifferenceResponse.create().withOperations(List.of(objectMapper.readValue(diffResult, Operation[].class)));
