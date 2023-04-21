@@ -1,39 +1,47 @@
 package se.sundsvall.notes.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
+import static org.zalando.problem.Status.BAD_REQUEST;
+
+import java.util.Map;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.zalando.problem.Problem;
 import org.zalando.problem.violations.ConstraintViolationProblem;
 import org.zalando.problem.violations.Violation;
+
 import se.sundsvall.notes.Application;
-
-import java.util.Map;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
-import static org.zalando.problem.Status.BAD_REQUEST;
+import se.sundsvall.notes.service.RevisionService;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")
 class RevisionResourceFailuresTest {
 
-	private static final String PATH = "/notes";
+	private static final String PATH = "/notes/{id}/revisions";
 
 	@Autowired
 	private WebTestClient webTestClient;
 
+	@MockBean
+	private RevisionService revisionServiceMock;
+
 	@Test
 	void getRevisionsByNoteIdInvalidId() {
 
-		// Parameter values
+		// Arrange
 		final var id = "invalid";
 
-		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}/revisions").build(Map.of("id", id)))
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH).build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -41,21 +49,25 @@ class RevisionResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
 		assertThat(response.getViolations())
 			.extracting(Violation::getField, Violation::getMessage)
 			.containsExactly(tuple("getRevisionsByNoteId.id", "not a valid UUID"));
+
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
 	void getDifferenceInvalidId() {
 
-		// Parameter values
+		// Arrange
 		final var id = "invalid";
 
-		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}" + "/difference").queryParam("from", 1).queryParam("to", 2).build(Map.of("id", id)))
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/difference").queryParam("source", 1).queryParam("target", 2).build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -63,20 +75,25 @@ class RevisionResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
 		assertThat(response.getViolations())
 			.extracting(Violation::getField, Violation::getMessage)
 			.containsExactly(tuple("getDifferenceByVersions.id", "not a valid UUID"));
+
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
 	void getDifferenceNoParameters() {
-		// Parameter values
+
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}/difference").build(Map.of("id", id)))
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/difference").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -84,18 +101,23 @@ class RevisionResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Bad Request");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
-		assertThat(response.getDetail()).isEqualTo("Required request parameter 'from' for method parameter type Integer is not present");
+		assertThat(response.getDetail()).isEqualTo("Required request parameter 'source' for method parameter type Integer is not present");
+
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
-	void getDifferenceNoToParameter() {
-		// Parameter values
+	void getDifferenceNoTargetParameter() {
+
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}/difference").queryParam("from", 1).build(Map.of("id", id)))
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/difference").queryParam("source", 1).build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -103,18 +125,47 @@ class RevisionResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Bad Request");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
-		assertThat(response.getDetail()).isEqualTo("Required request parameter 'to' for method parameter type Integer is not present");
+		assertThat(response.getDetail()).isEqualTo("Required request parameter 'target' for method parameter type Integer is not present");
+
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
-	void getDifferenceNegativeValueInFrom() {
-		// Parameter values
+	void getDifferenceNoSourceParameter() {
+
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}/difference").queryParam("from", -1).queryParam("to", 2).build(Map.of("id", id)))
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/difference").queryParam("target", 1).build(Map.of("id", id)))
+			.exchange()
+			.expectStatus().isBadRequest()
+			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
+			.expectBody(Problem.class)
+			.returnResult()
+			.getResponseBody();
+
+		// Assert
+		assertThat(response).isNotNull();
+		assertThat(response.getTitle()).isEqualTo("Bad Request");
+		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
+		assertThat(response.getDetail()).isEqualTo("Required request parameter 'source' for method parameter type Integer is not present");
+
+		verifyNoInteractions(revisionServiceMock);
+	}
+
+	@Test
+	void getDifferenceNegativeValueInSource() {
+
+		// Arrange
+		final var id = UUID.randomUUID().toString();
+
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/difference").queryParam("source", -1).queryParam("target", 2).build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -122,20 +173,25 @@ class RevisionResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
 		assertThat(response.getViolations())
 			.extracting(Violation::getField, Violation::getMessage)
-			.containsExactly(tuple("getDifferenceByVersions.from", "must be between 0 and 2147483647"));
+			.containsExactly(tuple("getDifferenceByVersions.source", "must be between 0 and 2147483647"));
+
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
-	void getDifferenceNegativeValueInTo() {
-		// Parameter values
+	void getDifferenceNegativeValueInTarget() {
+
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}/difference").queryParam("from", 1).queryParam("to", -2).build(Map.of("id", id)))
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/difference").queryParam("source", 1).queryParam("target", -2).build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -143,12 +199,14 @@ class RevisionResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
 		assertThat(response.getViolations())
 			.extracting(Violation::getField, Violation::getMessage)
-			.containsExactly(tuple("getDifferenceByVersions.to", "must be between 0 and 2147483647"));
-	}
+			.containsExactly(tuple("getDifferenceByVersions.target", "must be between 0 and 2147483647"));
 
+		verifyNoInteractions(revisionServiceMock);
+	}
 }

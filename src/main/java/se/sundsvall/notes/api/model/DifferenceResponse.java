@@ -1,12 +1,12 @@
 package se.sundsvall.notes.api.model;
 
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
+import static io.swagger.v3.oas.annotations.media.Schema.AccessMode.READ_ONLY;
 
 import java.util.List;
 import java.util.Objects;
 
-import static io.swagger.v3.oas.annotations.media.Schema.AccessMode.READ_ONLY;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "DifferenceResponse model")
 public class DifferenceResponse {
@@ -18,15 +18,15 @@ public class DifferenceResponse {
 		return new DifferenceResponse();
 	}
 
-	public List<Operation> getEvents() {
+	public List<Operation> getOperations() {
 		return operations;
 	}
 
-	public void setEvents(List<Operation> operations) {
+	public void setOperations(final List<Operation> operations) {
 		this.operations = operations;
 	}
 
-	public DifferenceResponse withEvents(List<Operation> operations) {
+	public DifferenceResponse withOperations(final List<Operation> operations) {
 		this.operations = operations;
 		return this;
 	}
@@ -37,7 +37,7 @@ public class DifferenceResponse {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -47,14 +47,14 @@ public class DifferenceResponse {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		DifferenceResponse other = (DifferenceResponse) obj;
+		final DifferenceResponse other = (DifferenceResponse) obj;
 		return Objects.equals(operations, other.operations);
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("DifferenceResponse [events=").append(operations).append("]");
+		final StringBuilder builder = new StringBuilder();
+		builder.append("DifferenceResponse [operations=").append(operations).append("]");
 		return builder.toString();
 	}
 }

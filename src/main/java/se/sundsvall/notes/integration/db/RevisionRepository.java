@@ -12,15 +12,6 @@ import se.sundsvall.notes.integration.db.model.RevisionEntity;
 public interface RevisionRepository extends JpaRepository<RevisionEntity, String> {
 
 	/**
-	 * Find the revision by entityId and entityType.
-	 *
-	 * @param entityId the entityId for the revision.
-	 * @param version  the version for the revision.
-	 * @return an optional entity that matches the provided parameters.
-	 */
-	Optional<RevisionEntity> findByEntityIdAndVersion(String entityId, int version);
-
-	/**
 	 * Find the last revision by entityId.
 	 *
 	 * @param entityId the entityId to find revisions for.
@@ -29,10 +20,19 @@ public interface RevisionRepository extends JpaRepository<RevisionEntity, String
 	Optional<RevisionEntity> findFirstByEntityIdOrderByVersionDesc(String entityId);
 
 	/**
-	 * Find all RevisionEntity-objects with a version matching the provided list.
+	 * Find the revision by entityId and version.
 	 *
-	 * @param versions the list of versions to return.
-	 * @return a list of RevisionEntity objects.
+	 * @param entityId the entityId for the revision.
+	 * @param version  the version for the revision.
+	 * @return an optional entity that matches the provided parameters.
 	 */
-	List<RevisionEntity> findByVersionIn(Integer... versions);
+	Optional<RevisionEntity> findByEntityIdAndVersion(String entityId, int version);
+
+	/**
+	 * Find all revisions by entityId.
+	 *
+	 * @param entityId the entityId.
+	 * @return a list of entities that matches the provided parameter.
+	 */
+	List<RevisionEntity> findAllByEntityIdOrderByVersion(String entityId);
 }

@@ -21,6 +21,7 @@
 		<sandbox.wiremock>false</sandbox.wiremock>
 		<!-- Service properties -->
 		<testcontainers.version>1.18.0</testcontainers.version>
+		<zjsonpatch.version>0.4.14</zjsonpatch.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -48,6 +49,11 @@
 		<dependency>
 			<groupId>se.sundsvall.dept44</groupId>
 			<artifactId>dept44-common-validators</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.flipkart.zjsonpatch</groupId>
+			<artifactId>zjsonpatch</artifactId>
+			<version>${zjsonpatch.version}</version>
 		</dependency>
 
 		<!-- Test -->

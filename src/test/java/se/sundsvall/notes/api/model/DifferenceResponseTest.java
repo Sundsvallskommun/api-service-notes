@@ -1,9 +1,5 @@
 package se.sundsvall.notes.api.model;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanConstructor;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanEquals;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanHashCode;
@@ -12,6 +8,10 @@ import static com.google.code.beanmatchers.BeanMatchers.hasValidGettersAndSetter
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 class DifferenceResponseTest {
 
@@ -27,13 +27,14 @@ class DifferenceResponseTest {
 
 	@Test
 	void testBuilderMethods() {
-		final var events = List.of(Operation.create().withOp("op").withPath("path").withValue("value").withFromValue("fromValue"));
+
+		final var operations = List.of(Operation.create().withOp("op").withPath("path").withValue("value").withFromValue("fromValue"));
 
 		final var bean = DifferenceResponse.create()
-				.withEvents(events);
+			.withOperations(operations);
 
 		assertThat(bean).isNotNull().hasNoNullFieldsOrProperties();
-		assertThat(bean.getEvents()).isEqualTo(events);
+		assertThat(bean.getOperations()).isEqualTo(operations);
 	}
 
 	@Test

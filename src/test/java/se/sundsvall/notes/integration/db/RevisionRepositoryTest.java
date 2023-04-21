@@ -3,8 +3,8 @@ package se.sundsvall.notes.integration.db;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.Assertions.within;
-import static org.assertj.core.groups.Tuple.tuple;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -35,7 +35,8 @@ import se.sundsvall.notes.integration.db.model.RevisionEntity;
 @Transactional
 class RevisionRepositoryTest {
 
-	private static final String ENTITY_ID = "9791682e-4ba8-4f3a-857a-54e14836a53b";
+	private static final String ENTITY_ID_1 = "9791682e-4ba8-4f3a-857a-54e14836a53b";
+	private static final String ENTITY_ID_2 = "abe72bbd-9808-4f3a-8aec-cd2945f5a201";
 
 	@Autowired
 	private RevisionRepository repository;
@@ -62,11 +63,13 @@ class RevisionRepositoryTest {
 		// Setup
 		final var version = 3;
 
-		final var revision = repository.findByEntityIdAndVersion(ENTITY_ID, version);
+		final var revision = repository.findByEntityIdAndVersion(ENTITY_ID_1, version);
 
-		assertThat(revision).isPresent();
-		assertThat(revision.get().getEntityId()).isEqualTo(ENTITY_ID);
-		assertThat(revision.get().getVersion()).isEqualTo(version);
+		assertThat(revision)
+			.isNotNull()
+			.get()
+			.extracting(RevisionEntity::getEntityId, RevisionEntity::getVersion)
+			.containsExactly(ENTITY_ID_1, 3);
 	}
 
 	@Test
@@ -75,7 +78,7 @@ class RevisionRepositoryTest {
 		// Setup
 		final var version = 666;
 
-		final var revision = repository.findByEntityIdAndVersion(ENTITY_ID, version);
+		final var revision = repository.findByEntityIdAndVersion(ENTITY_ID_1, version);
 
 		assertThat(revision).isEmpty();
 	}
@@ -83,10 +86,10 @@ class RevisionRepositoryTest {
 	@Test
 	void findFirstByEntityIdOrderByVersionDesc() {
 
-		final var revision = repository.findFirstByEntityIdOrderByVersionDesc(ENTITY_ID);
+		final var revision = repository.findFirstByEntityIdOrderByVersionDesc(ENTITY_ID_1);
 
 		assertThat(revision).isPresent();
-		assertThat(revision.get().getEntityId()).isEqualTo(ENTITY_ID);
+		assertThat(revision.get().getEntityId()).isEqualTo(ENTITY_ID_1);
 		assertThat(revision.get().getVersion()).isEqualTo(5);
 	}
 
@@ -99,26 +102,28 @@ class RevisionRepositoryTest {
 	}
 
 	@Test
-	void findByVersionIn() {
+	void findAllByEntityId() {
 
-		final var revisionList = repository.findByVersionIn(2, 4);
+		// Setup
+		final var revisionEntityList = repository.findAllByEntityIdOrderByVersion(ENTITY_ID_2);
 
-		assertThat(revisionList)
-			.hasSize(2)
-			.extracting(RevisionEntity::getId, RevisionEntity::getVersion)
-			.containsExactlyInAnyOrder(
-				tuple("5ac0398d-67d7-4267-b7b1-d9983b51758b", 2),
-				tuple("f9e222f3-2476-4ead-bb1a-3e7e25f9c6ee", 4));
+		assertThat(revisionEntityList)
+			.isNotEmpty()
+			.extracting(RevisionEntity::getEntityId, RevisionEntity::getVersion)
+			.containsExactly(
+				tuple(ENTITY_ID_2, 11),
+				tuple(ENTITY_ID_2, 12));
 	}
 
 	@Test
-	void findByVersionInNotFound() {
+	void findAllByEntityIdNotFound() {
 
-		final var revisionList = repository.findByVersionIn(666, 667);
+		// Setup
+		final var revisionEntityList = repository.findAllByEntityIdOrderByVersion("not-existing");
 
-		assertThat(revisionList).isNotNull().isEmpty();
+		assertThat(revisionEntityList).isEmpty();
 	}
-	
+
 	private boolean isValidUUID(final String value) {
 		try {
 			UUID.fromString(String.valueOf(value));

@@ -1,0 +1,33 @@
+package se.sundsvall.notes.service.mapper;
+
+import static java.util.Collections.emptyList;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.integration.db.model.RevisionEntity;
+
+public class RevisionMapper {
+
+	private RevisionMapper() {}
+
+	public static List<Revision> toRevisionList(final List<RevisionEntity> revisionEntityList) {
+		return Optional.ofNullable(revisionEntityList).orElse(emptyList()).stream()
+			.map(RevisionMapper::toRevision)
+			.filter(Objects::nonNull)
+			.toList();
+	}
+
+	private static Revision toRevision(final RevisionEntity revisionEntity) {
+		return Optional.ofNullable(revisionEntity)
+			.map(entity -> Revision.create()
+				.withCreated(entity.getCreated())
+				.withEntityId(entity.getEntityId())
+				.withEntityType(entity.getClass().getSimpleName())
+				.withId(entity.getId())
+				.withVersion(entity.getVersion()))
+			.orElse(null);
+	}
+}

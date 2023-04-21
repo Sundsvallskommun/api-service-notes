@@ -1,6 +1,12 @@
 package se.sundsvall.notes.integration.db.model;
 
-import org.hibernate.annotations.GenericGenerator;
+import static java.time.OffsetDateTime.now;
+import static java.time.temporal.ChronoUnit.MILLIS;
+
+import java.io.Serializable;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,12 +17,8 @@ import javax.persistence.Lob;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Objects;
 
-import static java.time.OffsetDateTime.now;
-import static java.time.temporal.ChronoUnit.MILLIS;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "note",
@@ -27,7 +29,9 @@ import static java.time.temporal.ChronoUnit.MILLIS;
 		@Index(name = "note_role_index", columnList = "role"),
 		@Index(name = "note_municipality_id_index", columnList = "municipality_id")
 	})
-public class NoteEntity {
+public class NoteEntity implements Serializable {
+
+	private static final long serialVersionUID = -3451441096651461590L;
 
 	@Id
 	@GeneratedValue(generator = "uuid2")
