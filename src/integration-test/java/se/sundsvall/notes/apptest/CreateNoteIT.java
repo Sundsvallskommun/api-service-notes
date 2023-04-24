@@ -17,6 +17,7 @@ import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
+import se.sundsvall.notes.integration.db.RevisionRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 
 /**
@@ -29,6 +30,9 @@ class CreateNoteIT extends AbstractAppTest {
 
 	@Autowired
 	private NoteRepository noteRepository;
+
+	@Autowired
+	private RevisionRepository revisionRepository;
 
 	@Test
 	void test01_createNoteWithPartyId() throws Exception {
@@ -45,27 +49,21 @@ class CreateNoteIT extends AbstractAppTest {
 			.withExpectedResponseHeader(LOCATION, List.of("^http://(.*)/notes/(.*)$"))
 			.sendRequestAndVerifyResponse();
 
-		assertThat(noteRepository.findAllByParameters(FindNotesRequest.create().withPartyId(partyId).withMunicipalityId(MUNICIPALITY_ID), PageRequest.of(0, 100))).hasSize(1)
-			.extracting(
-				NoteEntity::getBody,
-				NoteEntity::getCaseId,
-				NoteEntity::getCaseLink,
-				NoteEntity::getCaseType,
-				NoteEntity::getCreatedBy,
-				NoteEntity::getExternalCaseId,
-				NoteEntity::getPartyId,
-				NoteEntity::getSubject,
-				NoteEntity::getMunicipalityId)
-			.containsExactly(tuple(
-				"This is a note",
-				"12345",
-				"http://caselink.com/12345",
-				"caseType",
-				"John Doe",
-				"54321",
-				"ffd20e9d-5987-417a-b8cd-a4617ac83a88",
-				"This is a subject",
-				"2281"));
+		final var noteList = noteRepository.findAllByParameters(FindNotesRequest.create().withPartyId(partyId).withMunicipalityId(MUNICIPALITY_ID), PageRequest.of(0, 100));
+		assertThat(noteList.getContent()).hasSize(1);
+		final var note = noteList.getContent().get(0);
+
+		assertThat(note.getBody()).isEqualTo("This is a note");
+		assertThat(note.getCaseId()).isEqualTo("12345");
+		assertThat(note.getCaseLink()).isEqualTo("http://caselink.com/12345");
+		assertThat(note.getCreatedBy()).isEqualTo("John Doe");
+		assertThat(note.getExternalCaseId()).isEqualTo("54321");
+		assertThat(note.getPartyId()).isEqualTo("ffd20e9d-5987-417a-b8cd-a4617ac83a88");
+		assertThat(note.getSubject()).isEqualTo("This is a subject");
+		assertThat(note.getMunicipalityId()).isEqualTo("2281");
+
+		// Assert that we only have the first version (version zero).
+		assertThat(revisionRepository.findFirstByEntityIdOrderByVersionDesc(note.getId()).orElseThrow().getVersion()).isZero();
 	}
 
 	@Test
