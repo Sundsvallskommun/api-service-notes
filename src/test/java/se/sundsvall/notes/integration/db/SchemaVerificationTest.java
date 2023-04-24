@@ -2,8 +2,11 @@ package se.sundsvall.notes.integration.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,25 +19,21 @@ class SchemaVerificationTest {
 
 	private static final String STORED_SCHEMA_FILE = "db/schema/schema.sql";
 
-	@Value("${spring.jpa.properties.javax.persistence.schema-generation.scripts.create-target:}")
+	@Value("${spring.jpa.properties.javax.persistence.schema-generation.scripts.create-target}")
 	private String generatedSchemaFile;
 
 	@Test
-	void verifySchemaUpdates() throws IOException {
+	void verifySchemaUpdates() throws IOException, URISyntaxException {
 
-		final var storedSchema = getResourceFile(STORED_SCHEMA_FILE);
-		final var generatedSchema = getFile(generatedSchemaFile);
+		final var storedSchema = getResourceString(STORED_SCHEMA_FILE);
+		final var generatedSchema = Files.readString(Path.of(generatedSchemaFile));
 
-		assertThat(generatedSchema)
+		assertThat(storedSchema)
 			.as(String.format("Please reflect modifications to entities in file: %s", STORED_SCHEMA_FILE))
-			.hasSameTextualContentAs(storedSchema);
+			.isEqualToNormalizingWhitespace(generatedSchema);
 	}
 
-	private File getResourceFile(String fileName) {
-		return new File(getClass().getClassLoader().getResource(fileName).getFile());
-	}
-
-	private File getFile(String fileName) {
-		return new File(fileName);
+	private String getResourceString(final String fileName) throws IOException, URISyntaxException {
+		return Files.readString(Paths.get(getClass().getClassLoader().getResource(fileName).toURI()));
 	}
 }

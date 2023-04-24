@@ -37,6 +37,8 @@ import se.sundsvall.notes.service.NoteService;
 @ActiveProfiles("junit")
 class NoteResourceTest {
 
+	private static final String PATH = "/notes";
+	private static final String MUNICIPALITY_ID = "2281";
 	@MockBean
 	private NoteService noteService;
 
@@ -48,12 +50,13 @@ class NoteResourceTest {
 
 	@Captor
 	private ArgumentCaptor<FindNotesRequest> parametersCaptor;
-	
+
 	@Test
 	void createNoteWithPartyId() {
+
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		// Parameter values
 		final var createNoteRequest = CreateNoteRequest.create()
 			.withBody("Test note")
 			.withCaseId("caseId")
@@ -65,27 +68,30 @@ class NoteResourceTest {
 			.withExternalCaseId("externalCaseId")
 			.withPartyId(UUID.randomUUID().toString())
 			.withSubject("Test subject")
-			.withRole("role");
+			.withRole("role")
+			.withMunicipalityId(MUNICIPALITY_ID);
 
-		// Mock
-		when(noteService.createNote(any())).thenReturn(id);
+		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(id);
 
-		webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+		// Act
+		webTestClient.post().uri(PATH)
+			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isCreated()
 			.expectHeader().contentType(ALL)
 			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
 
-		// Verification
+		// Assert
 		verify(noteService).createNote(createNoteRequest);
 	}
 
 	@Test
 	void createNoteWithoutPartyId() {
+
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		// Parameter values
 		final var createNoteRequest = CreateNoteRequest.create()
 			.withBody("Test note")
 			.withCaseId("caseId")
@@ -96,27 +102,30 @@ class NoteResourceTest {
 			.withCreatedBy("createdBy")
 			.withExternalCaseId("externalCaseId")
 			.withSubject("Test subject")
-			.withRole("role");
+			.withRole("role")
+			.withMunicipalityId(MUNICIPALITY_ID);
 
-		// Mock
-		when(noteService.createNote(any())).thenReturn(id);
+		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(id);
 
-		webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+		// Act
+		webTestClient.post().uri(PATH)
+			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isCreated()
 			.expectHeader().contentType(ALL)
 			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
 
-		// Verification
+		// Assert
 		verify(noteService).createNote(createNoteRequest);
 	}
 
 	@Test
 	void updateNote() {
+
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		// Parameter values
 		final var updateNoteRequest = UpdateNoteRequest.create()
 			.withBody("Test note")
 			.withModifiedBy("modifiedBy")
@@ -126,11 +135,12 @@ class NoteResourceTest {
 			.withCaseLink("caseLink")
 			.withExternalCaseId("externalCaseId");
 
-		// Mock
-		Note note = Note.create().withId(id);
+		final Note note = Note.create().withId(id);
 		when(noteService.updateNote(id, updateNoteRequest)).thenReturn(note);
 
-		final var response = webTestClient.patch().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id))).contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
+			.contentType(APPLICATION_JSON)
 			.bodyValue(updateNoteRequest)
 			.exchange()
 			.expectStatus().isOk()
@@ -139,7 +149,7 @@ class NoteResourceTest {
 			.returnResult()
 			.getResponseBody();
 
-		// Verification
+		// Assert
 		assertThat(response).isNotNull().isEqualTo(note);
 		verify(noteService).updateNote(id, updateNoteRequest);
 	}
@@ -147,29 +157,30 @@ class NoteResourceTest {
 	@Test
 	void deleteNoteById() {
 
-		// Parameter values
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		webTestClient.delete().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id)))
+		// Act
+		webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isNoContent()
 			.expectHeader().doesNotExist(CONTENT_TYPE);
 
-		// Verification
+		// Assert
 		verify(noteService).deleteNoteById(id);
 	}
 
 	@Test
-	void getNoteById() {
+	void getNote() {
 
-		// Parameter values
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		// Mock
-		Note note = Note.create().withId(id);
+		final Note note = Note.create().withId(id);
 		when(noteService.getNoteById(id)).thenReturn(note);
 
-		final var response = webTestClient.get().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id)))
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isOk()
 			.expectHeader().contentType(APPLICATION_JSON)
@@ -177,29 +188,28 @@ class NoteResourceTest {
 			.returnResult()
 			.getResponseBody();
 
-		// Verification
+		// Assert
 		assertThat(response).isNotNull().isEqualTo(note);
 		verify(noteService).getNoteById(id);
 	}
 
 	@Test
 	void findNotes() {
-		//Parameter values
+
+		// Arrange
 		final var page = 1;
 		final var limit = 10;
 		final var partyId = UUID.randomUUID().toString();
 		final var context = "context";
 		final var role = "role";
 		final var clientId = "clientId";
-
-		final var inParams = createParameterMap(page, limit, partyId, null, context, role, clientId);
-
+		final var inParams = createParameterMap(page, limit, partyId, null, context, role, clientId, MUNICIPALITY_ID);
 		final var expectedResponse = FindNotesResponse.create().withNotes(List.of(Note.create()));
 
-		// Mock
 		when(noteService.getNotes(any())).thenReturn(FindNotesResponse.create().withNotes(List.of(Note.create())));
 
-		final var response = webTestClient.get().uri(builder -> builder.path("/notes").queryParams(inParams).build())
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH).queryParams(inParams).build())
 			.exchange()
 			.expectStatus().isOk()
 			.expectHeader().contentType(APPLICATION_JSON)
@@ -207,11 +217,11 @@ class NoteResourceTest {
 			.returnResult()
 			.getResponseBody();
 
-		// Verification
+		// Assert
 		assertThat(response).isNotNull().isEqualTo(expectedResponse);
 		verify(noteService).getNotes(parametersCaptor.capture());
 
-		FindNotesRequest findNotesRequest = parametersCaptor.getValue();
+		final FindNotesRequest findNotesRequest = parametersCaptor.getValue();
 		assertThat(findNotesRequest.getPage()).isEqualTo(page);
 		assertThat(findNotesRequest.getLimit()).isEqualTo(limit);
 		assertThat(findNotesRequest.getPartyId()).isEqualTo(partyId);
@@ -219,10 +229,11 @@ class NoteResourceTest {
 		assertThat(findNotesRequest.getContext()).isEqualTo(context);
 		assertThat(findNotesRequest.getRole()).isEqualTo(role);
 		assertThat(findNotesRequest.getClientId()).isEqualTo(clientId);
+		assertThat(findNotesRequest.getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
 	}
 
-	private MultiValueMap<String, String> createParameterMap(Integer page, Integer limit, String partyId, String caseId, String context, String role, String clientId) {
-		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+	private MultiValueMap<String, String> createParameterMap(final Integer page, final Integer limit, final String partyId, final String caseId, final String context, final String role, final String clientId, final String municipalityId) {
+		final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
 		ofNullable(page).ifPresent(p -> parameters.add("page", p.toString()));
 		ofNullable(limit).ifPresent(p -> parameters.add("limit", p.toString()));
@@ -231,6 +242,7 @@ class NoteResourceTest {
 		ofNullable(context).ifPresent(p -> parameters.add("context", p));
 		ofNullable(role).ifPresent(p -> parameters.add("role", p));
 		ofNullable(clientId).ifPresent(p -> parameters.add("clientId", p));
+		ofNullable(municipalityId).ifPresent(p -> parameters.add("municipalityId", p));
 
 		return parameters;
 	}

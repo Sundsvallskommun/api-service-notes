@@ -4,12 +4,12 @@
 	<parent>
 		<groupId>se.sundsvall.dept44</groupId>
 		<artifactId>dept44-service-parent</artifactId>
-		<version>1.34</version>
+		<version>1.35</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>se.sundsvall</groupId>
 	<artifactId>api-service-notes</artifactId>
-	<version>2.1</version>
+	<version>3.1</version>
 	<name>api-service-notes</name>
 	<description>Service for handling notes</description>
 	<properties>
@@ -21,6 +21,7 @@
 		<sandbox.wiremock>false</sandbox.wiremock>
 		<!-- Service properties -->
 		<testcontainers.version>1.18.0</testcontainers.version>
+		<zjsonpatch.version>0.4.14</zjsonpatch.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -48,6 +49,11 @@
 		<dependency>
 			<groupId>se.sundsvall.dept44</groupId>
 			<artifactId>dept44-common-validators</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.flipkart.zjsonpatch</groupId>
+			<artifactId>zjsonpatch</artifactId>
+			<version>${zjsonpatch.version}</version>
 		</dependency>
 
 		<!-- Test -->

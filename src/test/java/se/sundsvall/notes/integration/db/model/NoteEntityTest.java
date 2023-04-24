@@ -53,6 +53,7 @@ class NoteEntityTest {
 		final var caseType = "caseType";
 		final var caseLink = "caseLink";
 		final var externalCaseId = "externalCaseId";
+		final var municipalityId = "municipalityId";
 
 		final var noteEntity = NoteEntity.create()
 			.withId(id)
@@ -69,7 +70,8 @@ class NoteEntityTest {
 			.withCaseId(caseId)
 			.withCaseType(caseType)
 			.withCaseLink(caseLink)
-			.withExternalCaseId(externalCaseId);
+			.withExternalCaseId(externalCaseId)
+			.withMunicipalityId(municipalityId);
 
 		assertThat(noteEntity).isNotNull().hasNoNullFieldsOrProperties();
 		assertThat(noteEntity.getId()).isEqualTo(id);
@@ -87,10 +89,12 @@ class NoteEntityTest {
 		assertThat(noteEntity.getCaseType()).isEqualTo(caseType);
 		assertThat(noteEntity.getCaseLink()).isEqualTo(caseLink);
 		assertThat(noteEntity.getExternalCaseId()).isEqualTo(externalCaseId);
+		assertThat(noteEntity.getMunicipalityId()).isEqualTo(municipalityId);
 	}
 
 	@Test
 	void testNoDirtOnCreatedBean() {
 		assertThat(NoteEntity.create()).hasAllNullFieldsOrProperties();
+		assertThat(new NoteEntity()).hasAllNullFieldsOrProperties();
 	}
 }

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
 
@@ -41,6 +42,9 @@ class NoteServiceTest {
 	@Mock
 	private NoteRepository noteRepositoryMock;
 
+	@Mock
+	private RevisionService revisionServiceMock;
+
 	@InjectMocks
 	private NoteService noteService;
 
@@ -63,6 +67,7 @@ class NoteServiceTest {
 			// Verification
 			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(createNoteRequestMock)));
 			verify(noteRepositoryMock).save(same(noteEntityMock));
+			verify(revisionServiceMock).createRevision(same(noteEntityMock));
 			verify(noteEntityMock).getId();
 			assertThat(result).isEqualTo(id);
 		}
@@ -80,15 +85,16 @@ class NoteServiceTest {
 		when(noteRepositoryMock.findById(id)).thenReturn(Optional.of(noteEntityMock));
 
 		try (MockedStatic<NoteMapper> mapperMock = Mockito.mockStatic(NoteMapper.class)) {
-			mapperMock.when(() -> NoteMapper.toNoteEntity(any(), any())).thenReturn(noteEntityMock);
-			mapperMock.when(() -> NoteMapper.toNote(any())).thenReturn(noteMock);
+			mapperMock.when(() -> NoteMapper.toNoteEntity(any(NoteEntity.class), any(UpdateNoteRequest.class))).thenReturn(noteEntityMock);
+			mapperMock.when(() -> NoteMapper.toNote(any(NoteEntity.class))).thenReturn(noteMock);
 
 			// Call
 			final var result = noteService.updateNote(id, updateNoteRequestMock);
 
 			// Verification
-			verify(noteRepositoryMock).save(same(noteEntityMock));
 			verify(noteRepositoryMock).findById(id);
+			verify(noteRepositoryMock).save(same(noteEntityMock));
+			verify(revisionServiceMock).createRevision(same(noteEntityMock));
 			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(noteEntityMock), same(updateNoteRequestMock)));
 			mapperMock.verify(() -> NoteMapper.toNote(same(noteEntityMock)));
 
@@ -115,10 +121,11 @@ class NoteServiceTest {
 		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
 		verify(noteRepositoryMock).findById(id);
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
-	void deleteNoteById() {
+	void deleteNote() {
 
 		// Setup
 		final var id = UUID.randomUUID().toString();
@@ -132,10 +139,11 @@ class NoteServiceTest {
 		// Verification
 		verify(noteRepositoryMock).existsById(id);
 		verify(noteRepositoryMock).deleteById(id);
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
-	void deleteNoteByIdNotFound() {
+	void deleteNoteNotFound() {
 
 		// Setup
 		final var id = UUID.randomUUID().toString();
@@ -149,10 +157,11 @@ class NoteServiceTest {
 		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
 		verify(noteRepositoryMock).existsById(id);
+		verifyNoInteractions(revisionServiceMock);
 	}
 
 	@Test
-	void getNoteById() {
+	void getNote() {
 
 		final var id = UUID.randomUUID().toString();
 		final var noteEntityMock = Mockito.mock(NoteEntity.class);
@@ -176,7 +185,7 @@ class NoteServiceTest {
 	}
 
 	@Test
-	void getNoteByIdNotFound() {
+	void getNoteNotFound() {
 
 		// Setup
 		final var id = UUID.randomUUID().toString();
@@ -201,7 +210,7 @@ class NoteServiceTest {
 		// Setup
 		final var id = UUID.randomUUID().toString();
 		final var partyId = UUID.randomUUID().toString();
-		final var findNotesRequest = FindNotesRequest.create().withPartyId(partyId).withPage(1).withLimit(100);
+		final var findNotesRequest = FindNotesRequest.create().withPartyId(partyId).withPage(1).withLimit(100).withMunicipalityId("municipalityId");
 
 		// Mock
 		when(noteRepositoryMock.findAllByParameters(findNotesRequest, PageRequest.of(findNotesRequest.getPage() - 1, findNotesRequest.getLimit(), Sort.by("created").descending()))).thenReturn(new PageImpl<>(List.of(NoteEntity.create().withId(id)

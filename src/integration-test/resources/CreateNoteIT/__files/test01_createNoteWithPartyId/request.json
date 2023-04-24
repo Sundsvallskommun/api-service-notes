@@ -9,5 +9,6 @@
 	"caseId": "12345",
 	"caseType": "caseType",
 	"caseLink": "http://caselink.com/12345",
-	"externalCaseId": "54321"
+	"externalCaseId": "54321",
+	"municipalityId": "2281"
 }

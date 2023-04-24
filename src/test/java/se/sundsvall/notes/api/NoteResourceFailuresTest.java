@@ -28,13 +28,16 @@ import se.sundsvall.notes.api.model.UpdateNoteRequest;
 @ActiveProfiles("junit")
 class NoteResourceFailuresTest {
 
+	private static final String PATH = "/notes";
+	private static final String MUNICIPALITY_ID = "2281";
+
 	@Autowired
 	private WebTestClient webTestClient;
 
 	@Test
 	void createNoteContextRoleAndClientIdMissing() {
 
-		// Parameter values
+		// Arrange
 		final var createNoteRequest = CreateNoteRequest.create()
 			.withBody("Test note")
 			.withCreatedBy("createdBy")
@@ -43,9 +46,12 @@ class NoteResourceFailuresTest {
 			.withCaseId("caseId")
 			.withCaseType("caseType")
 			.withCaseLink("caseLink")
-			.withExternalCaseId("externalCaseId");
+			.withExternalCaseId("externalCaseId")
+			.withMunicipalityId(MUNICIPALITY_ID);
 
-		final var response = webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build())
+			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -54,6 +60,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -68,7 +75,7 @@ class NoteResourceFailuresTest {
 	@Test
 	void createNoteContextRoleAndClientIdEmptyString() {
 
-		// Parameter values
+		// Arrange
 		final var createNoteRequest = CreateNoteRequest.create()
 			.withBody("Test note")
 			.withContext("     ")
@@ -80,9 +87,12 @@ class NoteResourceFailuresTest {
 			.withCaseId("caseId")
 			.withCaseType("caseType")
 			.withCaseLink("caseLink")
-			.withExternalCaseId("externalCaseId");
+			.withExternalCaseId("externalCaseId")
+			.withMunicipalityId(MUNICIPALITY_ID);
 
-		final var response = webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build())
+			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -91,6 +101,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -105,7 +116,7 @@ class NoteResourceFailuresTest {
 	@Test
 	void createNoteInvalidPartyId() {
 
-		// Parameter values
+		// Arrange
 		final var createNoteRequest = CreateNoteRequest.create()
 			.withBody("Test note")
 			.withContext("context")
@@ -117,9 +128,12 @@ class NoteResourceFailuresTest {
 			.withCaseId("caseId")
 			.withCaseType("caseType")
 			.withCaseLink("caseLink")
-			.withExternalCaseId("externalCaseId");
+			.withExternalCaseId("externalCaseId")
+			.withMunicipalityId(MUNICIPALITY_ID);
 
-		final var response = webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build())
+			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -128,6 +142,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -137,9 +152,82 @@ class NoteResourceFailuresTest {
 	}
 
 	@Test
+	void createNoteInvalidMunicipalityId() {
+
+		// Arrange
+		final var createNoteRequest = CreateNoteRequest.create()
+			.withBody("Test note")
+			.withContext("context")
+			.withRole("role")
+			.withClientId("clientId")
+			.withCreatedBy("createdBy")
+			.withSubject("subject")
+			.withCaseId("caseId")
+			.withCaseType("caseType")
+			.withCaseLink("caseLink")
+			.withExternalCaseId("externalCaseId")
+			.withMunicipalityId("invalid-municipality-id");
+
+		// Act
+		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build())
+			.contentType(APPLICATION_JSON)
+			.bodyValue(createNoteRequest)
+			.exchange()
+			.expectStatus().isBadRequest()
+			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
+			.expectBody(ConstraintViolationProblem.class)
+			.returnResult()
+			.getResponseBody();
+
+		// Assert
+		assertThat(response).isNotNull();
+		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
+		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
+		assertThat(response.getViolations())
+			.extracting(Violation::getField, Violation::getMessage)
+			.containsExactly(tuple("municipalityId", "not a valid municipality ID"));
+	}
+
+	@Test
+	void createNoteMunicipalityIdNull() {
+
+		// Arrange
+		final var createNoteRequest = CreateNoteRequest.create()
+			.withBody("Test note")
+			.withContext("context")
+			.withRole("role")
+			.withClientId("clientId")
+			.withCreatedBy("createdBy")
+			.withSubject("subject")
+			.withCaseId("caseId")
+			.withCaseType("caseType")
+			.withCaseLink("caseLink")
+			.withExternalCaseId("externalCaseId");
+
+		// Act
+		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build())
+			.contentType(APPLICATION_JSON)
+			.bodyValue(createNoteRequest)
+			.exchange()
+			.expectStatus().isBadRequest()
+			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
+			.expectBody(ConstraintViolationProblem.class)
+			.returnResult()
+			.getResponseBody();
+
+		// Assert
+		assertThat(response).isNotNull();
+		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
+		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
+		assertThat(response.getViolations())
+			.extracting(Violation::getField, Violation::getMessage)
+			.containsExactly(tuple("municipalityId", "not a valid municipality ID"));
+	}
+
+	@Test
 	void createNoteToLongParameterValues() {
 
-		// Parameter values
+		// Arrange
 		final var createNoteRequest = CreateNoteRequest.create()
 			.withBody(repeat("*", 2049))
 			.withCreatedBy("createdBy")
@@ -151,9 +239,12 @@ class NoteResourceFailuresTest {
 			.withCaseId(repeat("*", 256))
 			.withCaseType(repeat("*", 256))
 			.withCaseLink(repeat("*", 513))
-			.withExternalCaseId(repeat("*", 256));
+			.withExternalCaseId(repeat("*", 256))
+			.withMunicipalityId(repeat("1", 256));
 
-		final var response = webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build())
+			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -162,6 +253,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -176,16 +268,20 @@ class NoteResourceFailuresTest {
 				tuple("caseType", "size must be between 1 and 255"),
 				tuple("clientId", "size must be between 1 and 255"),
 				tuple("externalCaseId", "size must be between 1 and 255"),
-				tuple("subject", "size must be between 1 and 255"));
+				tuple("subject", "size must be between 1 and 255"),
+				tuple("municipalityId", "not a valid municipality ID"),
+				tuple("municipalityId", "size must be between 1 and 255"));
 	}
 
 	@Test
 	void createNoteEmptyJsonBody() {
 
-		// Parameter values
+		// Arrange
 		final var createNoteRequest = "{}";
 
-		final var response = webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build())
+			.contentType(APPLICATION_JSON)
 			.bodyValue(createNoteRequest)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -194,6 +290,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -205,13 +302,16 @@ class NoteResourceFailuresTest {
 				tuple("role", "must not be blank"),
 				tuple("clientId", "must not be blank"),
 				tuple("createdBy", "must not be blank"),
-				tuple("subject", "must not be blank"));
+				tuple("subject", "must not be blank"),
+				tuple("municipalityId", "not a valid municipality ID"));
 	}
 
 	@Test
 	void createNoteNullBody() {
 
-		final var response = webTestClient.post().uri("/notes").contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.post().uri(builder -> builder.path(PATH).build())
+			.contentType(APPLICATION_JSON)
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -219,6 +319,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Bad Request");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -228,14 +329,16 @@ class NoteResourceFailuresTest {
 	@Test
 	void updateNoteInvalidId() {
 
-		// Parameter values
+		// Arrange
 		final var id = "invalid";
 		final var updateNoteRequest = UpdateNoteRequest.create()
 			.withBody("body")
 			.withSubject("subject")
 			.withModifiedBy("modifiedBy");
 
-		final var response = webTestClient.patch().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id))).contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
+			.contentType(APPLICATION_JSON)
 			.bodyValue(updateNoteRequest)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -244,6 +347,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -255,11 +359,12 @@ class NoteResourceFailuresTest {
 	@Test
 	void updateNoteMissingProperties() {
 
-		// Parameter values
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 		final var updateNoteRequest = UpdateNoteRequest.create();
 
-		final var response = webTestClient.patch().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id))).contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id))).contentType(APPLICATION_JSON)
 			.bodyValue(updateNoteRequest)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -268,6 +373,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -280,7 +386,7 @@ class NoteResourceFailuresTest {
 	@Test
 	void updateNoteTooLongParameterValues() {
 
-		// Parameter values
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 		final var updateNoteRequest = UpdateNoteRequest.create()
 			.withBody(repeat("*", 2049))
@@ -291,7 +397,9 @@ class NoteResourceFailuresTest {
 			.withCaseLink(repeat("*", 513))
 			.withExternalCaseId(repeat("*", 256));
 
-		final var response = webTestClient.patch().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id))).contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
+			.contentType(APPLICATION_JSON)
 			.bodyValue(updateNoteRequest)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -300,6 +408,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -317,10 +426,12 @@ class NoteResourceFailuresTest {
 	@Test
 	void updateNoteNullBody() {
 
-		// Parameter values
+		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		final var response = webTestClient.patch().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id))).contentType(APPLICATION_JSON)
+		// Act
+		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
+			.contentType(APPLICATION_JSON)
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -328,6 +439,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Bad Request");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -337,10 +449,11 @@ class NoteResourceFailuresTest {
 	@Test
 	void getNoteByIdInvalidId() {
 
-		// Parameter values
+		// Arrange
 		final var id = "invalid";
 
-		final var response = webTestClient.get().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id)))
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -348,6 +461,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -359,10 +473,11 @@ class NoteResourceFailuresTest {
 	@Test
 	void getNotesByPartyIdInvalidPartyId() {
 
-		// Parameter values
+		// Arrange
 		final var partyId = "invalid";
 
-		final var response = webTestClient.get().uri(builder -> builder.path("/notes").queryParam("partyId", partyId) .build())
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH).queryParam("partyId", partyId).queryParam("municipalityId", MUNICIPALITY_ID).build())
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -370,6 +485,7 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -379,12 +495,13 @@ class NoteResourceFailuresTest {
 	}
 
 	@Test
-	void deleteNoteByIdInvalidId() {
+	void getNotesByInvalidMunicipalityId() {
 
-		// Parameter values
-		final var id = "invalid";
+		// Arrange
+		final var municipalityId = "invalid";
 
-		final var response = webTestClient.delete().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id)))
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH).queryParam("municipalityId", municipalityId).build())
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -392,6 +509,52 @@ class NoteResourceFailuresTest {
 			.returnResult()
 			.getResponseBody();
 
+		// Assert
+		assertThat(response).isNotNull();
+		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
+		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
+		assertThat(response.getViolations())
+			.extracting(Violation::getField, Violation::getMessage)
+			.containsExactly(tuple("municipalityId", "not a valid municipality ID"));
+	}
+
+	@Test
+	void getNotesNullInMunicipalityId() {
+
+		// Act
+		final var response = webTestClient.get().uri(builder -> builder.path(PATH).build())
+			.exchange()
+			.expectStatus().isBadRequest()
+			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
+			.expectBody(ConstraintViolationProblem.class)
+			.returnResult()
+			.getResponseBody();
+
+		// Assert
+		assertThat(response).isNotNull();
+		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
+		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
+		assertThat(response.getViolations())
+			.extracting(Violation::getField, Violation::getMessage)
+			.containsExactly(tuple("municipalityId", "not a valid municipality ID"));
+	}
+
+	@Test
+	void deleteNoteByIdInvalidId() {
+
+		// Arrange
+		final var id = "invalid";
+
+		// Act
+		final var response = webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
+			.exchange()
+			.expectStatus().isBadRequest()
+			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
+			.expectBody(ConstraintViolationProblem.class)
+			.returnResult()
+			.getResponseBody();
+
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -403,17 +566,19 @@ class NoteResourceFailuresTest {
 	@Test
 	void deleteNoteByIdEmptyId() {
 
-		// Parameter values
+		// Arrange
 		final var id = "";
 
-		final var response = webTestClient.delete().uri(builder -> builder.path("/notes/{id}").build(Map.of("id", id)))
-				.exchange()
-				.expectStatus().isEqualTo(METHOD_NOT_ALLOWED)
-				.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
-				.expectBody(ConstraintViolationProblem.class)
-				.returnResult()
-				.getResponseBody();
+		// Act
+		final var response = webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
+			.exchange()
+			.expectStatus().isEqualTo(METHOD_NOT_ALLOWED)
+			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
+			.expectBody(ConstraintViolationProblem.class)
+			.returnResult()
+			.getResponseBody();
 
+		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus().getStatusCode()).isEqualTo(METHOD_NOT_ALLOWED.value());

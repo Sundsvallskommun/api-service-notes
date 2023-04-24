@@ -44,7 +44,7 @@ import se.sundsvall.notes.service.NoteService;
 @RestController
 @Validated
 @RequestMapping("/notes")
-@Tag(name = "Notes", description = "Notes")
+@Tag(name = "Notes", description = "Note operations")
 public class NotesResource {
 
 	@Autowired
@@ -70,7 +70,7 @@ public class NotesResource {
 	@ApiResponse(responseCode = "404", description = "Not found", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 	@ApiResponse(responseCode = "500", description = "Internal Server error", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 	public ResponseEntity<Note> updateNote(
-		@Parameter(name = "id", description = "Note ID", example = "b82bd8ac-1507-4d9a-958d-369261eecc15") @ValidUuid @PathVariable(name = "id", required = true) final String id,
+		@Parameter(name = "id", description = "Note ID", example = "b82bd8ac-1507-4d9a-958d-369261eecc15") @ValidUuid @PathVariable final String id,
 		@Valid @NotNull @RequestBody final UpdateNoteRequest body) {
 
 		return ok(noteService.updateNote(id, body));
@@ -83,7 +83,7 @@ public class NotesResource {
 	@ApiResponse(responseCode = "404", description = "Not found", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 	@ApiResponse(responseCode = "500", description = "Internal Server error", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 	public ResponseEntity<Note> getNoteById(
-		@Parameter(name = "id", description = "Note ID", example = "b82bd8ac-1507-4d9a-958d-369261eecc15") @ValidUuid @PathVariable(name = "id", required = true) final String id) {
+		@Parameter(name = "id", description = "Note ID", example = "b82bd8ac-1507-4d9a-958d-369261eecc15") @ValidUuid @PathVariable final String id) {
 
 		return ok(noteService.getNoteById(id));
 	}
@@ -93,7 +93,8 @@ public class NotesResource {
 	@ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = FindNotesResponse.class)))
 	@ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(oneOf = { Problem.class, ConstraintViolationProblem.class })))
 	@ApiResponse(responseCode = "500", description = "Internal Server error", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
-	public ResponseEntity<FindNotesResponse> findNotes(@Valid final FindNotesRequest searchParams) {
+	public ResponseEntity<FindNotesResponse> findNotes(
+		@Valid final FindNotesRequest searchParams) {
 		return ok(noteService.getNotes(searchParams));
 	}
 
