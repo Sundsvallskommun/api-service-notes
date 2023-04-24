@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 import se.sundsvall.dept44.test.AbstractAppTest;
@@ -20,7 +19,6 @@ import se.sundsvall.notes.integration.db.NoteRepository;
  * @see src/test/resources/db/scripts/DeleteNoteAppTest.sql for data setup.
  */
 @WireMockAppTestSuite(files = "classpath:/DeleteNoteIT/", classes = Application.class)
-@ActiveProfiles("junit")
 @Sql(scripts = {
 	"/db/scripts/truncate.sql",
 	"/db/scripts/DeleteNoteAppTest.sql"

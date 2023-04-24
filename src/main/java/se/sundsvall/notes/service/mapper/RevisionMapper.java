@@ -25,7 +25,7 @@ public class RevisionMapper {
 			.map(entity -> Revision.create()
 				.withCreated(entity.getCreated())
 				.withEntityId(entity.getEntityId())
-				.withEntityType(entity.getClass().getSimpleName())
+				.withEntityType(entity.getEntityType())
 				.withId(entity.getId())
 				.withVersion(entity.getVersion()))
 			.orElse(null);
