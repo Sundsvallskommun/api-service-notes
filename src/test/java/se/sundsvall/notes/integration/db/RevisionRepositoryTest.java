@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.within;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

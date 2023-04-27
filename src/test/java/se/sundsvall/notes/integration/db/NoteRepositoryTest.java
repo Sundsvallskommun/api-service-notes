@@ -10,7 +10,7 @@ import se.sundsvall.notes.Application;
 import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
