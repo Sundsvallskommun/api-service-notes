@@ -9,15 +9,13 @@ import static org.assertj.core.api.Assertions.within;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import jakarta.transaction.Transactional;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-import se.sundsvall.notes.Application;
+import jakarta.transaction.Transactional;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
 
@@ -26,7 +24,7 @@ import se.sundsvall.notes.integration.db.model.RevisionEntity;
  *
  * @see src/test/resources/db/scripts/RevisionRepositoryTest.sql for data setup.
  */
-@SpringBootTest(classes = { Application.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest
 @ActiveProfiles("junit")
 @Sql(scripts = {
 	"/db/scripts/truncate.sql",

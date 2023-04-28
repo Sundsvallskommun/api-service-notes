@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 
+import org.hibernate.Length;
 import org.hibernate.annotations.GenericGenerator;
 
 import jakarta.persistence.Column;
@@ -15,7 +16,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -66,8 +66,7 @@ public class NoteEntity implements Serializable {
 	@Column(name = "subject")
 	private String subject;
 
-	@Column(name = "body")
-	@Lob
+	@Column(name = "body", length = Length.LONG32)
 	private String body;
 
 	@Column(name = "case_id")

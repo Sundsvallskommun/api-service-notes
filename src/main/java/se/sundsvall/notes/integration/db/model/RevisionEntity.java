@@ -7,16 +7,16 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 
+import org.hibernate.Length;
+import org.hibernate.annotations.GenericGenerator;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "revision",
@@ -41,8 +41,7 @@ public class RevisionEntity {
 	@Column(name = "version")
 	private Integer version;
 
-	@Column(name = "serialized_snapshot")
-	@Lob
+	@Column(name = "serialized_snapshot", length = Length.LONG32)
 	private String serializedSnapshot;
 
 	@Column(name = "created")
@@ -145,7 +144,7 @@ public class RevisionEntity {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof RevisionEntity other)) {
+		if (!(obj instanceof final RevisionEntity other)) {
 			return false;
 		}
 		return Objects.equals(created, other.created) && Objects.equals(entityId, other.entityId) && Objects.equals(entityType, other.entityType) && Objects.equals(id, other.id) && Objects.equals(serializedSnapshot, other.serializedSnapshot) && Objects
