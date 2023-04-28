@@ -11,7 +11,7 @@ import static se.sundsvall.notes.service.mapper.NoteMapper.toNotes;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -47,7 +47,9 @@ public class NoteService {
 	public Note updateNote(final String id, final UpdateNoteRequest updateNoteRequest) {
 		final var noteEntity = noteRepository.findById(id).orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
 
-		noteRepository.save(toNoteEntity(noteEntity, updateNoteRequest));
+		toNoteEntity(noteEntity, updateNoteRequest);
+		noteRepository.flush();
+
 		revisionService.createRevision(noteEntity);
 
 		return toNote(noteEntity);

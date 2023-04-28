@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import se.sundsvall.dept44.common.validators.annotation.ValidMunicipalityId;
 import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.Objects;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;

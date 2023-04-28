@@ -1,35 +1,36 @@
 package se.sundsvall.notes.integration.db;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import se.sundsvall.notes.Application;
-import se.sundsvall.notes.api.model.FindNotesRequest;
-import se.sundsvall.notes.integration.db.model.NoteEntity;
-
-import javax.transaction.Transactional;
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+
+import se.sundsvall.notes.api.model.FindNotesRequest;
+import se.sundsvall.notes.integration.db.model.NoteEntity;
 
 /**
  * Note repository tests.
- * 
+ *
  * @see src/test/resources/db/scripts/NoteRepositoryTest.sql for data setup.
  */
-@SpringBootTest(classes = {Application.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = NONE)
 @ActiveProfiles("junit")
 @Sql(scripts = {
-		"/db/scripts/truncate.sql",
-		"/db/scripts/NoteRepositoryTest.sql"
+	"/db/scripts/truncate.sql",
+	"/db/scripts/NoteRepositoryTest.sql"
 })
-@Transactional
 class NoteRepositoryTest {
 
 	private static final String MUNICIPALITY_ID = "municipalityId1";
@@ -114,16 +115,16 @@ class NoteRepositoryTest {
 	@Test
 	void persist() {
 		final var noteEntity = NoteEntity.create()
-				.withPartyId(UUID.randomUUID().toString())
-				.withCreated(OffsetDateTime.now())
-				.withCreatedBy("createdBy")
-				.withSubject("subject")
-				.withBody("body")
-				.withCaseId("caseId")
-				.withCaseType("caseType")
-				.withCaseLink("caseLink")
-				.withExternalCaseId("externalCaseId")
-				.withMunicipalityId(MUNICIPALITY_ID);
+			.withPartyId(UUID.randomUUID().toString())
+			.withCreated(OffsetDateTime.now())
+			.withCreatedBy("createdBy")
+			.withSubject("subject")
+			.withBody("body")
+			.withCaseId("caseId")
+			.withCaseType("caseType")
+			.withCaseLink("caseLink")
+			.withExternalCaseId("externalCaseId")
+			.withMunicipalityId(MUNICIPALITY_ID);
 
 		final var persistedEntity = noteRepository.saveAndFlush(noteEntity);
 
@@ -137,17 +138,17 @@ class NoteRepositoryTest {
 	@Test
 	void update() {
 		final var noteEntity = NoteEntity.create()
-				.withPartyId(UUID.randomUUID().toString())
-				.withCreatedBy("createdBy")
-				.withSubject("subject")
-				.withBody("body")
-				.withCaseId("caseId")
-				.withCaseType("caseType")
-				.withCaseLink("caseLink")
-				.withExternalCaseId("externalCaseId")
-				.withMunicipalityId(MUNICIPALITY_ID);
+			.withPartyId(UUID.randomUUID().toString())
+			.withCreatedBy("createdBy")
+			.withSubject("subject")
+			.withBody("body")
+			.withCaseId("caseId")
+			.withCaseType("caseType")
+			.withCaseLink("caseLink")
+			.withExternalCaseId("externalCaseId")
+			.withMunicipalityId(MUNICIPALITY_ID);
 
-		var persistedEntity = noteRepository.saveAndFlush(noteEntity);
+		final var persistedEntity = noteRepository.saveAndFlush(noteEntity);
 
 		assertThat(persistedEntity).isEqualTo(noteEntity);
 		assertThat(persistedEntity.getCreated()).isCloseTo(OffsetDateTime.now(), within(2, SECONDS));
@@ -179,10 +180,10 @@ class NoteRepositoryTest {
 		assertThat(noteRepository.findById(ENTITY_2_ID)).isNotPresent();
 	}
 
-	private boolean isValidUUID(String value) {
+	private boolean isValidUUID(final String value) {
 		try {
 			UUID.fromString(String.valueOf(value));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return false;
 		}
 
