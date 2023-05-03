@@ -93,7 +93,7 @@ class NoteServiceTest {
 
 			// Verification
 			verify(noteRepositoryMock).findById(id);
-			verify(noteRepositoryMock).save(same(noteEntityMock));
+			verify(noteRepositoryMock).flush();
 			verify(revisionServiceMock).createRevision(same(noteEntityMock));
 			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(noteEntityMock), same(updateNoteRequestMock)));
 			mapperMock.verify(() -> NoteMapper.toNote(same(noteEntityMock)));

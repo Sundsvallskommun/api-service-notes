@@ -3,10 +3,10 @@ package se.sundsvall.notes.api;
 import static org.apache.commons.lang3.StringUtils.repeat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
-import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
 import static org.zalando.problem.Status.BAD_REQUEST;
+import static org.zalando.problem.Status.NOT_FOUND;
 
 import java.util.Map;
 import java.util.UUID;
@@ -572,7 +572,7 @@ class NoteResourceFailuresTest {
 		// Act
 		final var response = webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
-			.expectStatus().isEqualTo(METHOD_NOT_ALLOWED)
+			.expectStatus().isNotFound()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
 			.expectBody(ConstraintViolationProblem.class)
 			.returnResult()
@@ -581,7 +581,7 @@ class NoteResourceFailuresTest {
 		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
-		assertThat(response.getStatus().getStatusCode()).isEqualTo(METHOD_NOT_ALLOWED.value());
+		assertThat(response.getStatus()).isEqualTo(NOT_FOUND);
 		assertThat(response.getViolations()).isEmpty();
 	}
 }
