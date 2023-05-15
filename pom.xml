@@ -20,7 +20,7 @@
 		<published.container.port.production>9729</published.container.port.production>
 		<sandbox.wiremock>false</sandbox.wiremock>
 		<!-- Service properties -->
-		<testcontainers.version>1.18.0</testcontainers.version>
+		<testcontainers.version>1.18.1</testcontainers.version>
 		<zjsonpatch.version>0.4.14</zjsonpatch.version>
 	</properties>
 	<dependencies>
