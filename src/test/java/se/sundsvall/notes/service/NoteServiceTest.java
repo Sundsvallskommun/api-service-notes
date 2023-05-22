@@ -1,20 +1,6 @@
 package se.sundsvall.notes.service;
 
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
+import generated.se.sundsvall.eventlog.Event;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,14 +13,31 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
-
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.api.model.Note;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
+import se.sundsvall.notes.integration.eventlog.EventlogClient;
 import se.sundsvall.notes.service.mapper.NoteMapper;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 class NoteServiceTest {
@@ -44,6 +47,9 @@ class NoteServiceTest {
 
 	@Mock
 	private RevisionService revisionServiceMock;
+
+	@Mock
+	private EventlogClient eventlogClientMock;
 
 	@InjectMocks
 	private NoteService noteService;
@@ -67,8 +73,8 @@ class NoteServiceTest {
 			// Verification
 			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(createNoteRequestMock)));
 			verify(noteRepositoryMock).save(same(noteEntityMock));
-			verify(revisionServiceMock).createRevision(same(noteEntityMock));
-			verify(noteEntityMock).getId();
+			verify(revisionServiceMock).createNoteRevision(same(noteEntityMock));
+			verify(noteEntityMock, times(2)).getId();
 			assertThat(result).isEqualTo(id);
 		}
 	}
@@ -87,7 +93,7 @@ class NoteServiceTest {
 		try (MockedStatic<NoteMapper> mapperMock = Mockito.mockStatic(NoteMapper.class)) {
 			mapperMock.when(() -> NoteMapper.toNoteEntity(any(NoteEntity.class), any(UpdateNoteRequest.class))).thenReturn(noteEntityMock);
 			mapperMock.when(() -> NoteMapper.toNote(any(NoteEntity.class))).thenReturn(noteMock);
-
+			when(noteEntityMock.getId()).thenReturn(id);
 			// Call
 			final var result = noteService.updateNote(id, updateNoteRequestMock);
 
@@ -97,6 +103,7 @@ class NoteServiceTest {
 			verify(revisionServiceMock).createRevision(same(noteEntityMock));
 			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(noteEntityMock), same(updateNoteRequestMock)));
 			mapperMock.verify(() -> NoteMapper.toNote(same(noteEntityMock)));
+			verify(eventlogClientMock).createEvent(eq(id), any(Event.class));
 
 			assertThat(result).isSameAs(noteMock);
 		}
@@ -131,15 +138,16 @@ class NoteServiceTest {
 		final var id = UUID.randomUUID().toString();
 
 		// Mock
-		when(noteRepositoryMock.existsById(id)).thenReturn(true);
+		when(noteRepositoryMock.findById(id)).thenReturn(Optional.of(NoteEntity.create().withId(id)));
 
 		// Call
 		noteService.deleteNoteById(id);
 
 		// Verification
-		verify(noteRepositoryMock).existsById(id);
+		verify(noteRepositoryMock).findById(id);
 		verify(noteRepositoryMock).deleteById(id);
-		verifyNoInteractions(revisionServiceMock);
+		verify(eventlogClientMock).createEvent(eq(id), any(Event.class));
+		verify(revisionServiceMock).getLatestNoteRevision(id);
 	}
 
 	@Test
@@ -156,7 +164,7 @@ class NoteServiceTest {
 		assertThat(problem.getTitle()).isEqualTo(Status.NOT_FOUND.getReasonPhrase());
 		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
-		verify(noteRepositoryMock).existsById(id);
+		verify(noteRepositoryMock).findById(id);
 		verifyNoInteractions(revisionServiceMock);
 	}
 
@@ -222,8 +230,8 @@ class NoteServiceTest {
 		// Verification
 		assertThat(result).isNotNull();
 		assertThat(result.getNotes()).extracting(
-			Note::getId,
-			Note::getPartyId)
+				Note::getId,
+				Note::getPartyId)
 			.containsExactly(tuple(id, partyId));
 
 		verify(noteRepositoryMock).findAllByParameters(any(), any());
