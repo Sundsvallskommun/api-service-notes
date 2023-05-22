@@ -1,5 +1,27 @@
 package se.sundsvall.notes.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flipkart.zjsonpatch.DiffFlags;
+import com.flipkart.zjsonpatch.JsonDiff;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.zalando.problem.Problem;
+import se.sundsvall.notes.api.model.DifferenceResponse;
+import se.sundsvall.notes.api.model.Operation;
+import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.integration.db.RevisionRepository;
+import se.sundsvall.notes.integration.db.model.NoteEntity;
+import se.sundsvall.notes.integration.db.model.RevisionEntity;
+import se.sundsvall.notes.service.mapper.RevisionMapper;
+
+import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
+
 import static com.flipkart.zjsonpatch.DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE;
 import static com.flipkart.zjsonpatch.DiffFlags.OMIT_VALUE_ON_REMOVE;
 import static java.lang.String.format;
@@ -8,31 +30,10 @@ import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 import static org.zalando.problem.Status.NOT_FOUND;
 import static se.sundsvall.notes.service.ServiceConstants.PROBLEM_DURING_DIFF;
 import static se.sundsvall.notes.service.ServiceConstants.REVISION_NOT_FOUND_FOR_ID_AND_VERSION;
+import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevision;
+import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionEntity;
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionList;
-
-import java.io.IOException;
-import java.util.EnumSet;
-import java.util.List;
-
-import jakarta.transaction.Transactional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.zalando.problem.Problem;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flipkart.zjsonpatch.DiffFlags;
-import com.flipkart.zjsonpatch.JsonDiff;
-
-import se.sundsvall.notes.api.model.DifferenceResponse;
-import se.sundsvall.notes.api.model.Operation;
-import se.sundsvall.notes.api.model.Revision;
-import se.sundsvall.notes.integration.db.RevisionRepository;
-import se.sundsvall.notes.integration.db.model.NoteEntity;
-import se.sundsvall.notes.integration.db.model.RevisionEntity;
+import static se.sundsvall.notes.service.mapper.RevisionMapper.toSerializedSnapshot;
 
 @Service
 @Transactional
@@ -90,6 +91,35 @@ public class RevisionService {
 	 * - no previous revisions exist for the provided entity.
 	 *
 	 * @param entity the entity that will have a new revision.
+	 * @return the created revision.
+	 */
+	public Revision createNoteRevision(NoteEntity entity) {
+
+		final var lastRevision = revisionRepository.findFirstByEntityIdOrderByVersionDesc(entity.getId());
+
+		if (lastRevision.isPresent()) {
+
+			// No changes since last revision, return.
+			if (jsonEquals(lastRevision.get().getSerializedSnapshot(), toSerializedSnapshot(entity))) {
+				return null;
+			}
+
+			// Create revision <lastRevision.version + 1>
+			return toRevision(createAndReturnRevision(entity, lastRevision.get().getVersion() + 1));
+		}
+
+		// No previous revisions exist. Create revision 0
+		return toRevision(createAndReturnRevision(entity, 0));
+	}
+
+	/**
+	 * Create a new revision.
+	 *
+	 * A new revision will be created if:
+	 * - the last revisions serialized-snapshot differs from the current (i.e. provided) entity.
+	 * - no previous revisions exist for the provided entity.
+	 *
+	 * @param entity the entity that will have a new revision.
 	 * @return the id (uuid) of the created revision.
 	 */
 	public String createRevision(final NoteEntity entity) {
@@ -115,6 +145,18 @@ public class RevisionService {
 		return toRevisionList(revisionRepository.findAllByEntityIdOrderByVersion(noteEntityId));
 	}
 
+	/**
+	 * Returns the lastest (current) revision of the note
+	 *
+	 * @param noteId id of the note to fetch latest revision for.
+	 * @return the latest revision for the note or null if note does not exist.
+	 */
+	public Revision getLatestNoteRevision(String noteId) {
+		return revisionRepository.findFirstByEntityIdOrderByVersionDesc(noteId)
+			.map(RevisionMapper::toRevision)
+			.orElse(null);
+	}
+
 	private String toJsonString(final NoteEntity entity) {
 		try {
 			return objectMapper.writeValueAsString(entity);
@@ -131,6 +173,10 @@ public class RevisionService {
 			.withEntityType(entity.getClass().getSimpleName())
 			.withSerializedSnapshot(toJsonString(entity))
 			.withVersion(version)).getId();
+	}
+
+	private RevisionEntity createAndReturnRevision(final NoteEntity entity, final int version) {
+		return revisionRepository.save(toRevisionEntity(entity, version));
 	}
 
 	private boolean jsonEquals(final String json1, final String json2) {
