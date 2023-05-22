@@ -9,11 +9,12 @@ import java.time.ZoneId;
 import java.util.Objects;
 
 import org.hibernate.Length;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.TimeZoneStorage;
+import org.hibernate.annotations.TimeZoneStorageType;
+import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
@@ -34,8 +35,7 @@ public class NoteEntity implements Serializable {
 	private static final long serialVersionUID = -3451441096651461590L;
 
 	@Id
-	@GeneratedValue(generator = "uuid2")
-	@GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
+	@UuidGenerator
 	@Column(name = "id")
 	private String id;
 
@@ -55,12 +55,14 @@ public class NoteEntity implements Serializable {
 	private String createdBy;
 
 	@Column(name = "created")
+	@TimeZoneStorage(TimeZoneStorageType.NORMALIZE)
 	private OffsetDateTime created;
 
 	@Column(name = "modified_by")
 	private String modifiedBy;
 
 	@Column(name = "modified")
+	@TimeZoneStorage(TimeZoneStorageType.NORMALIZE)
 	private OffsetDateTime modified;
 
 	@Column(name = "subject")
