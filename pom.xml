@@ -20,7 +20,6 @@
 		<published.container.port.production>9729</published.container.port.production>
 		<sandbox.wiremock>false</sandbox.wiremock>
 		<!-- Service properties -->
-		<testcontainers.version>1.18.1</testcontainers.version>
 		<zjsonpatch.version>0.4.14</zjsonpatch.version>
 	</properties>
 	<dependencies>
@@ -60,7 +59,6 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>mariadb</artifactId>
-			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
