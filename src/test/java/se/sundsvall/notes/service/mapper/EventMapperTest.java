@@ -24,6 +24,8 @@ class EventMapperTest {
 
 	@Test
 	void toEvent() {
+
+		// Setup
 		final var eventType = EventType.CREATE;
 		final var message = "message";
 		final var revision = "revision";
@@ -31,8 +33,6 @@ class EventMapperTest {
 		final var executedByUserId = "executedByUserId";
 		final var owner = "Notes";
 		final var sourceType = Note.class.getSimpleName();
-
-		// Setup
 
 		// Call
 		final var event = EventMapper.toEvent(eventType, message, revision, metaData, executedByUserId);

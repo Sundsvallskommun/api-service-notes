@@ -1,17 +1,16 @@
 package se.sundsvall.notes.apptest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
-
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.integration.db.RevisionRepository;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Update note apptests.
@@ -39,6 +38,7 @@ class UpdateNoteIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath("/notes/" + entityId)
 			.withHttpMethod(HttpMethod.PATCH)
+			.withHeader("sentbyuser", "adUser")
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.OK)
 			.withExpectedResponse("response.json")

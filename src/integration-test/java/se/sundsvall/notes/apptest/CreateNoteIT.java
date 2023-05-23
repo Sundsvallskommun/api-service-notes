@@ -1,17 +1,10 @@
 package se.sundsvall.notes.apptest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-import static org.springframework.http.HttpHeaders.LOCATION;
-
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.notes.Application;
@@ -19,6 +12,12 @@ import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
 import se.sundsvall.notes.integration.db.RevisionRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+import static org.springframework.http.HttpHeaders.LOCATION;
 
 /**
  * Create note apptests.
@@ -44,6 +43,7 @@ class CreateNoteIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath("/notes")
 			.withHttpMethod(HttpMethod.POST)
+			.withHeader("sentbyuser", "adUser")
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.CREATED)
 			.withExpectedResponseHeader(LOCATION, List.of("^http://(.*)/notes/(.*)$"))
@@ -76,6 +76,7 @@ class CreateNoteIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath("/notes")
 			.withHttpMethod(HttpMethod.POST)
+			.withHeader("sentbyuser", "adUser")
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.CREATED)
 			.withExpectedResponseHeader(LOCATION, List.of("^http://(.*)/notes/(.*)$"))
