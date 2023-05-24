@@ -54,7 +54,10 @@ import static se.sundsvall.notes.service.ServiceConstants.EVENT_LOG_UPDATE_NOTE;
 class NoteServiceTest {
 
 	private final static String EXECUTED_BY = "ExecutedBy";
+	private final static String CREATED_BY = "CreatedBy";
+	private final static String MODIFIED_BY = "ModifiedBy";
 	private final static String USER_ID = "userId";
+	private final static String USER_ID_2 = "userId-2";
 	private final static String CURRENT_VERSION = "CurrentVersion";
 	private final static String CURRENT_REVISION = "CurrentRevision";
 	private final static String PREVIOUS_VERSION = "PreviousVersion";
@@ -85,6 +88,11 @@ class NoteServiceTest {
 
 		// Mock
 		when(noteEntityMock.getId()).thenReturn(id);
+		when(noteEntityMock.getCreatedBy()).thenReturn(USER_ID);
+		when(noteEntityMock.getModifiedBy()).thenReturn(USER_ID_2);
+		when(noteRepositoryMock.save(any())).thenReturn(noteEntityMock);
+		when(executingUserSupplierMock.getAdUser()).thenReturn(USER_ID);
+		when(revisionServiceMock.createNoteRevision(noteEntityMock)).thenReturn(Revision.create().withVersion(1).withId(id));
 		when(noteRepositoryMock.save(any())).thenReturn(noteEntityMock);
 		when(executingUserSupplierMock.getAdUser()).thenReturn(USER_ID);
 		when(revisionServiceMock.createNoteRevision(noteEntityMock)).thenReturn(Revision.create().withVersion(1).withId(id));
@@ -102,6 +110,8 @@ class NoteServiceTest {
 			verify(executingUserSupplierMock).getAdUser();
 			verify(eventlogClientMock).createEvent(eq(id), eventCaptor.capture());
 			verify(noteEntityMock, times(2)).getId();
+			verify(noteEntityMock).getCreatedBy();
+			verify(noteEntityMock).getModifiedBy();
 			assertThat(result).isEqualTo(id);
 
 			final var event = eventCaptor.getValue();
@@ -111,13 +121,14 @@ class NoteServiceTest {
 			assertThat(event.getMessage()).isEqualTo(EVENT_LOG_CREATE_NOTE);
 			assertThat(event.getOwner()).isEqualTo("Notes");
 			assertThat(event.getSourceType()).isEqualTo("Note");
-			assertThat(event.getMetadata()).isNotNull().hasSize(3)
+			assertThat(event.getMetadata()).isNotNull().hasSize(5)
 				.extracting(Metadata::getKey, Metadata::getValue)
 				.containsExactly(
+					tuple(CREATED_BY, USER_ID),
 					tuple(CURRENT_VERSION, "1"),
+					tuple(MODIFIED_BY, USER_ID_2),
 					tuple(CURRENT_REVISION, id),
-					tuple(EXECUTED_BY, USER_ID)
-				);
+					tuple(EXECUTED_BY, USER_ID));
 		}
 	}
 
@@ -129,9 +140,8 @@ class NoteServiceTest {
 
 		// Mock
 		when(noteEntityMock.getId()).thenReturn(id);
-		when(createNoteRequestMock.getCreatedBy()).thenReturn(USER_ID);
-		when(noteRepositoryMock.save(any())).thenReturn(noteEntityMock);
-		when(executingUserSupplierMock.getAdUser()).thenReturn(null);
+		when(noteEntityMock.getCreatedBy()).thenReturn(USER_ID);
+		when(noteEntityMock.getModifiedBy()).thenReturn(USER_ID_2);
 		when(noteRepositoryMock.save(any())).thenReturn(noteEntityMock);
 		when(executingUserSupplierMock.getAdUser()).thenReturn("UNKNOWN");
 		when(revisionServiceMock.createNoteRevision(noteEntityMock)).thenReturn(Revision.create().withVersion(1).withId(id));
@@ -153,13 +163,14 @@ class NoteServiceTest {
 
 			final var event = eventCaptor.getValue();
 			assertThat(event.getType()).isEqualTo(EventType.CREATE);
-			assertThat(event.getMetadata()).isNotNull().hasSize(3)
+			assertThat(event.getMetadata()).isNotNull().hasSize(5)
 				.extracting(Metadata::getKey, Metadata::getValue)
 				.containsExactly(
+					tuple(CREATED_BY, USER_ID),
 					tuple(CURRENT_VERSION, "1"),
+					tuple(MODIFIED_BY, USER_ID_2),
 					tuple(CURRENT_REVISION, id),
-					tuple(EXECUTED_BY, USER_ID)
-				);
+					tuple(EXECUTED_BY, "UNKNOWN"));
 		}
 	}
 
@@ -225,7 +236,6 @@ class NoteServiceTest {
 		// Mock
 		when(noteRepositoryMock.findById(id)).thenReturn(Optional.of(noteEntityMock));
 		when(executingUserSupplierMock.getAdUser()).thenReturn("UNKNOWN");
-		when(updateNoteRequestMock.getModifiedBy()).thenReturn(USER_ID);
 		when(revisionServiceMock.createNoteRevision(noteEntityMock)).thenReturn(Revision.create().withVersion(1).withId(id));
 		when(revisionServiceMock.getRevisions(id)).thenReturn(List.of(Revision.create().withVersion(1).withId(id), Revision.create().withVersion(0).withId(oldId)));
 
@@ -233,6 +243,8 @@ class NoteServiceTest {
 			mapperMock.when(() -> NoteMapper.toNoteEntity(any(NoteEntity.class), any(UpdateNoteRequest.class))).thenReturn(noteEntityMock);
 			mapperMock.when(() -> NoteMapper.toNote(any(NoteEntity.class))).thenReturn(noteMock);
 			when(noteEntityMock.getId()).thenReturn(id);
+			when(noteEntityMock.getCreatedBy()).thenReturn(USER_ID);
+			when(noteEntityMock.getModifiedBy()).thenReturn(USER_ID_2);
 			// Call
 			final var result = noteService.updateNote(id, updateNoteRequestMock);
 
@@ -254,14 +266,16 @@ class NoteServiceTest {
 			assertThat(event.getOwner()).isEqualTo("Notes");
 			assertThat(event.getSourceType()).isEqualTo("Note");
 			assertThat(event.getMetadata()).isNotNull();
-			assertThat(event.getMetadata()).isNotNull().hasSize(5)
+			assertThat(event.getMetadata()).isNotNull().hasSize(7)
 				.extracting(Metadata::getKey, Metadata::getValue)
 				.containsExactly(
+					tuple(CREATED_BY, USER_ID),
 					tuple(PREVIOUS_REVISION, oldId),
 					tuple(CURRENT_VERSION, "1"),
 					tuple(PREVIOUS_VERSION, "0"),
+					tuple(MODIFIED_BY, USER_ID_2),
 					tuple(CURRENT_REVISION, id),
-					tuple(EXECUTED_BY, USER_ID));
+					tuple(EXECUTED_BY, "UNKNOWN"));
 		}
 	}
 

@@ -24,6 +24,8 @@ public class EventMapper {
 
 	private static final String OWNER = "Notes";
 	private static final String SOURCE_TYPE = Note.class.getSimpleName();
+	private static final String KEY_CREATED_BY = "CreatedBy";
+	private static final String KEY_MDOIFIED_BY = "ModifiedBy";
 	private static final String KEY_EXECUTED_BY = "ExecutedBy";
 	private static final String KEY_CASE_ID = "CaseId";
 	private static final String KEY_PREVIOUS_REVISION = "PreviousRevision";
@@ -53,6 +55,12 @@ public class EventMapper {
 
 		ofNullable(noteEntity).map(NoteEntity::getCaseId).ifPresent(caseId -> metadata.put(KEY_CASE_ID, caseId));
 
+		// Add information about who created the note
+		ofNullable(noteEntity).map(NoteEntity::getCreatedBy).ifPresent(createdBy -> metadata.put(KEY_CREATED_BY, createdBy));
+
+		// Add information about who modified the note
+		ofNullable(noteEntity).map(NoteEntity::getModifiedBy).ifPresent(modifiedBy -> metadata.put(KEY_MDOIFIED_BY, modifiedBy));
+
 		// Add information for current revision of note
 		ofNullable(currentRevision).ifPresent(rev -> {
 			metadata.put(KEY_CURRENT_REVISION, rev.getId());
@@ -64,6 +72,7 @@ public class EventMapper {
 			metadata.put(KEY_PREVIOUS_REVISION, rev.getId());
 			metadata.put(KEY_PREVIOUS_VERSION, String.valueOf(rev.getVersion()));
 		});
+
 
 		return metadata;
 	}

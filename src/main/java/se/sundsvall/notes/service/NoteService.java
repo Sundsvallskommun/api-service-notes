@@ -18,7 +18,6 @@ import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.eventlog.EventlogClient;
-import se.sundsvall.notes.service.mapper.EventMapper;
 
 import java.util.List;
 
@@ -26,13 +25,13 @@ import static generated.se.sundsvall.eventlog.EventType.CREATE;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.zalando.problem.Status.NOT_FOUND;
 import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
 import static se.sundsvall.notes.service.ServiceConstants.EVENT_LOG_CREATE_NOTE;
 import static se.sundsvall.notes.service.ServiceConstants.EVENT_LOG_DELETE_NOTE;
 import static se.sundsvall.notes.service.ServiceConstants.EVENT_LOG_UPDATE_NOTE;
 import static se.sundsvall.notes.service.mapper.EventMapper.toEvent;
+import static se.sundsvall.notes.service.mapper.EventMapper.toMetadataMap;
 import static se.sundsvall.notes.service.mapper.NoteMapper.toNote;
 import static se.sundsvall.notes.service.mapper.NoteMapper.toNoteEntity;
 import static se.sundsvall.notes.service.mapper.NoteMapper.toNotes;
@@ -62,7 +61,7 @@ public class NoteService {
 		final var currentRevision = revisionService.createNoteRevision(noteEntity);
 
 		// Create log-event
-		createEvent(CREATE, EVENT_LOG_CREATE_NOTE, noteEntity, currentRevision, null, getExecutedByUserId(createNoteRequest));
+		createEvent(CREATE, EVENT_LOG_CREATE_NOTE, noteEntity, currentRevision, null, executingUserSupplier.getAdUser());
 		return noteEntity.getId();
 	}
 
@@ -77,7 +76,7 @@ public class NoteService {
 		final var previousRevision = revisionService.getRevisions(noteEntity.getId()).stream().filter(revision -> !revision.getId().equals(latestRevision.getId())).findFirst().orElse(null);
 
 		// Create log-event
-		createEvent(EventType.UPDATE, EVENT_LOG_UPDATE_NOTE, noteEntity, latestRevision, previousRevision, getExecutedByUserId(updateNoteRequest));
+		createEvent(EventType.UPDATE, EVENT_LOG_UPDATE_NOTE, noteEntity, latestRevision, previousRevision, executingUserSupplier.getAdUser());
 
 		return toNote(noteEntity);
 	}
@@ -117,24 +116,10 @@ public class NoteService {
 	}
 
 	private void createEvent(EventType eventType, String message, NoteEntity noteEntity, Revision currentRevision, Revision previousRevision, String executedByUserId) {
-		final var metadata = EventMapper.toMetadataMap(noteEntity, currentRevision, previousRevision);
+		final var metadata = toMetadataMap(noteEntity, currentRevision, previousRevision);
 		eventlogClient.createEvent(
 			noteEntity.getId(),
 			toEvent(eventType, message, ofNullable(currentRevision).map(Revision::getId).orElse(null), metadata, executedByUserId));
 
-	}
-
-	private String getExecutedByUserId(UpdateNoteRequest updateNoteRequest) {
-		final var userId = ofNullable(executingUserSupplier.getAdUser())
-			.filter(adUser -> isNotBlank(adUser) && !UNKNOWN.equals(adUser))
-			.orElse(updateNoteRequest.getModifiedBy());
-		return ofNullable(userId).orElse(UNKNOWN);
-	}
-
-	private String getExecutedByUserId(CreateNoteRequest createNoteRequest) {
-		final var userId =  ofNullable(executingUserSupplier.getAdUser())
-			.filter(adUser -> isNotBlank(adUser) && !UNKNOWN.equals(adUser))
-			.orElse(createNoteRequest.getCreatedBy());
-		return ofNullable(userId).orElse(UNKNOWN);
 	}
 }

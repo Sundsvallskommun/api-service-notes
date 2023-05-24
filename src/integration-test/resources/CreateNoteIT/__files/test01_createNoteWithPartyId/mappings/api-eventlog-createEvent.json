@@ -20,20 +20,24 @@
 					"sourceType": "Note",
 					"metadata": [
 						{
+							"key": "CreatedBy",
+							"value": "John Doe"
+						},
+						{
 							"key": "CurrentVersion",
 							"value": "0"
 						},
 						{
-							"key":"CaseId",
-							"value":"12345"
+							"key": "CaseId",
+							"value": "12345"
 						},
 						{
 							"key": "CurrentRevision",
 							"value": "${json-unit.regex}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
 						},
 						{
-							"key":"ExecutedBy",
-							"value":"adUser"
+							"key": "ExecutedBy",
+							"value": "adUser"
 						}
 					]
 				}

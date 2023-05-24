@@ -20,12 +20,20 @@
 					"sourceType": "Note",
 					"metadata": [
 						{
+							"key": "CreatedBy",
+							"value": "createdBy1"
+						},
+						{
 							"key": "CurrentVersion",
 							"value": "1"
 						},
 						{
+							"key": "ModifiedBy",
+							"value": "updatedBy1"
+						},
+						{
 							"key": "CurrentRevision",
-							"value": "2103ac13-1691-4017-b6c6-78fa75ff68fc"
+							"value": "${json-unit.regex}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
 						},
 						{
 							"key": "ExecutedBy",

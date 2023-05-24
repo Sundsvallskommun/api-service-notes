@@ -99,8 +99,13 @@ class EventMapperTest {
 		final var CURRENT_ID = "currentId";
 		final var CURRENT_VERSION = 2;
 		final var KEY_CASE_ID = "CaseId";
+		final var KEY_CREATED_BY = "CreatedBy";
+		final var CREATED_BY = "createdBy";
+		final var MODIFIED_BY = "modifiedBy";
+		final var KEY_MODIFIED_BY = "ModifiedBy";
+
 		return Stream.of(
-			Arguments.of(NoteEntity.create().withCaseId(CASE_ID), null, null, Map.of(KEY_CASE_ID, CASE_ID)),
+			Arguments.of(NoteEntity.create().withCaseId(CASE_ID).withCreatedBy(CREATED_BY).withModifiedBy(MODIFIED_BY), null, null, Map.of(KEY_CASE_ID, CASE_ID, KEY_CREATED_BY, CREATED_BY, KEY_MODIFIED_BY, MODIFIED_BY)),
 			Arguments.of(null, null, Revision.create().withId(PREVIOUS_ID).withVersion(PREVIOUS_VERSION), Map.of(KEY_PREVIOUS_REVISION, PREVIOUS_ID, KEY_PREVIOUS_VERSION, String.valueOf(PREVIOUS_VERSION))),
 			Arguments.of(null, Revision.create().withId(CURRENT_ID).withVersion(CURRENT_VERSION), null, Map.of(KEY_CURRENT_REVISION, CURRENT_ID, KEY_CURRENT_VERSION, String.valueOf(CURRENT_VERSION))),
 			Arguments.of(null, null, null, emptyMap()));
