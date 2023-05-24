@@ -13,7 +13,7 @@
 				"ignoreArrayOrder": true,
 				"equalToJson": {
 					"type": "DELETE",
-					"message": "Noteringen har raderats.",
+					"message": "Anteckningen har raderats.",
 					"owner": "Notes",
 					"created": "${json-unit.any-string}",
 					"historyReference": "2103ac13-1691-4017-b6c6-78fa75ff68fc",
