@@ -72,7 +72,7 @@ class NoteServiceTest {
 	@Mock
 	private ExecutingUserSupplier executingUserSupplierMock;
 
-	ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+	private final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
 	@InjectMocks
 	private NoteService noteService;

@@ -1,6 +1,5 @@
 package se.sundsvall.notes.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.zjsonpatch.DiffFlags;
 import com.flipkart.zjsonpatch.JsonDiff;
@@ -33,7 +32,6 @@ import static se.sundsvall.notes.service.ServiceConstants.REVISION_NOT_FOUND_FOR
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevision;
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionEntity;
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionList;
-import static se.sundsvall.notes.service.mapper.RevisionMapper.toSerializedSnapshot;
 
 @Service
 @Transactional
@@ -100,7 +98,7 @@ public class RevisionService {
 		if (lastRevision.isPresent()) {
 
 			// No changes since last revision, return.
-			if (jsonEquals(lastRevision.get().getSerializedSnapshot(), toSerializedSnapshot(entity))) {
+			if (jsonEquals(lastRevision.get().getSerializedSnapshot(), RevisionMapper.toJsonString(entity))) {
 				return null;
 			}
 
@@ -129,7 +127,7 @@ public class RevisionService {
 		if (lastRevision.isPresent()) {
 
 			// No changes since last revision, return.
-			if (jsonEquals(lastRevision.get().getSerializedSnapshot(), toJsonString(entity))) {
+			if (jsonEquals(lastRevision.get().getSerializedSnapshot(), RevisionMapper.toJsonString(entity))) {
 				return null;
 			}
 
@@ -157,21 +155,11 @@ public class RevisionService {
 			.orElse(null);
 	}
 
-	private String toJsonString(final NoteEntity entity) {
-		try {
-			return objectMapper.writeValueAsString(entity);
-		} catch (final JsonProcessingException e) {
-			LOG.error("Error during serialization of entity into JSON string!", e);
-		}
-
-		return null;
-	}
-
 	private String createRevision(final NoteEntity entity, final int version) {
 		return revisionRepository.save(RevisionEntity.create()
 			.withEntityId(entity.getId())
 			.withEntityType(entity.getClass().getSimpleName())
-			.withSerializedSnapshot(toJsonString(entity))
+			.withSerializedSnapshot(RevisionMapper.toJsonString(entity))
 			.withVersion(version)).getId();
 	}
 

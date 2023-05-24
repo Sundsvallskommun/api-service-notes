@@ -61,6 +61,7 @@ class RevisionServiceTest {
 		final var noteEntity = createNoteEntity();
 		final var revisionEntityId = UUID.randomUUID().toString();
 		final var lastRevisionVersion = 3;
+		final var serializedSnapshot = objectMapperSpy.writeValueAsString(noteEntity);
 
 		when(revisionRepositoryMock.save(any())).thenReturn(RevisionEntity.create().withId(revisionEntityId));
 		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId()))
@@ -120,6 +121,7 @@ class RevisionServiceTest {
 		assertThat(result).isNull();
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
 		verify(revisionRepositoryMock, never()).save(any());
+
 	}
 
 	@Test
@@ -130,6 +132,7 @@ class RevisionServiceTest {
 		final var revisionEntityId = UUID.randomUUID().toString();
 		final var lastRevisionVersion = 3;
 		final var invalidJson = "hello";
+		final var serializedSnapshot = objectMapperSpy.writeValueAsString(noteEntity);
 
 		when(revisionRepositoryMock.save(any())).thenReturn(RevisionEntity.create().withId(revisionEntityId));
 		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId()))
@@ -146,7 +149,7 @@ class RevisionServiceTest {
 		final var capturedRevisionEntity = revisionEntityCaptor.getValue();
 		assertThat(capturedRevisionEntity).isNotNull();
 		assertThat(capturedRevisionEntity.getVersion()).isEqualTo(lastRevisionVersion + 1);
-		assertThat(capturedRevisionEntity.getSerializedSnapshot()).isEqualTo(objectMapperSpy.writeValueAsString(noteEntity));
+		assertThat(capturedRevisionEntity.getSerializedSnapshot()).isEqualTo(serializedSnapshot);
 	}
 
 	@Test
