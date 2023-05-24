@@ -8,7 +8,7 @@ public class ServiceConstants {
 	static final String PROBLEM_DURING_DIFF = "An error occured during diff of entityId '%s' looking at version '%s' and version '%s'!";
 	static final String ERROR_NOTE_NOT_FOUND = "Note with id '%s' not found";
 
-	static final String EVENT_LOG_CREATE_NOTE = "Notering har skapats.";
+	static final String EVENT_LOG_CREATE_NOTE = "Noteringen har skapats.";
 	static final String EVENT_LOG_UPDATE_NOTE = "Noteringen har uppdaterats.";
-	static final String EVENT_LOG_DELETE_NOTE = "Notering har raderats.";
+	static final String EVENT_LOG_DELETE_NOTE = "Noteringen har raderats.";
 }
