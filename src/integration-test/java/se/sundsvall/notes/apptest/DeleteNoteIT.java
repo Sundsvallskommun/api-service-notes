@@ -37,7 +37,6 @@ class DeleteNoteIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath("/notes/".concat(id))
 			.withHttpMethod(HttpMethod.DELETE)
-			.withHeader("sentbyuser", "adUser")
 			.withExpectedResponseStatus(HttpStatus.NO_CONTENT)
 			.sendRequestAndVerifyResponse();
 

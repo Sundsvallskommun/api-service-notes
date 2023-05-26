@@ -78,11 +78,11 @@ class RevisionServiceTest {
 		final var capturedRevisionEntity = revisionEntityCaptor.getValue();
 		assertThat(capturedRevisionEntity).isNotNull();
 		assertThat(capturedRevisionEntity.getVersion()).isEqualTo(lastRevisionVersion + 1);
-		assertThat(capturedRevisionEntity.getSerializedSnapshot()).isEqualTo(objectMapperSpy.writeValueAsString(noteEntity));
+		assertThat(capturedRevisionEntity.getSerializedSnapshot()).isEqualTo(serializedSnapshot);
 	}
 
 	@Test
-	void createRevisionNoPreviousRevisionExist() throws JsonProcessingException {
+	void createRevisionNoPreviousRevisionExist() {
 
 		// Arrange
 		final var noteEntity = createNoteEntity();
@@ -208,7 +208,7 @@ class RevisionServiceTest {
 	}
 
 	@Test
-	void diffWhenErrorOccur() throws JsonProcessingException {
+	void diffWhenErrorOccur() {
 
 		// Arrange
 		final var entityId = UUID.randomUUID().toString();
@@ -230,41 +230,11 @@ class RevisionServiceTest {
 
 		// Assert
 		assertThat(problem).isNotNull();
-		assertThat(problem.getMessage()).isEqualTo(String.format("Internal Server Error: An error occured during diff of entityId '%s' looking at version '%s' and version '%s'!", entityId, source, target));
+		assertThat(problem.getMessage()).isEqualTo(String.format("Internal Server Error: An error occurred during diff of entityId '%s' looking at version '%s' and version '%s'!", entityId, source, target));
 		assertThat(problem.getStatus()).isEqualTo(INTERNAL_SERVER_ERROR);
 
 		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, source);
 		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, target);
-	}
-
-	@Test
-	void getLatestRevision() {
-
-		// Arrange
-		final var entityId = UUID.randomUUID().toString();
-		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(any())).thenReturn(Optional.of(RevisionEntity.create().withEntityId(entityId)));
-
-		// Act
-		final var result = revisionService.getLatestNoteRevision(entityId);
-
-		// Assert
-		assertThat(result).isNotNull();
-		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(entityId);
-	}
-
-	@Test
-	void getLatestRevisionNotFound() {
-
-		// Arrange
-		final var entityId = UUID.randomUUID().toString();
-		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(any())).thenReturn(Optional.empty());
-
-		// Act
-		final var result = revisionService.getLatestNoteRevision(entityId);
-
-		// Assert
-		assertThat(result).isNull();
-		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(entityId);
 	}
 
 	private NoteEntity createNoteEntity() {

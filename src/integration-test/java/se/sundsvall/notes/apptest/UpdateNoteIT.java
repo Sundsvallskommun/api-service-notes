@@ -38,7 +38,6 @@ class UpdateNoteIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath("/notes/" + entityId)
 			.withHttpMethod(HttpMethod.PATCH)
-			.withHeader("sentbyuser", "adUser")
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.OK)
 			.withExpectedResponse("response.json")
