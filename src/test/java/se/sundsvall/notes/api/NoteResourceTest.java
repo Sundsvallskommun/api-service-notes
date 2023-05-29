@@ -1,18 +1,5 @@
 package se.sundsvall.notes.api;
 
-import static java.util.Optional.ofNullable;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.ALL;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -24,7 +11,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
@@ -32,6 +18,23 @@ import se.sundsvall.notes.api.model.FindNotesResponse;
 import se.sundsvall.notes.api.model.Note;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.service.NoteService;
+import se.sundsvall.notes.service.RevisionService;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static java.util.Optional.ofNullable;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.PATCH;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.ALL;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")
@@ -39,8 +42,15 @@ class NoteResourceTest {
 
 	private static final String PATH = "/notes";
 	private static final String MUNICIPALITY_ID = "2281";
+	private static final String KEY_CURRENT_REVISION = "x-current-revision";
+	private static final String KEY_CURRENT_VERSION = "x-current-version";
+	private static final String KEY_PREVIOUS_REVISION = "x-previous-revision";
+	private static final String KEY_PREVIOUS_VERSION = "x-previous-version";
 	@MockBean
 	private NoteService noteService;
+
+	@MockBean
+	private RevisionService revisionService;
 
 	@Autowired
 	private WebTestClient webTestClient;
@@ -73,6 +83,10 @@ class NoteResourceTest {
 
 		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(id);
 
+		when(revisionService.getRevisionHeaders(id, POST))
+			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
+				KEY_CURRENT_VERSION, "currentVersion"));
+
 		// Act
 		webTestClient.post().uri(PATH)
 			.contentType(APPLICATION_JSON)
@@ -80,6 +94,8 @@ class NoteResourceTest {
 			.exchange()
 			.expectStatus().isCreated()
 			.expectHeader().contentType(ALL)
+			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
+			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "currentVersion")
 			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
 
 		// Assert
@@ -106,6 +122,9 @@ class NoteResourceTest {
 			.withMunicipalityId(MUNICIPALITY_ID);
 
 		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(id);
+		when(revisionService.getRevisionHeaders(id, POST))
+			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
+				KEY_CURRENT_VERSION, "currentVersion"));
 
 		// Act
 		webTestClient.post().uri(PATH)
@@ -114,6 +133,8 @@ class NoteResourceTest {
 			.exchange()
 			.expectStatus().isCreated()
 			.expectHeader().contentType(ALL)
+			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
+			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "currentVersion")
 			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
 
 		// Assert
@@ -137,6 +158,11 @@ class NoteResourceTest {
 
 		final Note note = Note.create().withId(id);
 		when(noteService.updateNote(id, updateNoteRequest)).thenReturn(note);
+		when(revisionService.getRevisionHeaders(id, PATCH))
+			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
+				KEY_CURRENT_VERSION, "currentVersion",
+				KEY_PREVIOUS_REVISION, "previousRevision",
+				KEY_PREVIOUS_VERSION, "previousVersion"));
 
 		// Act
 		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
@@ -145,12 +171,17 @@ class NoteResourceTest {
 			.exchange()
 			.expectStatus().isOk()
 			.expectHeader().contentType(APPLICATION_JSON)
+			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
+			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "currentVersion")
+			.expectHeader().valueEquals(KEY_PREVIOUS_REVISION, "previousRevision")
+			.expectHeader().valueEquals(KEY_PREVIOUS_VERSION, "previousVersion")
 			.expectBody(Note.class)
 			.returnResult()
 			.getResponseBody();
 
 		// Assert
 		assertThat(response).isNotNull().isEqualTo(note);
+		verify(revisionService).getRevisionHeaders(id, PATCH);
 		verify(noteService).updateNote(id, updateNoteRequest);
 	}
 
@@ -160,10 +191,16 @@ class NoteResourceTest {
 		// Arrange
 		final var id = UUID.randomUUID().toString();
 
+		when(revisionService.getRevisionHeaders(id, DELETE))
+			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
+				KEY_CURRENT_VERSION, "currentVersion"));
+
 		// Act
 		webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isNoContent()
+			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
+			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "currentVersion")
 			.expectHeader().doesNotExist(CONTENT_TYPE);
 
 		// Assert

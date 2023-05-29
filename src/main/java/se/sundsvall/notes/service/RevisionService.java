@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.zalando.problem.Problem;
 import se.sundsvall.notes.api.model.DifferenceResponse;
@@ -19,11 +20,17 @@ import se.sundsvall.notes.integration.db.model.RevisionEntity;
 
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.flipkart.zjsonpatch.DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE;
 import static com.flipkart.zjsonpatch.DiffFlags.OMIT_VALUE_ON_REMOVE;
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.anyNull;
 import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 import static org.zalando.problem.Status.NOT_FOUND;
@@ -37,6 +44,14 @@ public class RevisionService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RevisionService.class);
 	private static final EnumSet<DiffFlags> DIFF_FLAGS = EnumSet.of(ADD_ORIGINAL_VALUE_ON_REPLACE, OMIT_VALUE_ON_REMOVE);
+
+	private static final String POST = "POST";
+	private static final String PATCH = "PATCH";
+	private static final String DELETE = "DELETE";
+	private static final String KEY_CURRENT_REVISION = "x-current-revision";
+	private static final String KEY_CURRENT_VERSION = "x-current-version";
+	private static final String KEY_PREVIOUS_VERSION = "x-previous-version";
+	private static final String KEY_PREVIOUS_REVISION = "x-previous-revision";
 
 	@Autowired
 	private RevisionRepository revisionRepository;
@@ -112,6 +127,10 @@ public class RevisionService {
 		return toRevisionList(revisionRepository.findAllByEntityIdOrderByVersion(noteEntityId));
 	}
 
+	public Map<String, String> getRevisionHeaders(final String noteEntityId, HttpMethod method) {
+		return getRevisionInfoMap(revisionRepository.findAllByEntityIdOrderByVersion(noteEntityId), method);
+	}
+
 	private String createRevision(final NoteEntity entity, final int version) {
 		return revisionRepository.save(RevisionEntity.create()
 			.withEntityId(entity.getId())
@@ -141,5 +160,63 @@ public class RevisionService {
 		}
 
 		return null;
+	}
+
+	private Map<String, String> getRevisionInfoMap(final List<RevisionEntity> revisionEntities, HttpMethod httpMethod) {
+
+		return switch (httpMethod.name()) {
+			case POST, DELETE -> getRevisionInfoMapCreateAndDelete(revisionEntities);
+			case PATCH -> getRevisionInfoMapUpdate(revisionEntities);
+			default -> emptyMap();
+		};
+	}
+
+	private Map<String, String> getRevisionInfoMapCreateAndDelete(final List<RevisionEntity> revisionEntityList) {
+
+		return ofNullable(revisionEntityList).orElse(emptyList()).stream()
+			.filter(Objects::nonNull)
+			.findFirst()
+			.map(revision -> Map.of(KEY_CURRENT_REVISION, revision.getId(),
+				KEY_CURRENT_VERSION, String.valueOf(revision.getVersion())))
+			.orElse(emptyMap());
+	}
+
+	private Map<String, String> getRevisionInfoMapUpdate(final List<RevisionEntity> revisionEntityList) {
+		final var currentRevision = getLatestNoteRevision(revisionEntityList);
+
+		final var previousRevision = ofNullable(currentRevision)
+			.map(revision -> getPreviousNoteRevision(revision.getId(), revisionEntityList)).orElse(null);
+
+		var result = ofNullable(currentRevision)
+			.map(revision -> Map.of(KEY_CURRENT_REVISION, revision.getId(),
+				KEY_CURRENT_VERSION, String.valueOf(revision.getVersion())))
+			.orElse(emptyMap());
+
+		if (previousRevision != null) {
+			var resultWithPrevious = new HashMap<>(result);
+			resultWithPrevious.put(KEY_PREVIOUS_REVISION, previousRevision.getId());
+			resultWithPrevious.put(KEY_PREVIOUS_VERSION, String.valueOf(previousRevision.getVersion()));
+			return resultWithPrevious;
+		}
+		return result;
+	}
+
+	private RevisionEntity getLatestNoteRevision(List<RevisionEntity> revisionEntities) {
+		final var noteId = ofNullable(revisionEntities).stream()
+			.flatMap(List::stream)
+			.map(RevisionEntity::getEntityId)
+			.findFirst()
+			.orElse(null);
+
+		return revisionRepository.findFirstByEntityIdOrderByVersionDesc(noteId)
+			.orElse(null);
+	}
+
+	private RevisionEntity getPreviousNoteRevision(String currentRevisionId, List<RevisionEntity> revisionEntities) {
+		return ofNullable(revisionEntities).stream()
+			.flatMap(List::stream)
+			.filter(revisionEntity -> !revisionEntity.getId().equals(currentRevisionId))
+			.findFirst()
+			.orElse(null);
 	}
 }
