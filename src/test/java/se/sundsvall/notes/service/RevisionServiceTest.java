@@ -252,14 +252,14 @@ class RevisionServiceTest {
 		final var id = UUID.randomUUID().toString();
 		final var noteEntityId = UUID.randomUUID().toString();
 
-		when(revisionRepositoryMock.findAllByEntityIdOrderByVersion(noteEntityId)).thenReturn(List.of(RevisionEntity.create().withId(id).withEntityId(noteEntityId).withVersion(version)));
+		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntityId)).thenReturn(Optional.of(RevisionEntity.create().withId(id).withEntityId(noteEntityId).withVersion(version)));
 
 		// Act
 		final var result = revisionService.getRevisionHeaders(noteEntityId, POST);
 
 		// Assert
 		assertThat(result).isNotNull().hasSize(2).extractingByKeys(KEY_CURRENT_VERSION, KEY_CURRENT_REVISION).containsExactly(String.valueOf(version), id);
-		verify(revisionRepositoryMock).findAllByEntityIdOrderByVersion(noteEntityId);
+		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntityId);
 	}
 
 	@Test
@@ -275,9 +275,8 @@ class RevisionServiceTest {
 		final var currentRevision = RevisionEntity.create().withId(idCurrentRevision).withEntityId(noteEntityId).withVersion(currentVersion);
 		final var previousRevision = RevisionEntity.create().withId(idPreviousRevision).withEntityId(noteEntityId).withVersion(previousVersion);
 
-		when(revisionRepositoryMock.findAllByEntityIdOrderByVersion(noteEntityId)).thenReturn(List.of(currentRevision, previousRevision));
-
 		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntityId)).thenReturn(Optional.of(currentRevision));
+		when(revisionRepositoryMock.findByEntityIdAndVersion(noteEntityId, previousVersion)).thenReturn(Optional.of(previousRevision));
 
 		// Act
 		final var result = revisionService.getRevisionHeaders(noteEntityId, PATCH);
@@ -285,7 +284,8 @@ class RevisionServiceTest {
 		// Assert
 		assertThat(result).isNotNull().hasSize(4).extractingByKeys(KEY_CURRENT_REVISION, KEY_CURRENT_VERSION, KEY_PREVIOUS_REVISION, KEY_PREVIOUS_VERSION)
 			.containsExactly(idCurrentRevision, String.valueOf(currentVersion), idPreviousRevision, String.valueOf(previousVersion));
-		verify(revisionRepositoryMock).findAllByEntityIdOrderByVersion(noteEntityId);
+		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntityId);
+		verify(revisionRepositoryMock).findByEntityIdAndVersion(noteEntityId, previousVersion);
 	}
 
 	@Test
@@ -296,14 +296,14 @@ class RevisionServiceTest {
 		final var id = UUID.randomUUID().toString();
 		final var noteEntityId = UUID.randomUUID().toString();
 
-		when(revisionRepositoryMock.findAllByEntityIdOrderByVersion(noteEntityId)).thenReturn(List.of(RevisionEntity.create().withId(id).withEntityId(noteEntityId).withVersion(version)));
+		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntityId)).thenReturn(Optional.of(RevisionEntity.create().withId(id).withEntityId(noteEntityId).withVersion(version)));
 
 		// Act
 		final var result = revisionService.getRevisionHeaders(noteEntityId, DELETE);
 
 		// Assert
 		assertThat(result).isNotNull().hasSize(2).extractingByKeys(KEY_CURRENT_VERSION, KEY_CURRENT_REVISION).containsExactly(String.valueOf(version), id);
-		verify(revisionRepositoryMock).findAllByEntityIdOrderByVersion(noteEntityId);
+		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntityId);
 	}
 
 	private NoteEntity createNoteEntity() {
