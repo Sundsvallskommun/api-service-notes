@@ -36,6 +36,7 @@ import se.sundsvall.notes.service.RevisionService;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.HttpMethod.DELETE;
@@ -46,6 +47,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 import static org.springframework.http.ResponseEntity.noContent;
 import static org.springframework.http.ResponseEntity.ok;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_NOTE;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_REVISION_ID;
 
 @RestController
 @Validated
@@ -86,10 +89,15 @@ public class NotesResource {
 	public ResponseEntity<Note> updateNote(
 		@Parameter(name = "id", description = "Note ID", example = "b82bd8ac-1507-4d9a-958d-369261eecc15") @ValidUuid @PathVariable final String id,
 		@Valid @NotNull @RequestBody final UpdateNoteRequest body) {
+		final var noteMap = noteService.updateNote(id, body);
+
+		// If revision ID is present, it means that a new revision was created
+		final var headers = isNotEmpty((String) noteMap.get(KEY_REVISION_ID)) ? createHeaders(revisionService.getRevisionHeaders(id, PATCH)) : new HttpHeaders();
+
 		return ResponseEntity
 			.ok()
-			.headers(createHeaders(revisionService.getRevisionHeaders(id, PATCH)))
-			.body(noteService.updateNote(id, body));
+			.headers(headers)
+			.body((Note) noteMap.get(KEY_NOTE));
 	}
 
 	@GetMapping(path = "/{id}", produces = { APPLICATION_JSON_VALUE, APPLICATION_PROBLEM_JSON_VALUE })
@@ -131,7 +139,7 @@ public class NotesResource {
 
 	private HttpHeaders createHeaders(Map<String, String> headers) {
 		var httpHeaders = new HttpHeaders();
-		headers.entrySet().forEach(entry -> httpHeaders.add(entry.getKey(), entry.getValue()));
+		headers.forEach(httpHeaders::add);
 		return httpHeaders;
 	}
 

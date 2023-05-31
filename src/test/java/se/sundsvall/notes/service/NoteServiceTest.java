@@ -32,8 +32,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_NOTE;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_REVISION_ID;
 
 @ExtendWith(MockitoExtension.class)
 class NoteServiceTest {
@@ -73,27 +76,34 @@ class NoteServiceTest {
 	}
 
 	@Test
-	void createNoteNoUserInHeader() {
+	void updateNoteNoRevisionCreated() {
+
 		final var id = UUID.randomUUID().toString();
-		final var createNoteRequestMock = Mockito.mock(CreateNoteRequest.class);
+		final var updateNoteRequestMock = Mockito.mock(UpdateNoteRequest.class);
 		final var noteEntityMock = Mockito.mock(NoteEntity.class);
+		final var noteMock = Mockito.mock(Note.class);
 
 		// Mock
-		when(noteRepositoryMock.save(any())).thenReturn(noteEntityMock);
-		when(noteEntityMock.getId()).thenReturn(id);
+		when(noteRepositoryMock.findById(id)).thenReturn(Optional.of(noteEntityMock));
+		when(revisionServiceMock.createRevision(same(noteEntityMock))).thenReturn(null);
+
 
 		try (MockedStatic<NoteMapper> mapperMock = Mockito.mockStatic(NoteMapper.class)) {
-			mapperMock.when(() -> NoteMapper.toNoteEntity(any())).thenReturn(noteEntityMock);
+			mapperMock.when(() -> NoteMapper.toNoteEntity(any(NoteEntity.class), any(UpdateNoteRequest.class))).thenReturn(noteEntityMock);
+			mapperMock.when(() -> NoteMapper.toNote(any(NoteEntity.class))).thenReturn(noteMock);
 
 			// Call
-			final var result = noteService.createNote(createNoteRequestMock);
+			final var result = noteService.updateNote(id, updateNoteRequestMock);
 
 			// Verification
-			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(createNoteRequestMock)));
-			verify(noteRepositoryMock).save(same(noteEntityMock));
+			verify(noteRepositoryMock).findById(id);
+			verify(noteRepositoryMock).flush();
 			verify(revisionServiceMock).createRevision(same(noteEntityMock));
-			verify(noteEntityMock).getId();
-			assertThat(result).isEqualTo(id);
+			verifyNoMoreInteractions(revisionServiceMock);
+			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(noteEntityMock), same(updateNoteRequestMock)));
+			mapperMock.verify(() -> NoteMapper.toNote(same(noteEntityMock)));
+
+			assertThat(result).isNotNull().hasSize(2).extractingByKeys(KEY_NOTE, KEY_REVISION_ID).containsExactly(noteMock, "");
 		}
 	}
 
@@ -101,12 +111,14 @@ class NoteServiceTest {
 	void updateNote() {
 
 		final var id = UUID.randomUUID().toString();
+		final var revisionId = UUID.randomUUID().toString();
 		final var updateNoteRequestMock = Mockito.mock(UpdateNoteRequest.class);
 		final var noteEntityMock = Mockito.mock(NoteEntity.class);
 		final var noteMock = Mockito.mock(Note.class);
 
 		// Mock
 		when(noteRepositoryMock.findById(id)).thenReturn(Optional.of(noteEntityMock));
+		when(revisionServiceMock.createRevision(same(noteEntityMock))).thenReturn(revisionId);
 
 		try (MockedStatic<NoteMapper> mapperMock = Mockito.mockStatic(NoteMapper.class)) {
 			mapperMock.when(() -> NoteMapper.toNoteEntity(any(NoteEntity.class), any(UpdateNoteRequest.class))).thenReturn(noteEntityMock);
@@ -122,36 +134,7 @@ class NoteServiceTest {
 			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(noteEntityMock), same(updateNoteRequestMock)));
 			mapperMock.verify(() -> NoteMapper.toNote(same(noteEntityMock)));
 
-			assertThat(result).isSameAs(noteMock);
-		}
-	}
-
-	@Test
-	void updateNoteNoUserInHeader() {
-
-		final var id = UUID.randomUUID().toString();
-		final var updateNoteRequestMock = Mockito.mock(UpdateNoteRequest.class);
-		final var noteEntityMock = Mockito.mock(NoteEntity.class);
-		final var noteMock = Mockito.mock(Note.class);
-
-		// Mock
-		when(noteRepositoryMock.findById(id)).thenReturn(Optional.of(noteEntityMock));
-
-		try (MockedStatic<NoteMapper> mapperMock = Mockito.mockStatic(NoteMapper.class)) {
-			mapperMock.when(() -> NoteMapper.toNoteEntity(any(NoteEntity.class), any(UpdateNoteRequest.class))).thenReturn(noteEntityMock);
-			mapperMock.when(() -> NoteMapper.toNote(any(NoteEntity.class))).thenReturn(noteMock);
-
-			// Call
-			final var result = noteService.updateNote(id, updateNoteRequestMock);
-
-			// Verification
-			verify(noteRepositoryMock).findById(id);
-			verify(noteRepositoryMock).flush();
-			verify(revisionServiceMock).createRevision(same(noteEntityMock));
-			mapperMock.verify(() -> NoteMapper.toNoteEntity(same(noteEntityMock), same(updateNoteRequestMock)));
-			mapperMock.verify(() -> NoteMapper.toNote(same(noteEntityMock)));
-
-			assertThat(result).isSameAs(noteMock);
+			assertThat(result).isNotNull().hasSize(2).extractingByKeys(KEY_NOTE, KEY_REVISION_ID).containsExactly(noteMock, revisionId);
 		}
 	}
 

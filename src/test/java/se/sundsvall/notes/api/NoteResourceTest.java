@@ -35,6 +35,8 @@ import static org.springframework.http.HttpMethod.PATCH;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_NOTE;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_REVISION_ID;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")
@@ -157,7 +159,12 @@ class NoteResourceTest {
 			.withExternalCaseId("externalCaseId");
 
 		final Note note = Note.create().withId(id);
-		when(noteService.updateNote(id, updateNoteRequest)).thenReturn(note);
+		when(noteService.updateNote(id, updateNoteRequest)).thenReturn(Map.of(KEY_NOTE, note, KEY_REVISION_ID, "revisionId"));
+		when(revisionService.getRevisionHeaders(id, PATCH))
+			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
+				KEY_CURRENT_VERSION, "currentVersion",
+				KEY_PREVIOUS_REVISION, "previousRevision",
+				KEY_PREVIOUS_VERSION, "previousVersion"));
 		when(revisionService.getRevisionHeaders(id, PATCH))
 			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
 				KEY_CURRENT_VERSION, "currentVersion",

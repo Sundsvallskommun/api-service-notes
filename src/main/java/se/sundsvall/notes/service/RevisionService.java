@@ -140,7 +140,7 @@ public class RevisionService {
 			.withVersion(version)).getId();
 	}
 
-	private boolean jsonEquals(final String json1, final String json2) {
+	public boolean jsonEquals(final String json1, final String json2) {
 		if (anyNull(json1, json2)) {
 			return false;
 		}

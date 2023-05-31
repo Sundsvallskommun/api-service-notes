@@ -15,11 +15,15 @@ import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static org.zalando.problem.Status.NOT_FOUND;
 import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_NOTE;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_REVISION_ID;
 import static se.sundsvall.notes.service.mapper.NoteMapper.toNote;
 import static se.sundsvall.notes.service.mapper.NoteMapper.toNoteEntity;
 import static se.sundsvall.notes.service.mapper.NoteMapper.toNotes;
@@ -43,15 +47,15 @@ public class NoteService {
 		return noteEntity.getId();
 	}
 
-	public Note updateNote(final String id, final UpdateNoteRequest updateNoteRequest) {
+	public Map<String, Object> updateNote(final String id, final UpdateNoteRequest updateNoteRequest) {
 		final var noteEntity = noteRepository.findById(id).orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
 
 		toNoteEntity(noteEntity, updateNoteRequest);
 		noteRepository.flush();
 
-		revisionService.createRevision(noteEntity);
+		final var revisionId = revisionService.createRevision(noteEntity);
 
-		return toNote(noteEntity);
+		return Map.of(KEY_NOTE, toNote(noteEntity), KEY_REVISION_ID, ofNullable(revisionId).orElse(""));
 	}
 
 	public Note getNoteById(final String id) {
