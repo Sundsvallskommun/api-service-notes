@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -260,6 +261,7 @@ class RevisionServiceTest {
 		// Assert
 		assertThat(result).isNotNull().hasSize(2).extractingByKeys(KEY_CURRENT_VERSION, KEY_CURRENT_REVISION).containsExactly(String.valueOf(version), id);
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntityId);
+		verify(revisionRepositoryMock, never()).findByEntityIdAndVersion(any(), anyInt());
 	}
 
 	@Test
@@ -304,6 +306,7 @@ class RevisionServiceTest {
 		// Assert
 		assertThat(result).isNotNull().hasSize(2).extractingByKeys(KEY_CURRENT_VERSION, KEY_CURRENT_REVISION).containsExactly(String.valueOf(version), id);
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntityId);
+		verify(revisionRepositoryMock, never()).findByEntityIdAndVersion(any(), anyInt());
 	}
 
 	private NoteEntity createNoteEntity() {
