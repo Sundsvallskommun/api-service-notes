@@ -15,6 +15,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.zalando.problem.ThrowableProblem;
 import se.sundsvall.notes.api.model.Operation;
+import se.sundsvall.notes.api.model.Revision;
 import se.sundsvall.notes.integration.db.RevisionRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
@@ -29,22 +30,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.PATCH;
-import static org.springframework.http.HttpMethod.POST;
 import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 
 @ExtendWith(MockitoExtension.class)
 class RevisionServiceTest {
 
-	private static final String KEY_CURRENT_VERSION = "x-current-version";
-	private static final String KEY_CURRENT_REVISION = "x-current-revision";
-	private static final String KEY_PREVIOUS_VERSION = "x-previous-version";
-	private static final String KEY_PREVIOUS_REVISION = "x-previous-revision";
 	@Mock
 	private RevisionRepository revisionRepositoryMock;
 
@@ -70,16 +63,18 @@ class RevisionServiceTest {
 		final var revisionEntityId = UUID.randomUUID().toString();
 		final var lastRevisionVersion = 3;
 		final var serializedSnapshot = objectMapperSpy.writeValueAsString(noteEntity);
+		final var currentRevisionEntity = RevisionEntity.create().withEntityId(noteEntity.getId()).withId(revisionEntityId).withVersion(lastRevisionVersion + 1);
+		final var expectedRevision = Revision.create().withId(revisionEntityId).withVersion(lastRevisionVersion + 1).withEntityId(noteEntity.getId());
 
-		when(revisionRepositoryMock.save(any())).thenReturn(RevisionEntity.create().withId(revisionEntityId));
+		when(revisionRepositoryMock.save(any())).thenReturn(currentRevisionEntity);
 		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId()))
 			.thenReturn(Optional.of(RevisionEntity.create().withVersion(lastRevisionVersion)));
 
 		// Act
-		final var result = revisionService.createRevision(noteEntity);
+		final var createdRevision = revisionService.createRevision(noteEntity);
 
 		// Assert
-		assertThat(result).isEqualTo(revisionEntityId);
+		assertThat(createdRevision).isNotNull().isEqualTo(expectedRevision);
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
 		verify(revisionRepositoryMock).save(revisionEntityCaptor.capture());
 
@@ -95,15 +90,17 @@ class RevisionServiceTest {
 		// Arrange
 		final var noteEntity = createNoteEntity();
 		final var revisionEntityId = UUID.randomUUID().toString();
+		final var revisionEntity = RevisionEntity.create().withEntityId(noteEntity.getId()).withId(revisionEntityId).withVersion(0);
+		final var expectedRevision = Revision.create().withId(revisionEntityId).withEntityId(noteEntity.getId()).withVersion(0);
 
-		when(revisionRepositoryMock.save(any())).thenReturn(RevisionEntity.create().withId(revisionEntityId));
+		when(revisionRepositoryMock.save(any())).thenReturn(revisionEntity);
 		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId())).thenReturn(empty());
 
 		// Act
-		final var result = revisionService.createRevision(noteEntity);
+		final var createdRevision = revisionService.createRevision(noteEntity);
 
 		// Assert
-		assertThat(result).isEqualTo(revisionEntityId);
+		assertThat(createdRevision).isNotNull().isEqualTo(expectedRevision);
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
 		verify(revisionRepositoryMock).save(revisionEntityCaptor.capture());
 
@@ -123,10 +120,10 @@ class RevisionServiceTest {
 			.thenReturn(Optional.of(RevisionEntity.create().withSerializedSnapshot(serializedSnapshot)));
 
 		// Act
-		final var result = revisionService.createRevision(noteEntity);
+		final var createdRevision = revisionService.createRevision(noteEntity);
 
 		// Assert
-		assertThat(result).isNull();
+		assertThat(createdRevision).isNull();
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
 		verify(revisionRepositoryMock, never()).save(any());
 
@@ -141,16 +138,18 @@ class RevisionServiceTest {
 		final var lastRevisionVersion = 3;
 		final var invalidJson = "hello";
 		final var serializedSnapshot = objectMapperSpy.writeValueAsString(noteEntity);
+		final var currentRevisionEntity = RevisionEntity.create().withEntityId(noteEntity.getId()).withId(revisionEntityId).withVersion(lastRevisionVersion + 1);
+		final var expectedRevision = Revision.create().withId(revisionEntityId).withVersion(lastRevisionVersion + 1).withEntityId(noteEntity.getId());
 
-		when(revisionRepositoryMock.save(any())).thenReturn(RevisionEntity.create().withId(revisionEntityId));
+		when(revisionRepositoryMock.save(any())).thenReturn(currentRevisionEntity);
 		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId()))
 			.thenReturn(Optional.of(RevisionEntity.create().withVersion(lastRevisionVersion).withSerializedSnapshot(invalidJson)));
 
 		// Act
-		final var result = revisionService.createRevision(noteEntity);
+		final var createdRevision = revisionService.createRevision(noteEntity);
 
 		// Assert
-		assertThat(result).isEqualTo(revisionEntityId);
+		assertThat(createdRevision).isNotNull().isEqualTo(expectedRevision);
 		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
 		verify(revisionRepositoryMock).save(revisionEntityCaptor.capture());
 
@@ -243,70 +242,6 @@ class RevisionServiceTest {
 
 		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, source);
 		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, target);
-	}
-
-	@Test
-	void getRevisionHeadersPost() {
-
-		// Arrange
-		final var version = 1;
-		final var id = UUID.randomUUID().toString();
-		final var noteEntityId = UUID.randomUUID().toString();
-
-		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntityId)).thenReturn(Optional.of(RevisionEntity.create().withId(id).withEntityId(noteEntityId).withVersion(version)));
-
-		// Act
-		final var result = revisionService.getRevisionHeaders(noteEntityId, POST);
-
-		// Assert
-		assertThat(result).isNotNull().hasSize(2).extractingByKeys(KEY_CURRENT_VERSION, KEY_CURRENT_REVISION).containsExactly(String.valueOf(version), id);
-		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntityId);
-		verify(revisionRepositoryMock, never()).findByEntityIdAndVersion(any(), anyInt());
-	}
-
-	@Test
-	void getRevisionHeadersPatch() {
-
-		// Arrange
-		final var previousVersion = 0;
-		final var currentVersion = 1;
-		final var idPreviousRevision = UUID.randomUUID().toString();
-		final var idCurrentRevision = UUID.randomUUID().toString();
-		final var noteEntityId = UUID.randomUUID().toString();
-
-		final var currentRevision = RevisionEntity.create().withId(idCurrentRevision).withEntityId(noteEntityId).withVersion(currentVersion);
-		final var previousRevision = RevisionEntity.create().withId(idPreviousRevision).withEntityId(noteEntityId).withVersion(previousVersion);
-
-		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntityId)).thenReturn(Optional.of(currentRevision));
-		when(revisionRepositoryMock.findByEntityIdAndVersion(noteEntityId, previousVersion)).thenReturn(Optional.of(previousRevision));
-
-		// Act
-		final var result = revisionService.getRevisionHeaders(noteEntityId, PATCH);
-
-		// Assert
-		assertThat(result).isNotNull().hasSize(4).extractingByKeys(KEY_CURRENT_REVISION, KEY_CURRENT_VERSION, KEY_PREVIOUS_REVISION, KEY_PREVIOUS_VERSION)
-			.containsExactly(idCurrentRevision, String.valueOf(currentVersion), idPreviousRevision, String.valueOf(previousVersion));
-		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntityId);
-		verify(revisionRepositoryMock).findByEntityIdAndVersion(noteEntityId, previousVersion);
-	}
-
-	@Test
-	void getRevisionHeadersDelete() {
-
-		// Arrange
-		final var version = 1;
-		final var id = UUID.randomUUID().toString();
-		final var noteEntityId = UUID.randomUUID().toString();
-
-		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntityId)).thenReturn(Optional.of(RevisionEntity.create().withId(id).withEntityId(noteEntityId).withVersion(version)));
-
-		// Act
-		final var result = revisionService.getRevisionHeaders(noteEntityId, DELETE);
-
-		// Assert
-		assertThat(result).isNotNull().hasSize(2).extractingByKeys(KEY_CURRENT_VERSION, KEY_CURRENT_REVISION).containsExactly(String.valueOf(version), id);
-		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntityId);
-		verify(revisionRepositoryMock, never()).findByEntityIdAndVersion(any(), anyInt());
 	}
 
 	private NoteEntity createNoteEntity() {

@@ -10,6 +10,8 @@ import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.integration.db.NoteRepository;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -38,6 +40,8 @@ class DeleteNoteIT extends AbstractAppTest {
 			.withServicePath("/notes/".concat(id))
 			.withHttpMethod(HttpMethod.DELETE)
 			.withExpectedResponseStatus(HttpStatus.NO_CONTENT)
+			.withExpectedResponseHeader("x-current-revision", List.of("2103ac13-1691-4017-b6c6-78fa75ff68fc"))
+			.withExpectedResponseHeader("x-current-version", List.of("1"))
 			.sendRequestAndVerifyResponse();
 
 		assertThat(noteRepository.findById(id)).isNotPresent();

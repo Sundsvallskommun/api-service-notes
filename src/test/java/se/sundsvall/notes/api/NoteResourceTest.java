@@ -16,9 +16,10 @@ import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.api.model.FindNotesResponse;
 import se.sundsvall.notes.api.model.Note;
+import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.api.model.RevisionInformation;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.service.NoteService;
-import se.sundsvall.notes.service.RevisionService;
 
 import java.util.List;
 import java.util.Map;
@@ -30,13 +31,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.PATCH;
-import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_NOTE;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_REVISION_ID;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")
@@ -50,9 +46,6 @@ class NoteResourceTest {
 	private static final String KEY_PREVIOUS_VERSION = "x-previous-version";
 	@MockBean
 	private NoteService noteService;
-
-	@MockBean
-	private RevisionService revisionService;
 
 	@Autowired
 	private WebTestClient webTestClient;
@@ -83,11 +76,9 @@ class NoteResourceTest {
 			.withRole("role")
 			.withMunicipalityId(MUNICIPALITY_ID);
 
-		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(id);
-
-		when(revisionService.getRevisionHeaders(id, POST))
-			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
-				KEY_CURRENT_VERSION, "currentVersion"));
+		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(RevisionInformation.create()
+			.withNote(Note.create().withId(id))
+			.withCurrentRevision(Revision.create().withId("currentRevision").withVersion(0)));
 
 		// Act
 		webTestClient.post().uri(PATH)
@@ -97,7 +88,7 @@ class NoteResourceTest {
 			.expectStatus().isCreated()
 			.expectHeader().contentType(ALL)
 			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
-			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "currentVersion")
+			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "0")
 			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
 
 		// Assert
@@ -123,10 +114,9 @@ class NoteResourceTest {
 			.withRole("role")
 			.withMunicipalityId(MUNICIPALITY_ID);
 
-		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(id);
-		when(revisionService.getRevisionHeaders(id, POST))
-			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
-				KEY_CURRENT_VERSION, "currentVersion"));
+		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(RevisionInformation.create()
+			.withNote(Note.create().withId(id))
+			.withCurrentRevision(Revision.create().withId("currentRevision").withVersion(0)));
 
 		// Act
 		webTestClient.post().uri(PATH)
@@ -136,7 +126,7 @@ class NoteResourceTest {
 			.expectStatus().isCreated()
 			.expectHeader().contentType(ALL)
 			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
-			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "currentVersion")
+			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "0")
 			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
 
 		// Assert
@@ -158,18 +148,14 @@ class NoteResourceTest {
 			.withCaseLink("caseLink")
 			.withExternalCaseId("externalCaseId");
 
+		final var currentRevision = Revision.create().withId("currentRevision").withVersion(1);
+		final var previousRevision = Revision.create().withId("previousRevision").withVersion(0);
+
 		final Note note = Note.create().withId(id);
-		when(noteService.updateNote(id, updateNoteRequest)).thenReturn(Map.of(KEY_NOTE, note, KEY_REVISION_ID, "revisionId"));
-		when(revisionService.getRevisionHeaders(id, PATCH))
-			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
-				KEY_CURRENT_VERSION, "currentVersion",
-				KEY_PREVIOUS_REVISION, "previousRevision",
-				KEY_PREVIOUS_VERSION, "previousVersion"));
-		when(revisionService.getRevisionHeaders(id, PATCH))
-			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
-				KEY_CURRENT_VERSION, "currentVersion",
-				KEY_PREVIOUS_REVISION, "previousRevision",
-				KEY_PREVIOUS_VERSION, "previousVersion"));
+
+		when(noteService.updateNote(id, updateNoteRequest)).thenReturn(RevisionInformation.create().withNote(note)
+			.withCurrentRevision(currentRevision)
+			.withPreviousRevision(previousRevision));
 
 		// Act
 		final var response = webTestClient.patch().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
@@ -179,16 +165,15 @@ class NoteResourceTest {
 			.expectStatus().isOk()
 			.expectHeader().contentType(APPLICATION_JSON)
 			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
-			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "currentVersion")
+			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "1")
 			.expectHeader().valueEquals(KEY_PREVIOUS_REVISION, "previousRevision")
-			.expectHeader().valueEquals(KEY_PREVIOUS_VERSION, "previousVersion")
+			.expectHeader().valueEquals(KEY_PREVIOUS_VERSION, "0")
 			.expectBody(Note.class)
 			.returnResult()
 			.getResponseBody();
 
 		// Assert
 		assertThat(response).isNotNull().isEqualTo(note);
-		verify(revisionService).getRevisionHeaders(id, PATCH);
 		verify(noteService).updateNote(id, updateNoteRequest);
 	}
 
@@ -198,16 +183,15 @@ class NoteResourceTest {
 		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		when(revisionService.getRevisionHeaders(id, DELETE))
-			.thenReturn(Map.of(KEY_CURRENT_REVISION, "currentRevision",
-				KEY_CURRENT_VERSION, "currentVersion"));
+		when(noteService.deleteNoteById(id)).thenReturn(RevisionInformation.create()
+			.withCurrentRevision(Revision.create().withId("currentRevision").withVersion(1)));
 
 		// Act
 		webTestClient.delete().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
 			.exchange()
 			.expectStatus().isNoContent()
 			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
-			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "currentVersion")
+			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "1")
 			.expectHeader().doesNotExist(CONTENT_TYPE);
 
 		// Assert

@@ -29,26 +29,22 @@ import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.api.model.FindNotesResponse;
 import se.sundsvall.notes.api.model.Note;
+import se.sundsvall.notes.api.model.RevisionInformation;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.service.NoteService;
-import se.sundsvall.notes.service.RevisionService;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static java.util.Optional.ofNullable;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpHeaders.LOCATION;
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.PATCH;
-import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.ALL_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 import static org.springframework.http.ResponseEntity.noContent;
 import static org.springframework.http.ResponseEntity.ok;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_NOTE;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_REVISION_ID;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_REVISION;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_VERSION;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_REVISION;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_VERSION;
 
 @RestController
 @Validated
@@ -59,24 +55,22 @@ public class NotesResource {
 	@Autowired
 	private NoteService noteService;
 
-	@Autowired
-	private RevisionService revisionService;
-
 	@PostMapping(consumes = APPLICATION_JSON_VALUE, produces = {ALL_VALUE, APPLICATION_PROBLEM_JSON_VALUE})
 	@Operation(summary = "Create new note")
 	@ApiResponse(responseCode = "201", headers = @Header(name = LOCATION, schema = @Schema(type = "string")), description = "Successful operation", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = Void.class)))
 	@ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(oneOf = {Problem.class, ConstraintViolationProblem.class})))
 	@ApiResponse(responseCode = "500", description = "Internal Server error", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 	public ResponseEntity<Void> createNote(final UriComponentsBuilder uriComponentsBuilder, @Valid @NotNull @RequestBody final CreateNoteRequest body) {
-		final var id = noteService.createNote(body);
+		final var revisionInformation = noteService.createNote(body);
 
-		var headers = revisionService.getRevisionHeaders(id, POST);
-		var mapOfHeaders = new HashMap<>(headers);
-		mapOfHeaders.put(CONTENT_TYPE, ALL_VALUE);
+		final var headers = new HttpHeaders();
+		headers.add(CONTENT_TYPE, ALL_VALUE);
+
+		final var id = ofNullable(revisionInformation.getNote()).map(Note::getId).orElse(null);
 
 		return ResponseEntity
 			.created(uriComponentsBuilder.path("/notes/{id}").buildAndExpand(id).toUri())
-			.headers(createHeaders(mapOfHeaders))
+			.headers(createRevisionHeaders(revisionInformation, headers))
 			.build();
 	}
 
@@ -89,15 +83,16 @@ public class NotesResource {
 	public ResponseEntity<Note> updateNote(
 		@Parameter(name = "id", description = "Note ID", example = "b82bd8ac-1507-4d9a-958d-369261eecc15") @ValidUuid @PathVariable final String id,
 		@Valid @NotNull @RequestBody final UpdateNoteRequest body) {
-		final var noteMap = noteService.updateNote(id, body);
+		final var revisionInformation = noteService.updateNote(id, body);
 
-		// If revision ID is present, it means that a new revision was created
-		final var headers = isNotEmpty((String) noteMap.get(KEY_REVISION_ID)) ? createHeaders(revisionService.getRevisionHeaders(id, PATCH)) : new HttpHeaders();
+		if (revisionInformation.isNewRevisionCreated()) {
+			return ResponseEntity
+				.ok()
+				.headers(createRevisionHeaders(revisionInformation, null))
+				.body(revisionInformation.getNote());
+		}
 
-		return ResponseEntity
-			.ok()
-			.headers(headers)
-			.body((Note) noteMap.get(KEY_NOTE));
+		return ResponseEntity.ok().body(revisionInformation.getNote());
 	}
 
 	@GetMapping(path = "/{id}", produces = { APPLICATION_JSON_VALUE, APPLICATION_PROBLEM_JSON_VALUE })
@@ -131,16 +126,28 @@ public class NotesResource {
 	public ResponseEntity<Void> deleteNoteById(
 		@Parameter(name = "id", description = "Note ID", example = "b82bd8ac-1507-4d9a-958d-369261eecc15") @ValidUuid @PathVariable final String id) {
 
-		noteService.deleteNoteById(id);
+		final var revisionInformation = noteService.deleteNoteById(id);
+
 		return noContent()
-			.headers(createHeaders(revisionService.getRevisionHeaders(id, DELETE)))
+			.headers(createRevisionHeaders(revisionInformation, null))
 			.build();
 	}
 
-	private HttpHeaders createHeaders(Map<String, String> headers) {
+	private HttpHeaders createRevisionHeaders(RevisionInformation revisionInformation, HttpHeaders additionalHeaders) {
 		var httpHeaders = new HttpHeaders();
-		headers.forEach(httpHeaders::add);
+
+		ofNullable(revisionInformation.getCurrentRevision()).ifPresent(revision -> {
+			httpHeaders.add(KEY_CURRENT_REVISION, revision.getId());
+			httpHeaders.add(KEY_CURRENT_VERSION, revision.getVersion().toString());
+		});
+
+		ofNullable(revisionInformation.getPreviousRevision()).ifPresent(revision -> {
+			httpHeaders.add(KEY_PREVIOUS_REVISION, revision.getId());
+			httpHeaders.add(KEY_PREVIOUS_VERSION, revision.getVersion().toString());
+		});
+
+		ofNullable(additionalHeaders).ifPresent(httpHeaders::putAll);
+
 		return httpHeaders;
 	}
-
 }
