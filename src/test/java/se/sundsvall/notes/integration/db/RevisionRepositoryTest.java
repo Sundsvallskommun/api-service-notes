@@ -104,21 +104,21 @@ class RevisionRepositoryTest {
 	void findAllByEntityId() {
 
 		// Setup
-		final var revisionEntityList = repository.findAllByEntityIdOrderByVersion(ENTITY_ID_2);
+		final var revisionEntityList = repository.findAllByEntityIdOrderByVersionDesc(ENTITY_ID_2);
 
 		assertThat(revisionEntityList)
 			.isNotEmpty()
 			.extracting(RevisionEntity::getEntityId, RevisionEntity::getVersion)
 			.containsExactly(
-				tuple(ENTITY_ID_2, 11),
-				tuple(ENTITY_ID_2, 12));
+				tuple(ENTITY_ID_2, 12),
+				tuple(ENTITY_ID_2, 11));
 	}
 
 	@Test
 	void findAllByEntityIdNotFound() {
 
 		// Setup
-		final var revisionEntityList = repository.findAllByEntityIdOrderByVersion("not-existing");
+		final var revisionEntityList = repository.findAllByEntityIdOrderByVersionDesc("not-existing");
 
 		assertThat(revisionEntityList).isEmpty();
 	}

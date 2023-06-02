@@ -11,6 +11,8 @@ import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.api.model.FindNotesResponse;
 import se.sundsvall.notes.api.model.MetaData;
 import se.sundsvall.notes.api.model.Note;
+import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.api.model.RevisionInformation;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
 
@@ -34,24 +36,34 @@ public class NoteService {
 	@Autowired
 	private RevisionService revisionService;
 
-	public String createNote(final CreateNoteRequest createNoteRequest) {
+	public RevisionInformation createNote(final CreateNoteRequest createNoteRequest) {
 		final var noteEntity = noteRepository.save(toNoteEntity(createNoteRequest));
 
 		// Create revision
-		revisionService.createRevision(noteEntity);
+		final var currentRevision = revisionService.createRevision(noteEntity);
 
-		return noteEntity.getId();
+		return RevisionInformation.create()
+			.withNote(toNote(noteEntity))
+			.withCurrentRevision(currentRevision);
 	}
 
-	public Note updateNote(final String id, final UpdateNoteRequest updateNoteRequest) {
+	public RevisionInformation updateNote(final String id, final UpdateNoteRequest updateNoteRequest) {
 		final var noteEntity = noteRepository.findById(id).orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
 
 		toNoteEntity(noteEntity, updateNoteRequest);
 		noteRepository.flush();
 
-		revisionService.createRevision(noteEntity);
+		// Create revision
+		final var currentRevision = revisionService.createRevision(noteEntity);
 
-		return toNote(noteEntity);
+		var revisionInformation = RevisionInformation.create()
+			.withNote(toNote(noteEntity))
+			.withCurrentRevision(currentRevision);
+
+		if (revisionInformation.isNewRevisionCreated()) {
+			revisionInformation.setPreviousRevision(getPreviousRevision(noteEntity.getId(), currentRevision));
+		}
+		return revisionInformation;
 	}
 
 	public Note getNoteById(final String id) {
@@ -77,11 +89,21 @@ public class NoteService {
 			.withNotes(notes);
 	}
 
-	public void deleteNoteById(final String id) {
+	public RevisionInformation deleteNoteById(final String id) {
 		if (!noteRepository.existsById(id)) {
 			throw Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id));
 		}
 
 		noteRepository.deleteById(id);
+
+		final var currentRevision = revisionService.getRevisions(id).stream().findFirst().orElse(null);
+
+		return RevisionInformation.create()
+			.withCurrentRevision(currentRevision);
+	}
+
+	private Revision getPreviousRevision(final String noteEntityId, final Revision currentRevision) {
+		return revisionService.getRevisions(noteEntityId).stream()
+			.filter(revision -> !revision.getId().equals(currentRevision.getId())).findFirst().orElse(null);
 	}
 }

@@ -29,6 +29,7 @@ import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 import static org.zalando.problem.Status.NOT_FOUND;
 import static se.sundsvall.notes.service.ServiceConstants.PROBLEM_DURING_DIFF;
 import static se.sundsvall.notes.service.ServiceConstants.REVISION_NOT_FOUND_FOR_ID_AND_VERSION;
+import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevision;
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionList;
 
 @Service
@@ -87,9 +88,9 @@ public class RevisionService {
 	 * - no previous revisions exist for the provided entity.
 	 *
 	 * @param entity the entity that will have a new revision.
-	 * @return the id (uuid) of the created revision.
+	 * @return the created revision.
 	 */
-	public String createRevision(final NoteEntity entity) {
+	public Revision createRevision(final NoteEntity entity) {
 
 		final var lastRevision = revisionRepository.findFirstByEntityIdOrderByVersionDesc(entity.getId());
 
@@ -101,23 +102,23 @@ public class RevisionService {
 			}
 
 			// Create revision <lastRevision.version + 1>
-			return createRevision(entity, lastRevision.get().getVersion() + 1);
+			return toRevision(createRevision(entity, lastRevision.get().getVersion() + 1));
 		}
 
 		// No previous revisions exist. Create revision 0
-		return createRevision(entity, 0);
+		return toRevision(createRevision(entity, 0));
 	}
 
 	public List<Revision> getRevisions(final String noteEntityId) {
-		return toRevisionList(revisionRepository.findAllByEntityIdOrderByVersion(noteEntityId));
+		return toRevisionList(revisionRepository.findAllByEntityIdOrderByVersionDesc(noteEntityId));
 	}
 
-	private String createRevision(final NoteEntity entity, final int version) {
+	private RevisionEntity createRevision(final NoteEntity entity, final int version) {
 		return revisionRepository.save(RevisionEntity.create()
 			.withEntityId(entity.getId())
 			.withEntityType(entity.getClass().getSimpleName())
 			.withSerializedSnapshot(toJsonString(entity))
-			.withVersion(version)).getId();
+			.withVersion(version));
 	}
 
 	private boolean jsonEquals(final String json1, final String json2) {

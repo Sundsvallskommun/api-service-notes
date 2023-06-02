@@ -46,6 +46,8 @@ class CreateNoteIT extends AbstractAppTest {
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.CREATED)
 			.withExpectedResponseHeader(LOCATION, List.of("^http://(.*)/notes/(.*)$"))
+			.withExpectedResponseHeader("x-current-revision", List.of("(.*)-(.*)-(.*)-(.*)-(.*)"))
+			.withExpectedResponseHeader("x-current-version", List.of("0"))
 			.sendRequestAndVerifyResponse();
 
 		final var noteList = noteRepository.findAllByParameters(FindNotesRequest.create().withPartyId(partyId).withMunicipalityId(MUNICIPALITY_ID), PageRequest.of(0, 100));
@@ -78,6 +80,8 @@ class CreateNoteIT extends AbstractAppTest {
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.CREATED)
 			.withExpectedResponseHeader(LOCATION, List.of("^http://(.*)/notes/(.*)$"))
+			.withExpectedResponseHeader("x-current-revision", List.of("(.*)-(.*)-(.*)-(.*)-(.*)"))
+			.withExpectedResponseHeader("x-current-version", List.of("0"))
 			.sendRequestAndVerifyResponse();
 
 		assertThat(noteRepository.findAllByParameters(FindNotesRequest.create().withClientId(client), PageRequest.of(0, 100))).hasSize(1)
