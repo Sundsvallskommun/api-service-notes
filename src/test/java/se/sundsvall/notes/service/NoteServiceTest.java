@@ -123,14 +123,15 @@ class NoteServiceTest {
 		final var noteEntityMock = Mockito.mock(NoteEntity.class);
 		final var noteMock = Mockito.mock(Note.class);
 
-		final var currentRevision = Revision.create().withId(revisionId).withVersion(1);
-		final var previousRevision = Revision.create().withId(previousRevisionId).withVersion(0);
+		final var currentRevision = Revision.create().withId(revisionId).withVersion(2);
+		final var previousRevision = Revision.create().withId(previousRevisionId).withVersion(1);
+		final var oldRevision = Revision.create().withId(previousRevisionId).withVersion(0);
 
 		// Mock
 		when(noteRepositoryMock.findById(id)).thenReturn(Optional.of(noteEntityMock));
 		when(revisionServiceMock.createRevision(same(noteEntityMock))).thenReturn(currentRevision);
 		when(noteEntityMock.getId()).thenReturn(id);
-		when(revisionServiceMock.getRevisions(id)).thenReturn(List.of(currentRevision, previousRevision));
+		when(revisionServiceMock.getRevisions(id)).thenReturn(List.of(currentRevision, previousRevision, oldRevision));
 
 		try (MockedStatic<NoteMapper> mapperMock = Mockito.mockStatic(NoteMapper.class)) {
 			mapperMock.when(() -> NoteMapper.toNoteEntity(any(NoteEntity.class), any(UpdateNoteRequest.class))).thenReturn(noteEntityMock);

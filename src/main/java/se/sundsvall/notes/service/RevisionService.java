@@ -110,7 +110,7 @@ public class RevisionService {
 	}
 
 	public List<Revision> getRevisions(final String noteEntityId) {
-		return toRevisionList(revisionRepository.findAllByEntityIdOrderByVersion(noteEntityId));
+		return toRevisionList(revisionRepository.findAllByEntityIdOrderByVersionDesc(noteEntityId));
 	}
 
 	private RevisionEntity createRevision(final NoteEntity entity, final int version) {

@@ -164,14 +164,14 @@ class RevisionServiceTest {
 
 		// Arrange
 		final var entityId = UUID.randomUUID().toString();
-		when(revisionRepositoryMock.findAllByEntityIdOrderByVersion(any())).thenReturn(List.of(RevisionEntity.create().withEntityId(entityId)));
+		when(revisionRepositoryMock.findAllByEntityIdOrderByVersionDesc(any())).thenReturn(List.of(RevisionEntity.create().withEntityId(entityId)));
 
 		// Act
 		final var result = revisionService.getRevisions(entityId);
 
 		// Assert
 		assertThat(result).isNotNull();
-		verify(revisionRepositoryMock).findAllByEntityIdOrderByVersion(entityId);
+		verify(revisionRepositoryMock).findAllByEntityIdOrderByVersionDesc(entityId);
 	}
 
 	@Test

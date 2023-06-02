@@ -32,7 +32,7 @@ public interface RevisionRepository extends JpaRepository<RevisionEntity, String
 	 * Find all revisions by entityId.
 	 *
 	 * @param entityId the entityId.
-	 * @return a list of entities that matches the provided parameter.
+	 * @return a list of entities that matches the provided parameter ordered by version descending.
 	 */
-	List<RevisionEntity> findAllByEntityIdOrderByVersion(String entityId);
+	List<RevisionEntity> findAllByEntityIdOrderByVersionDesc(String entityId);
 }
