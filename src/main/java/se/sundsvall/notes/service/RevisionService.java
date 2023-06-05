@@ -1,5 +1,26 @@
 package se.sundsvall.notes.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flipkart.zjsonpatch.DiffFlags;
+import com.flipkart.zjsonpatch.JsonDiff;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.zalando.problem.Problem;
+import se.sundsvall.notes.api.model.DifferenceResponse;
+import se.sundsvall.notes.api.model.Operation;
+import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.integration.db.RevisionRepository;
+import se.sundsvall.notes.integration.db.model.NoteEntity;
+import se.sundsvall.notes.integration.db.model.RevisionEntity;
+
+import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
+
 import static com.flipkart.zjsonpatch.DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE;
 import static com.flipkart.zjsonpatch.DiffFlags.OMIT_VALUE_ON_REMOVE;
 import static java.lang.String.format;
@@ -8,31 +29,8 @@ import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 import static org.zalando.problem.Status.NOT_FOUND;
 import static se.sundsvall.notes.service.ServiceConstants.PROBLEM_DURING_DIFF;
 import static se.sundsvall.notes.service.ServiceConstants.REVISION_NOT_FOUND_FOR_ID_AND_VERSION;
+import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevision;
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionList;
-
-import java.io.IOException;
-import java.util.EnumSet;
-import java.util.List;
-
-import jakarta.transaction.Transactional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.zalando.problem.Problem;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flipkart.zjsonpatch.DiffFlags;
-import com.flipkart.zjsonpatch.JsonDiff;
-
-import se.sundsvall.notes.api.model.DifferenceResponse;
-import se.sundsvall.notes.api.model.Operation;
-import se.sundsvall.notes.api.model.Revision;
-import se.sundsvall.notes.integration.db.RevisionRepository;
-import se.sundsvall.notes.integration.db.model.NoteEntity;
-import se.sundsvall.notes.integration.db.model.RevisionEntity;
 
 @Service
 @Transactional
@@ -90,9 +88,9 @@ public class RevisionService {
 	 * - no previous revisions exist for the provided entity.
 	 *
 	 * @param entity the entity that will have a new revision.
-	 * @return the id (uuid) of the created revision.
+	 * @return the created revision.
 	 */
-	public String createRevision(final NoteEntity entity) {
+	public Revision createRevision(final NoteEntity entity) {
 
 		final var lastRevision = revisionRepository.findFirstByEntityIdOrderByVersionDesc(entity.getId());
 
@@ -104,33 +102,23 @@ public class RevisionService {
 			}
 
 			// Create revision <lastRevision.version + 1>
-			return createRevision(entity, lastRevision.get().getVersion() + 1);
+			return toRevision(createRevision(entity, lastRevision.get().getVersion() + 1));
 		}
 
 		// No previous revisions exist. Create revision 0
-		return createRevision(entity, 0);
+		return toRevision(createRevision(entity, 0));
 	}
 
 	public List<Revision> getRevisions(final String noteEntityId) {
-		return toRevisionList(revisionRepository.findAllByEntityIdOrderByVersion(noteEntityId));
+		return toRevisionList(revisionRepository.findAllByEntityIdOrderByVersionDesc(noteEntityId));
 	}
 
-	private String toJsonString(final NoteEntity entity) {
-		try {
-			return objectMapper.writeValueAsString(entity);
-		} catch (final JsonProcessingException e) {
-			LOG.error("Error during serialization of entity into JSON string!", e);
-		}
-
-		return null;
-	}
-
-	private String createRevision(final NoteEntity entity, final int version) {
+	private RevisionEntity createRevision(final NoteEntity entity, final int version) {
 		return revisionRepository.save(RevisionEntity.create()
 			.withEntityId(entity.getId())
 			.withEntityType(entity.getClass().getSimpleName())
 			.withSerializedSnapshot(toJsonString(entity))
-			.withVersion(version)).getId();
+			.withVersion(version));
 	}
 
 	private boolean jsonEquals(final String json1, final String json2) {
@@ -144,5 +132,15 @@ public class RevisionService {
 			LOG.error("Error during JSON compare!", e);
 			return false;
 		}
+	}
+
+	private String toJsonString(final NoteEntity entity) {
+		try {
+			return objectMapper.writeValueAsString(entity);
+		} catch (final JsonProcessingException e) {
+			LOG.error("Error during serialization of entity into JSON string!", e);
+		}
+
+		return null;
 	}
 }

@@ -1,31 +1,30 @@
 package se.sundsvall.notes.service;
 
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static org.apache.commons.lang3.BooleanUtils.isNotTrue;
-import static org.zalando.problem.Status.NOT_FOUND;
-import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
-import static se.sundsvall.notes.service.mapper.NoteMapper.toNote;
-import static se.sundsvall.notes.service.mapper.NoteMapper.toNoteEntity;
-import static se.sundsvall.notes.service.mapper.NoteMapper.toNotes;
-
-import java.util.List;
-
 import jakarta.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.zalando.problem.Problem;
-
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.api.model.FindNotesResponse;
 import se.sundsvall.notes.api.model.MetaData;
 import se.sundsvall.notes.api.model.Note;
+import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.api.model.RevisionInformation;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
+
+import java.util.List;
+
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static org.zalando.problem.Status.NOT_FOUND;
+import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
+import static se.sundsvall.notes.service.mapper.NoteMapper.toNote;
+import static se.sundsvall.notes.service.mapper.NoteMapper.toNoteEntity;
+import static se.sundsvall.notes.service.mapper.NoteMapper.toNotes;
 
 @Service
 @Transactional
@@ -37,22 +36,34 @@ public class NoteService {
 	@Autowired
 	private RevisionService revisionService;
 
-	public String createNote(final CreateNoteRequest createNoteRequest) {
+	public RevisionInformation createNote(final CreateNoteRequest createNoteRequest) {
 		final var noteEntity = noteRepository.save(toNoteEntity(createNoteRequest));
-		revisionService.createRevision(noteEntity);
 
-		return noteEntity.getId();
+		// Create revision
+		final var currentRevision = revisionService.createRevision(noteEntity);
+
+		return RevisionInformation.create()
+			.withNote(toNote(noteEntity))
+			.withCurrentRevision(currentRevision);
 	}
 
-	public Note updateNote(final String id, final UpdateNoteRequest updateNoteRequest) {
+	public RevisionInformation updateNote(final String id, final UpdateNoteRequest updateNoteRequest) {
 		final var noteEntity = noteRepository.findById(id).orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
 
 		toNoteEntity(noteEntity, updateNoteRequest);
 		noteRepository.flush();
 
-		revisionService.createRevision(noteEntity);
+		// Create revision
+		final var currentRevision = revisionService.createRevision(noteEntity);
 
-		return toNote(noteEntity);
+		var revisionInformation = RevisionInformation.create()
+			.withNote(toNote(noteEntity))
+			.withCurrentRevision(currentRevision);
+
+		if (revisionInformation.isNewRevisionCreated()) {
+			revisionInformation.setPreviousRevision(getPreviousRevision(noteEntity.getId(), currentRevision));
+		}
+		return revisionInformation;
 	}
 
 	public Note getNoteById(final String id) {
@@ -65,7 +76,7 @@ public class NoteService {
 		final var matches = noteRepository.findAllByParameters(findNotesRequest, PageRequest.of(findNotesRequest.getPage() - 1,
 			findNotesRequest.getLimit(), Sort.by("created").descending()));
 
-		// If page larger than last page is requested, a empty list is returned otherwise the current page
+		// If page larger than last page is requested, an empty list is returned otherwise the current page
 		final List<Note> notes = matches.getTotalPages() < findNotesRequest.getPage() ? emptyList() : toNotes(matches.getContent());
 
 		return FindNotesResponse.create()
@@ -78,10 +89,21 @@ public class NoteService {
 			.withNotes(notes);
 	}
 
-	public void deleteNoteById(final String id) {
-		if (isNotTrue(noteRepository.existsById(id))) {
+	public RevisionInformation deleteNoteById(final String id) {
+		if (!noteRepository.existsById(id)) {
 			throw Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id));
 		}
+
 		noteRepository.deleteById(id);
+
+		final var currentRevision = revisionService.getRevisions(id).stream().findFirst().orElse(null);
+
+		return RevisionInformation.create()
+			.withCurrentRevision(currentRevision);
+	}
+
+	private Revision getPreviousRevision(final String noteEntityId, final Revision currentRevision) {
+		return revisionService.getRevisions(noteEntityId).stream()
+			.filter(revision -> !revision.getId().equals(currentRevision.getId())).findFirst().orElse(null);
 	}
 }

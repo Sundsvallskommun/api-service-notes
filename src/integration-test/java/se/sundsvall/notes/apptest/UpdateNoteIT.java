@@ -1,17 +1,18 @@
 package se.sundsvall.notes.apptest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
-
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.integration.db.RevisionRepository;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Update note apptests.
@@ -41,6 +42,10 @@ class UpdateNoteIT extends AbstractAppTest {
 			.withHttpMethod(HttpMethod.PATCH)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(HttpStatus.OK)
+			.withExpectedResponseHeader("x-current-revision", List.of("(.*)-(.*)-(.*)-(.*)-(.*)"))
+			.withExpectedResponseHeader("x-current-version", List.of("1"))
+			.withExpectedResponseHeader("x-previous-revision", List.of("6e18bfaf-2480-424a-83c1-fb234c75befc"))
+			.withExpectedResponseHeader("x-previous-version", List.of("0"))
 			.withExpectedResponse("response.json")
 			.sendRequestAndVerifyResponse();
 
