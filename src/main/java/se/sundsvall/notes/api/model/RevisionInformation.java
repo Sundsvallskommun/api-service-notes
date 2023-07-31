@@ -1,8 +1,8 @@
 package se.sundsvall.notes.api.model;
 
-import java.util.Objects;
-
 import static java.util.Objects.nonNull;
+
+import java.util.Objects;
 
 public class RevisionInformation {
 
@@ -63,10 +63,13 @@ public class RevisionInformation {
 	}
 
 	@Override
-	@SuppressWarnings("ObjectEqualsForPrimitives")
 	public boolean equals(final Object obj) {
-		if (this == obj) return true;
-		if (!(obj instanceof final RevisionInformation other)) return false;
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof final RevisionInformation other)) {
+			return false;
+		}
 		return Objects.equals(currentRevision, other.currentRevision)
 			&& Objects.equals(previousRevision, other.previousRevision)
 			&& Objects.equals(note, other.note)
@@ -75,7 +78,7 @@ public class RevisionInformation {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		builder.append("RevisionInformation [note=").append(note)
 			.append(", currentRevision=").append(currentRevision)
 			.append(", previousRevision=").append(previousRevision)
