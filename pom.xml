@@ -18,7 +18,7 @@
 		<published.container.port.test>9729</published.container.port.test>
 		<published.container.port.production>9729</published.container.port.production>
 		<!-- Service properties -->
-		<zjsonpatch.version>0.4.14</zjsonpatch.version>
+		<zjsonpatch.version>0.4.16</zjsonpatch.version>
 	</properties>
 	<dependencies>
 		<dependency>
