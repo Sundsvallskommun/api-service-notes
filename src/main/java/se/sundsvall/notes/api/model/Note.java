@@ -1,13 +1,18 @@
 package se.sundsvall.notes.api.model;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import java.time.OffsetDateTime;
 import java.util.Objects;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(NON_NULL)
 @Schema(description = "Note model")
 public class Note {
 
@@ -51,9 +56,11 @@ public class Note {
 	private String modifiedBy;
 
 	@Schema(description = "Created timestamp")
+	@DateTimeFormat(iso = ISO.DATE_TIME)
 	private OffsetDateTime created;
 
 	@Schema(description = "Modified timestamp")
+	@DateTimeFormat(iso = ISO.DATE_TIME)
 	private OffsetDateTime modified;
 
 	public static Note create() {

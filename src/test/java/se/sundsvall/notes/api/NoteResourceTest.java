@@ -1,16 +1,29 @@
 package se.sundsvall.notes.api;
 
+import static java.util.Optional.ofNullable;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.ALL;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
@@ -20,19 +33,6 @@ import se.sundsvall.notes.api.model.Revision;
 import se.sundsvall.notes.api.model.RevisionInformation;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.service.NoteService;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static java.util.Optional.ofNullable;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.ALL;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")
@@ -49,9 +49,6 @@ class NoteResourceTest {
 
 	@Autowired
 	private WebTestClient webTestClient;
-
-	@LocalServerPort
-	private int port;
 
 	@Captor
 	private ArgumentCaptor<FindNotesRequest> parametersCaptor;
@@ -89,7 +86,7 @@ class NoteResourceTest {
 			.expectHeader().contentType(ALL)
 			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
 			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "0")
-			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
+			.expectHeader().location("/notes/".concat(id));
 
 		// Assert
 		verify(noteService).createNote(createNoteRequest);
@@ -127,7 +124,7 @@ class NoteResourceTest {
 			.expectHeader().contentType(ALL)
 			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
 			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "0")
-			.expectHeader().location("http://localhost:".concat(String.valueOf(port)).concat("/notes/").concat(id));
+			.expectHeader().location("/notes/".concat(id));
 
 		// Assert
 		verify(noteService).createNote(createNoteRequest);

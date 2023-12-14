@@ -10,6 +10,7 @@ public class ServiceConstants {
 	public static final String KEY_CURRENT_VERSION = "x-current-version";
 	public static final String KEY_PREVIOUS_VERSION = "x-previous-version";
 	public static final String KEY_PREVIOUS_REVISION = "x-previous-revision";
+
 	private ServiceConstants() {
 	}
 }

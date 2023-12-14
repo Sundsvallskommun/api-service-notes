@@ -3,16 +3,28 @@ package se.sundsvall.notes.api.model;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Revision model")
 public class Revision {
 
+	@Schema(description = "Id for the revision")
 	private String id;
 
+	@Schema(description = "Id for entity connected to the created revision")
 	private String entityId;
 
+	@Schema(description = "Type of entity connected to the created revision")
 	private String entityType;
 
+	@Schema(description = "Revision version")
 	private Integer version;
 
+	@Schema(description = "Created timestamp")
+	@DateTimeFormat(iso = ISO.DATE_TIME)
 	private OffsetDateTime created;
 
 	public static Revision create() {

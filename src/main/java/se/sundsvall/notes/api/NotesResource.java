@@ -1,14 +1,18 @@
 package se.sundsvall.notes.api;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import static java.util.Optional.ofNullable;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpHeaders.LOCATION;
+import static org.springframework.http.MediaType.ALL_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
+import static org.springframework.http.ResponseEntity.noContent;
+import static org.springframework.http.ResponseEntity.ok;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_REVISION;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_VERSION;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_REVISION;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_VERSION;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +28,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.zalando.problem.Problem;
 import org.zalando.problem.violations.ConstraintViolationProblem;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
@@ -32,19 +46,6 @@ import se.sundsvall.notes.api.model.Note;
 import se.sundsvall.notes.api.model.RevisionInformation;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.service.NoteService;
-
-import static java.util.Optional.ofNullable;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpHeaders.LOCATION;
-import static org.springframework.http.MediaType.ALL_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
-import static org.springframework.http.ResponseEntity.noContent;
-import static org.springframework.http.ResponseEntity.ok;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_REVISION;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_VERSION;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_REVISION;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_VERSION;
 
 @RestController
 @Validated
@@ -60,7 +61,7 @@ public class NotesResource {
 	@ApiResponse(responseCode = "201", headers = @Header(name = LOCATION, schema = @Schema(type = "string")), description = "Successful operation", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = Void.class)))
 	@ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(oneOf = {Problem.class, ConstraintViolationProblem.class})))
 	@ApiResponse(responseCode = "500", description = "Internal Server error", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
-	public ResponseEntity<Void> createNote(final UriComponentsBuilder uriComponentsBuilder, @Valid @NotNull @RequestBody final CreateNoteRequest body) {
+	public ResponseEntity<Void> createNote(@Valid @NotNull @RequestBody final CreateNoteRequest body) {
 		final var revisionInformation = noteService.createNote(body);
 
 		final var headers = new HttpHeaders();
@@ -69,7 +70,7 @@ public class NotesResource {
 		final var id = ofNullable(revisionInformation.getNote()).map(Note::getId).orElse(null);
 
 		return ResponseEntity
-			.created(uriComponentsBuilder.path("/notes/{id}").buildAndExpand(id).toUri())
+			.created(UriComponentsBuilder.fromPath("/notes/{id}").buildAndExpand(id).toUri())
 			.headers(createRevisionHeaders(revisionInformation, headers))
 			.build();
 	}
