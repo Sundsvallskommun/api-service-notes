@@ -1,9 +1,10 @@
 package se.sundsvall.notes.api.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.Objects;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Operation model")
 public class Operation {
 
 	@Schema(description = "Type of operation", example = "replace")
