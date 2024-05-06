@@ -407,7 +407,7 @@ components:
           minLength: 1
           type: string
           description: Link to the case
-          example: http://test.sundsvall.se/case1337
+          example: http://caselink.com/12345
         externalCaseId:
           maxLength: 255
           minLength: 1
@@ -655,7 +655,7 @@ components:
           minLength: 1
           type: string
           description: Link to the case
-          example: http://test.sundsvall.se/case1337
+          example: http://caselink.com/12345
         externalCaseId:
           maxLength: 255
           minLength: 1
@@ -705,7 +705,7 @@ components:
         caseLink:
           type: string
           description: Link to the case
-          example: http://test.sundsvall.se/case1337
+          example: http://caselink.com/12345
         externalCaseId:
           type: string
           description: External id for the case

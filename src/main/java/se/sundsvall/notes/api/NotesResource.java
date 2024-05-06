@@ -13,7 +13,6 @@ import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_VERSION;
 import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_REVISION;
 import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_VERSION;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -55,8 +54,11 @@ import se.sundsvall.notes.service.NoteService;
 @ApiResponse(responseCode = "500", description = "Internal Server error", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 public class NotesResource {
 
-	@Autowired
-	private NoteService noteService;
+	private final NoteService noteService;
+
+	NotesResource(NoteService noteService) {
+		this.noteService = noteService;
+	}
 
 	@PostMapping(consumes = APPLICATION_JSON_VALUE, produces = {ALL_VALUE, APPLICATION_PROBLEM_JSON_VALUE})
 	@Operation(summary = "Create new note")

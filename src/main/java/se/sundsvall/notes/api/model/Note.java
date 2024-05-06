@@ -43,7 +43,7 @@ public class Note {
 	@Schema(description = "Type of the case", example = "Byggärende")
 	private String caseType;
 
-	@Schema(description = "Link to the case", example = "http://test.sundsvall.se/case1337")
+	@Schema(description = "Link to the case", example = "http://caselink.com/12345")
 	private String caseLink;
 
 	@Schema(description = "External id for the case", example = "2229")
