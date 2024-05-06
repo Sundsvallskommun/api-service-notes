@@ -1,26 +1,5 @@
 package se.sundsvall.notes.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flipkart.zjsonpatch.DiffFlags;
-import com.flipkart.zjsonpatch.JsonDiff;
-import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.zalando.problem.Problem;
-import se.sundsvall.notes.api.model.DifferenceResponse;
-import se.sundsvall.notes.api.model.Operation;
-import se.sundsvall.notes.api.model.Revision;
-import se.sundsvall.notes.integration.db.RevisionRepository;
-import se.sundsvall.notes.integration.db.model.NoteEntity;
-import se.sundsvall.notes.integration.db.model.RevisionEntity;
-
-import java.io.IOException;
-import java.util.EnumSet;
-import java.util.List;
-
 import static com.flipkart.zjsonpatch.DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE;
 import static com.flipkart.zjsonpatch.DiffFlags.OMIT_VALUE_ON_REMOVE;
 import static java.lang.String.format;
@@ -32,6 +11,28 @@ import static se.sundsvall.notes.service.ServiceConstants.REVISION_NOT_FOUND_FOR
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevision;
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionList;
 
+import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.zalando.problem.Problem;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flipkart.zjsonpatch.DiffFlags;
+import com.flipkart.zjsonpatch.JsonDiff;
+
+import jakarta.transaction.Transactional;
+import se.sundsvall.notes.api.model.DifferenceResponse;
+import se.sundsvall.notes.api.model.Operation;
+import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.integration.db.RevisionRepository;
+import se.sundsvall.notes.integration.db.model.NoteEntity;
+import se.sundsvall.notes.integration.db.model.RevisionEntity;
+
 @Service
 @Transactional
 public class RevisionService {
@@ -39,11 +40,13 @@ public class RevisionService {
 	private static final Logger LOG = LoggerFactory.getLogger(RevisionService.class);
 	private static final EnumSet<DiffFlags> DIFF_FLAGS = EnumSet.of(ADD_ORIGINAL_VALUE_ON_REPLACE, OMIT_VALUE_ON_REMOVE);
 
-	@Autowired
-	private RevisionRepository revisionRepository;
+	private final RevisionRepository revisionRepository;
+	private final ObjectMapper objectMapper;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+	RevisionService(RevisionRepository revisionRepository, ObjectMapper objectMapper) {
+		this.revisionRepository = revisionRepository;
+		this.objectMapper = objectMapper;
+	}
 
 	/**
 	 * Performs a diff between to versions of a NoteEtity.

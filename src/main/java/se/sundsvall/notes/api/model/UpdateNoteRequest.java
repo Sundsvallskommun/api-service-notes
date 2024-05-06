@@ -4,10 +4,9 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import java.util.Objects;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "UpdateNoteRequest model")
 public class UpdateNoteRequest {
@@ -32,7 +31,7 @@ public class UpdateNoteRequest {
 	@Size(min = 1, max = 255)
 	private String caseType;
 
-	@Schema(description = "Link to the case", example = "http://test.sundsvall.se/case1337")
+	@Schema(description = "Link to the case", example = "http://caselink.com/12345")
 	@Size(min = 1, max = 512)
 	private String caseLink;
 

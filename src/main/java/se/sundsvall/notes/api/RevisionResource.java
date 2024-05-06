@@ -7,7 +7,6 @@ import static org.springframework.http.ResponseEntity.ok;
 import java.util.List;
 
 import org.hibernate.validator.constraints.Range;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,8 +35,11 @@ import se.sundsvall.notes.service.RevisionService;
 @ApiResponse(responseCode = "500", description = "Internal Server error", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 public class RevisionResource {
 
-	@Autowired
-	private RevisionService revisionService;
+	private final RevisionService revisionService;
+
+	RevisionResource(RevisionService revisionService) {
+		this.revisionService = revisionService;
+	}
 
 	@GetMapping(path = "/notes/{id}/revisions", produces = { APPLICATION_JSON_VALUE, APPLICATION_PROBLEM_JSON_VALUE })
 	@Operation(summary = "Get revisions by note ID")
