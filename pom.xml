@@ -13,10 +13,6 @@
 	<name>api-service-notes</name>
 	<description>Service for handling notes</description>
 	<properties>
-		<!-- Pipeline properties -->
-		<docker.image.name>ms-notes</docker.image.name>
-		<published.container.port.test>9729</published.container.port.test>
-		<published.container.port.production>9729</published.container.port.production>
 		<!-- Service properties -->
 		<zjsonpatch.version>0.4.16</zjsonpatch.version>
 	</properties>
