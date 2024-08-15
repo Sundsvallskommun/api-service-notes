@@ -1,23 +1,23 @@
 package se.sundsvall.notes.service.mapper;
 
-import static java.util.Collections.emptyList;
-import static java.util.Objects.isNull;
-import static java.util.Optional.ofNullable;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.Note;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
+
 public class NoteMapper {
 
 	private NoteMapper() {}
 
-	public static NoteEntity toNoteEntity(final CreateNoteRequest request) {
+	public static NoteEntity toNoteEntity(final String municipalityId, final CreateNoteRequest request) {
 		return Optional.ofNullable(request)
 			.map(r -> NoteEntity.create()
 				.withContext(r.getContext())
@@ -31,7 +31,7 @@ public class NoteMapper {
 				.withCaseType(r.getCaseType())
 				.withCaseLink(r.getCaseLink())
 				.withExternalCaseId(r.getExternalCaseId())
-				.withMunicipalityId(r.getMunicipalityId()))
+				.withMunicipalityId(municipalityId))
 			.orElse(null);
 	}
 

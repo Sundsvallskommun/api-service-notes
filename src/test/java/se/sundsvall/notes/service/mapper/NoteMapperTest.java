@@ -42,11 +42,10 @@ class NoteMapperTest {
 			.withCaseId(caseId)
 			.withCaseType(caseType)
 			.withCaseLink(caseLink)
-			.withExternalCaseId(externalCaseId)
-			.withMunicipalityId(municipalityId);
+			.withExternalCaseId(externalCaseId);
 
 		// Call
-		final var noteEntity = NoteMapper.toNoteEntity(createNoteRequest);
+		final var noteEntity = NoteMapper.toNoteEntity(municipalityId, createNoteRequest);
 
 		// Verification
 		assertThat(noteEntity.getBody()).isEqualTo(body);
@@ -70,9 +69,11 @@ class NoteMapperTest {
 	}
 
 	@Test
-	void toNoteEntityFromNull() {
+	void toNoteEntityFromNullRequest() {
+		// Setup
+		final var municipalityId = "municipalityId";
 		// Call
-		final var webMessageEntity = NoteMapper.toNoteEntity(null);
+		final var webMessageEntity = NoteMapper.toNoteEntity(municipalityId, null);
 
 		// Verification
 		assertThat(webMessageEntity).isNull();

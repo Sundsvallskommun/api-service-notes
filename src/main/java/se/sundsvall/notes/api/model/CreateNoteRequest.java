@@ -1,14 +1,13 @@
 package se.sundsvall.notes.api.model;
 
-import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
-
-import java.util.Objects;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import se.sundsvall.dept44.common.validators.annotation.ValidMunicipalityId;
 import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
+
+import java.util.Objects;
+
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 @Schema(description = "CreateNoteRequest model")
 public class CreateNoteRequest {
@@ -61,11 +60,6 @@ public class CreateNoteRequest {
 	@Schema(description = "External id for the case", example = "2229")
 	@Size(min = 1, max = 255)
 	private String externalCaseId;
-
-	@Schema(description = "Municipality id for the case", example = "2229", requiredMode = REQUIRED)
-	@Size(min = 1, max = 255)
-	@ValidMunicipalityId
-	private String municipalityId;
 
 	public static CreateNoteRequest create() {
 		return new CreateNoteRequest();
@@ -214,22 +208,9 @@ public class CreateNoteRequest {
 		return this;
 	}
 
-	public String getMunicipalityId() {
-		return municipalityId;
-	}
-
-	public void setMunicipalityId(final String municipalityId) {
-		this.municipalityId = municipalityId;
-	}
-
-	public CreateNoteRequest withMunicipalityId(final String municipalityId) {
-		this.municipalityId = municipalityId;
-		return this;
-	}
-
 	@Override
 	public int hashCode() {
-		return Objects.hash(body, caseId, caseLink, caseType, clientId, context, createdBy, externalCaseId, partyId, role, subject, municipalityId);
+		return Objects.hash(body, caseId, caseLink, caseType, clientId, context, createdBy, externalCaseId, partyId, role, subject);
 	}
 
 	@Override
@@ -245,8 +226,7 @@ public class CreateNoteRequest {
 		}
 		final var other = (CreateNoteRequest) obj;
 		return Objects.equals(body, other.body) && Objects.equals(caseId, other.caseId) && Objects.equals(caseLink, other.caseLink) && Objects.equals(caseType, other.caseType) && Objects.equals(clientId, other.clientId) && Objects.equals(context,
-			other.context) && Objects.equals(createdBy, other.createdBy) && Objects.equals(externalCaseId, other.externalCaseId) && Objects.equals(partyId, other.partyId) && Objects.equals(role, other.role) && Objects.equals(subject, other.subject) &&
-			Objects.equals(municipalityId, other.municipalityId);
+			other.context) && Objects.equals(createdBy, other.createdBy) && Objects.equals(externalCaseId, other.externalCaseId) && Objects.equals(partyId, other.partyId) && Objects.equals(role, other.role) && Objects.equals(subject, other.subject);
 	}
 
 	@Override
@@ -263,7 +243,6 @@ public class CreateNoteRequest {
 			.append(", caseType=").append(caseType)
 			.append(", caseLink=").append(caseLink)
 			.append(", externalCaseId=").append(externalCaseId)
-			.append(", municipalityId=").append(municipalityId)
 			.append("]").toString();
 	}
 }

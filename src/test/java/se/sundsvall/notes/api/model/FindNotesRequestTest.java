@@ -35,7 +35,6 @@ class FindNotesRequestTest {
 		final var page = 37;
 		final var partyId = UUID.randomUUID().toString();
 		final var role = "role";
-		final var municipalityId = "municipalityId";
 
 		final var findNotesRequest = FindNotesRequest.create()
 			.withCaseId(caseId)
@@ -44,8 +43,7 @@ class FindNotesRequestTest {
 			.withLimit(limit)
 			.withPage(page)
 			.withPartyId(partyId)
-			.withRole(role)
-			.withMunicipalityId(municipalityId);
+			.withRole(role);
 
 		assertThat(findNotesRequest).isNotNull().hasNoNullFieldsOrProperties();
 		assertThat(findNotesRequest.getCaseId()).isEqualTo(caseId);
@@ -55,7 +53,6 @@ class FindNotesRequestTest {
 		assertThat(findNotesRequest.getPage()).isEqualTo(page);
 		assertThat(findNotesRequest.getPartyId()).isEqualTo(partyId);
 		assertThat(findNotesRequest.getRole()).isEqualTo(role);
-		assertThat(findNotesRequest.getMunicipalityId()).isEqualTo(municipalityId);
 	}
 
 	@Test

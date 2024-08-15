@@ -1,18 +1,5 @@
 package se.sundsvall.notes.api;
 
-import static java.util.Optional.ofNullable;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.ALL;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -23,7 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
@@ -34,11 +20,26 @@ import se.sundsvall.notes.api.model.RevisionInformation;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.service.NoteService;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static java.util.Optional.ofNullable;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.ALL;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")
 class NoteResourceTest {
 
-	private static final String PATH = "/notes";
+	private static final String PATH = "/2281/notes";
 	private static final String MUNICIPALITY_ID = "2281";
 	private static final String KEY_CURRENT_REVISION = "x-current-revision";
 	private static final String KEY_CURRENT_VERSION = "x-current-version";
@@ -70,10 +71,9 @@ class NoteResourceTest {
 			.withExternalCaseId("externalCaseId")
 			.withPartyId(UUID.randomUUID().toString())
 			.withSubject("Test subject")
-			.withRole("role")
-			.withMunicipalityId(MUNICIPALITY_ID);
+			.withRole("role");
 
-		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(RevisionInformation.create()
+		when(noteService.createNote(any(CreateNoteRequest.class), anyString())).thenReturn(RevisionInformation.create()
 			.withNote(Note.create().withId(id))
 			.withCurrentRevision(Revision.create().withId("currentRevision").withVersion(0)));
 
@@ -86,10 +86,10 @@ class NoteResourceTest {
 			.expectHeader().contentType(ALL)
 			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
 			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "0")
-			.expectHeader().location("/notes/".concat(id));
+			.expectHeader().location("/2281/notes/".concat(id));
 
 		// Assert
-		verify(noteService).createNote(createNoteRequest);
+		verify(noteService).createNote(createNoteRequest, MUNICIPALITY_ID);
 	}
 
 	@Test
@@ -108,10 +108,9 @@ class NoteResourceTest {
 			.withCreatedBy("createdBy")
 			.withExternalCaseId("externalCaseId")
 			.withSubject("Test subject")
-			.withRole("role")
-			.withMunicipalityId(MUNICIPALITY_ID);
+			.withRole("role");
 
-		when(noteService.createNote(any(CreateNoteRequest.class))).thenReturn(RevisionInformation.create()
+		when(noteService.createNote(any(CreateNoteRequest.class), anyString())).thenReturn(RevisionInformation.create()
 			.withNote(Note.create().withId(id))
 			.withCurrentRevision(Revision.create().withId("currentRevision").withVersion(0)));
 
@@ -124,10 +123,10 @@ class NoteResourceTest {
 			.expectHeader().contentType(ALL)
 			.expectHeader().valueEquals(KEY_CURRENT_REVISION, "currentRevision")
 			.expectHeader().valueEquals(KEY_CURRENT_VERSION, "0")
-			.expectHeader().location("/notes/".concat(id));
+			.expectHeader().location("/" + MUNICIPALITY_ID + "/notes/" + id);
 
 		// Assert
-		verify(noteService).createNote(createNoteRequest);
+		verify(noteService).createNote(createNoteRequest, MUNICIPALITY_ID);
 	}
 
 	@Test
@@ -150,7 +149,7 @@ class NoteResourceTest {
 
 		final Note note = Note.create().withId(id);
 
-		when(noteService.updateNote(id, updateNoteRequest)).thenReturn(RevisionInformation.create().withNote(note)
+		when(noteService.updateNote(id, updateNoteRequest, MUNICIPALITY_ID)).thenReturn(RevisionInformation.create().withNote(note)
 			.withCurrentRevision(currentRevision)
 			.withPreviousRevision(previousRevision));
 
@@ -171,16 +170,16 @@ class NoteResourceTest {
 
 		// Assert
 		assertThat(response).isNotNull().isEqualTo(note);
-		verify(noteService).updateNote(id, updateNoteRequest);
+		verify(noteService).updateNote(id, updateNoteRequest, MUNICIPALITY_ID);
 	}
 
 	@Test
-	void deleteNoteById() {
+	void deleteNoteByIdAndMunicipalityId() {
 
 		// Arrange
 		final var id = UUID.randomUUID().toString();
 
-		when(noteService.deleteNoteById(id)).thenReturn(RevisionInformation.create()
+		when(noteService.deleteNoteByIdAndMunicipalityId(id, MUNICIPALITY_ID)).thenReturn(RevisionInformation.create()
 			.withCurrentRevision(Revision.create().withId("currentRevision").withVersion(1)));
 
 		// Act
@@ -192,7 +191,7 @@ class NoteResourceTest {
 			.expectHeader().doesNotExist(CONTENT_TYPE);
 
 		// Assert
-		verify(noteService).deleteNoteById(id);
+		verify(noteService).deleteNoteByIdAndMunicipalityId(id, MUNICIPALITY_ID);
 	}
 
 	@Test
@@ -202,7 +201,7 @@ class NoteResourceTest {
 		final var id = UUID.randomUUID().toString();
 
 		final Note note = Note.create().withId(id);
-		when(noteService.getNoteById(id)).thenReturn(note);
+		when(noteService.getNoteByIdAndMunicipalityId(id, MUNICIPALITY_ID)).thenReturn(note);
 
 		// Act
 		final var response = webTestClient.get().uri(builder -> builder.path(PATH + "/{id}").build(Map.of("id", id)))
@@ -215,7 +214,7 @@ class NoteResourceTest {
 
 		// Assert
 		assertThat(response).isNotNull().isEqualTo(note);
-		verify(noteService).getNoteById(id);
+		verify(noteService).getNoteByIdAndMunicipalityId(id, MUNICIPALITY_ID);
 	}
 
 	@Test
@@ -228,10 +227,10 @@ class NoteResourceTest {
 		final var context = "context";
 		final var role = "role";
 		final var clientId = "clientId";
-		final var inParams = createParameterMap(page, limit, partyId, null, context, role, clientId, MUNICIPALITY_ID);
+		final var inParams = createParameterMap(page, limit, partyId, null, context, role, clientId);
 		final var expectedResponse = FindNotesResponse.create().withNotes(List.of(Note.create()));
 
-		when(noteService.getNotes(any())).thenReturn(FindNotesResponse.create().withNotes(List.of(Note.create())));
+		when(noteService.getNotes(any(), anyString())).thenReturn(FindNotesResponse.create().withNotes(List.of(Note.create())));
 
 		// Act
 		final var response = webTestClient.get().uri(builder -> builder.path(PATH).queryParams(inParams).build())
@@ -244,7 +243,7 @@ class NoteResourceTest {
 
 		// Assert
 		assertThat(response).isNotNull().isEqualTo(expectedResponse);
-		verify(noteService).getNotes(parametersCaptor.capture());
+		verify(noteService).getNotes(parametersCaptor.capture(), eq(MUNICIPALITY_ID));
 
 		final FindNotesRequest findNotesRequest = parametersCaptor.getValue();
 		assertThat(findNotesRequest.getPage()).isEqualTo(page);
@@ -254,10 +253,9 @@ class NoteResourceTest {
 		assertThat(findNotesRequest.getContext()).isEqualTo(context);
 		assertThat(findNotesRequest.getRole()).isEqualTo(role);
 		assertThat(findNotesRequest.getClientId()).isEqualTo(clientId);
-		assertThat(findNotesRequest.getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
 	}
 
-	private MultiValueMap<String, String> createParameterMap(final Integer page, final Integer limit, final String partyId, final String caseId, final String context, final String role, final String clientId, final String municipalityId) {
+	private MultiValueMap<String, String> createParameterMap(final Integer page, final Integer limit, final String partyId, final String caseId, final String context, final String role, final String clientId) {
 		final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
 		ofNullable(page).ifPresent(p -> parameters.add("page", p.toString()));
@@ -267,7 +265,6 @@ class NoteResourceTest {
 		ofNullable(context).ifPresent(p -> parameters.add("context", p));
 		ofNullable(role).ifPresent(p -> parameters.add("role", p));
 		ofNullable(clientId).ifPresent(p -> parameters.add("clientId", p));
-		ofNullable(municipalityId).ifPresent(p -> parameters.add("municipalityId", p));
 
 		return parameters;
 	}

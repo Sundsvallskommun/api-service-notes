@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
-
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.notes.Application;
@@ -21,10 +20,10 @@ import se.sundsvall.notes.Application;
 })
 class RevisionsIT extends AbstractAppTest {
 
-	private static final String REVISIONS_PATH = "/notes/9791682e-4ba8-4f3a-857a-54e14836a53b/revisions";
+	private static final String REVISIONS_PATH = "/2281/notes/9791682e-4ba8-4f3a-857a-54e14836a53b/revisions";
 
 	@Test
-	void test01_listRevisions() throws Exception {
+	void test01_listRevisions() {
 		setupCall()
 			.withServicePath(REVISIONS_PATH)
 			.withHttpMethod(HttpMethod.GET)
@@ -34,7 +33,7 @@ class RevisionsIT extends AbstractAppTest {
 	}
 
 	@Test
-	void test02_diffRevisions() throws Exception {
+	void test02_diffRevisions() {
 		setupCall()
 			.withServicePath(REVISIONS_PATH + "/difference?source=1&target=2")
 			.withHttpMethod(HttpMethod.GET)
@@ -44,7 +43,7 @@ class RevisionsIT extends AbstractAppTest {
 	}
 
 	@Test
-	void test03_diffRevisionsNoDifference() throws Exception {
+	void test03_diffRevisionsNoDifference() {
 		setupCall()
 			.withServicePath(REVISIONS_PATH + "/difference?source=3&target=4")
 			.withHttpMethod(HttpMethod.GET)

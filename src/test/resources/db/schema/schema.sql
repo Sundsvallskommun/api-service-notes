@@ -25,6 +25,7 @@
         entity_id varchar(255),
         entity_type varchar(255),
         id varchar(255) not null,
+        municipality_id varchar(255) not null,
         serialized_snapshot longtext,
         primary key (id)
     ) engine=InnoDB;
@@ -49,3 +50,6 @@
 
     create index revision_entity_type_index 
        on revision (entity_type);
+
+    create index revision_municipality_id_index
+       on revision (municipality_id);
