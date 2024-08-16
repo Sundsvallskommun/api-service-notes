@@ -1,29 +1,29 @@
 package se.sundsvall.notes.integration.db.model;
 
-import static java.time.OffsetDateTime.now;
-import static java.time.temporal.ChronoUnit.MILLIS;
-
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Objects;
-
-import org.hibernate.Length;
-import org.hibernate.annotations.TimeZoneStorage;
-import org.hibernate.annotations.TimeZoneStorageType;
-import org.hibernate.annotations.UuidGenerator;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import org.hibernate.Length;
+import org.hibernate.annotations.TimeZoneStorage;
+import org.hibernate.annotations.TimeZoneStorageType;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Objects;
+
+import static java.time.OffsetDateTime.now;
+import static java.time.temporal.ChronoUnit.MILLIS;
 
 @Entity
 @Table(name = "revision",
 	indexes = {
 		@Index(name = "revision_entity_id_index", columnList = "entity_id"),
-		@Index(name = "revision_entity_type_index", columnList = "entity_type")
+		@Index(name = "revision_entity_type_index", columnList = "entity_type"),
+		@Index(name = "revision_municipality_id_index", columnList = "municipality_id")
 	})
 public class RevisionEntity {
 
@@ -43,6 +43,9 @@ public class RevisionEntity {
 
 	@Column(name = "serialized_snapshot", length = Length.LONG32)
 	private String serializedSnapshot;
+
+	@Column(name = "municipality_id", nullable = false)
+	private String municipalityId;
 
 	@Column(name = "created")
 	@TimeZoneStorage(TimeZoneStorageType.NORMALIZE)
@@ -117,6 +120,19 @@ public class RevisionEntity {
 		return this;
 	}
 
+	public String getMunicipalityId() {
+		return municipalityId;
+	}
+
+	public void setMunicipalityId(final String municipalityId) {
+		this.municipalityId = municipalityId;
+	}
+
+	public RevisionEntity withMunicipalityId(final String municipalityId) {
+		this.municipalityId = municipalityId;
+		return this;
+	}
+
 	public OffsetDateTime getCreated() {
 		return created;
 	}
@@ -137,7 +153,7 @@ public class RevisionEntity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(created, entityId, entityType, id, serializedSnapshot, version);
+		return Objects.hash(created, entityId, entityType, id, serializedSnapshot, version, municipalityId);
 	}
 
 	@Override
@@ -149,14 +165,14 @@ public class RevisionEntity {
 			return false;
 		}
 		return Objects.equals(created, other.created) && Objects.equals(entityId, other.entityId) && Objects.equals(entityType, other.entityType) && Objects.equals(id, other.id) && Objects.equals(serializedSnapshot, other.serializedSnapshot) && Objects
-			.equals(version, other.version);
+			.equals(version, other.version) && Objects.equals(municipalityId, other.municipalityId);
 	}
 
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();
-		builder.append("RevisionEntity [id=").append(id).append(", entityId=").append(entityId).append(", entityType=").append(entityType).append(", version=").append(version).append(", serializedSnapshot=").append(serializedSnapshot).append(", created=")
-			.append(created).append("]");
+		builder.append("RevisionEntity [id=").append(id).append(", entityId=").append(entityId).append(", entityType=").append(entityType).append(", version=").append(version).append(", serializedSnapshot=").append(serializedSnapshot)
+			.append(", municipalityId=").append(municipalityId).append(", created=").append(created).append("]");
 		return builder.toString();
 	}
 }

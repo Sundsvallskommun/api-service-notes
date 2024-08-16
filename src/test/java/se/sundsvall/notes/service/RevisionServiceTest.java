@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,17 +66,18 @@ class RevisionServiceTest {
 		final var serializedSnapshot = objectMapperSpy.writeValueAsString(noteEntity);
 		final var currentRevisionEntity = RevisionEntity.create().withEntityId(noteEntity.getId()).withId(revisionEntityId).withVersion(lastRevisionVersion + 1);
 		final var expectedRevision = Revision.create().withId(revisionEntityId).withVersion(lastRevisionVersion + 1).withEntityId(noteEntity.getId());
+		final var municipalityId = "municipalityId";
 
 		when(revisionRepositoryMock.save(any())).thenReturn(currentRevisionEntity);
-		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId()))
+		when(revisionRepositoryMock.findFirstByEntityIdAndMunicipalityIdOrderByVersionDesc(noteEntity.getId(), municipalityId))
 			.thenReturn(Optional.of(RevisionEntity.create().withVersion(lastRevisionVersion)));
 
 		// Act
-		final var createdRevision = revisionService.createRevision(noteEntity);
+		final var createdRevision = revisionService.createRevision(noteEntity, municipalityId);
 
 		// Assert
 		assertThat(createdRevision).isNotNull().isEqualTo(expectedRevision);
-		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
+		verify(revisionRepositoryMock).findFirstByEntityIdAndMunicipalityIdOrderByVersionDesc(noteEntity.getId(), municipalityId);
 		verify(revisionRepositoryMock).save(revisionEntityCaptor.capture());
 
 		final var capturedRevisionEntity = revisionEntityCaptor.getValue();
@@ -92,16 +94,17 @@ class RevisionServiceTest {
 		final var revisionEntityId = UUID.randomUUID().toString();
 		final var revisionEntity = RevisionEntity.create().withEntityId(noteEntity.getId()).withId(revisionEntityId).withVersion(0);
 		final var expectedRevision = Revision.create().withId(revisionEntityId).withEntityId(noteEntity.getId()).withVersion(0);
+		final var municipalityId = "municipalityId";
 
 		when(revisionRepositoryMock.save(any())).thenReturn(revisionEntity);
-		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId())).thenReturn(empty());
+		when(revisionRepositoryMock.findFirstByEntityIdAndMunicipalityIdOrderByVersionDesc(noteEntity.getId(), municipalityId)).thenReturn(empty());
 
 		// Act
-		final var createdRevision = revisionService.createRevision(noteEntity);
+		final var createdRevision = revisionService.createRevision(noteEntity, municipalityId);
 
 		// Assert
 		assertThat(createdRevision).isNotNull().isEqualTo(expectedRevision);
-		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
+		verify(revisionRepositoryMock).findFirstByEntityIdAndMunicipalityIdOrderByVersionDesc(noteEntity.getId(), municipalityId);
 		verify(revisionRepositoryMock).save(revisionEntityCaptor.capture());
 
 		final var capturedRevisionEntity = revisionEntityCaptor.getValue();
@@ -115,16 +118,17 @@ class RevisionServiceTest {
 		// Arrange
 		final var noteEntity = createNoteEntity();
 		final var serializedSnapshot = objectMapperSpy.writeValueAsString(noteEntity);
+		final var municipalityId = "municipalityId";
 
-		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId()))
+		when(revisionRepositoryMock.findFirstByEntityIdAndMunicipalityIdOrderByVersionDesc(noteEntity.getId(), municipalityId))
 			.thenReturn(Optional.of(RevisionEntity.create().withSerializedSnapshot(serializedSnapshot)));
 
 		// Act
-		final var createdRevision = revisionService.createRevision(noteEntity);
+		final var createdRevision = revisionService.createRevision(noteEntity, municipalityId);
 
 		// Assert
 		assertThat(createdRevision).isNull();
-		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
+		verify(revisionRepositoryMock).findFirstByEntityIdAndMunicipalityIdOrderByVersionDesc(noteEntity.getId(), municipalityId);
 		verify(revisionRepositoryMock, never()).save(any());
 
 	}
@@ -140,17 +144,18 @@ class RevisionServiceTest {
 		final var serializedSnapshot = objectMapperSpy.writeValueAsString(noteEntity);
 		final var currentRevisionEntity = RevisionEntity.create().withEntityId(noteEntity.getId()).withId(revisionEntityId).withVersion(lastRevisionVersion + 1);
 		final var expectedRevision = Revision.create().withId(revisionEntityId).withVersion(lastRevisionVersion + 1).withEntityId(noteEntity.getId());
+		final var municipalityId = "municipalityId";
 
 		when(revisionRepositoryMock.save(any())).thenReturn(currentRevisionEntity);
-		when(revisionRepositoryMock.findFirstByEntityIdOrderByVersionDesc(noteEntity.getId()))
+		when(revisionRepositoryMock.findFirstByEntityIdAndMunicipalityIdOrderByVersionDesc(noteEntity.getId(), municipalityId))
 			.thenReturn(Optional.of(RevisionEntity.create().withVersion(lastRevisionVersion).withSerializedSnapshot(invalidJson)));
 
 		// Act
-		final var createdRevision = revisionService.createRevision(noteEntity);
+		final var createdRevision = revisionService.createRevision(noteEntity, municipalityId);
 
 		// Assert
 		assertThat(createdRevision).isNotNull().isEqualTo(expectedRevision);
-		verify(revisionRepositoryMock).findFirstByEntityIdOrderByVersionDesc(noteEntity.getId());
+		verify(revisionRepositoryMock).findFirstByEntityIdAndMunicipalityIdOrderByVersionDesc(noteEntity.getId(), municipalityId);
 		verify(revisionRepositoryMock).save(revisionEntityCaptor.capture());
 
 		final var capturedRevisionEntity = revisionEntityCaptor.getValue();
@@ -164,14 +169,16 @@ class RevisionServiceTest {
 
 		// Arrange
 		final var entityId = UUID.randomUUID().toString();
-		when(revisionRepositoryMock.findAllByEntityIdOrderByVersionDesc(any())).thenReturn(List.of(RevisionEntity.create().withEntityId(entityId)));
+		final var municipalityId = "municipalityId";
+
+		when(revisionRepositoryMock.findAllByEntityIdAndMunicipalityIdOrderByVersionDesc(anyString(), anyString())).thenReturn(List.of(RevisionEntity.create().withEntityId(entityId)));
 
 		// Act
-		final var result = revisionService.getRevisions(entityId);
+		final var result = revisionService.getRevisions(entityId, municipalityId);
 
 		// Assert
 		assertThat(result).isNotNull();
-		verify(revisionRepositoryMock).findAllByEntityIdOrderByVersionDesc(entityId);
+		verify(revisionRepositoryMock).findAllByEntityIdAndMunicipalityIdOrderByVersionDesc(entityId, municipalityId);
 	}
 
 	@Test
@@ -183,19 +190,20 @@ class RevisionServiceTest {
 		final var target = 2;
 		final var noteEntity1 = createNoteEntity();
 		final var noteEntity2 = SerializationUtils.clone(noteEntity1).withBody("changed body").withModifiedBy("user22");
+		final var municipalityId = "municipalityId";
 
-		when(revisionRepositoryMock.findByEntityIdAndVersion(entityId, source)).thenReturn(Optional.of(RevisionEntity.create()
+		when(revisionRepositoryMock.findByEntityIdAndMunicipalityIdAndVersion(entityId, municipalityId, source)).thenReturn(Optional.of(RevisionEntity.create()
 			.withEntityId(entityId)
 			.withVersion(source)
 			.withSerializedSnapshot(toJsonString(noteEntity1))));
 
-		when(revisionRepositoryMock.findByEntityIdAndVersion(entityId, target)).thenReturn(Optional.of(RevisionEntity.create()
+		when(revisionRepositoryMock.findByEntityIdAndMunicipalityIdAndVersion(entityId, municipalityId, target)).thenReturn(Optional.of(RevisionEntity.create()
 			.withEntityId(entityId)
 			.withVersion(target)
 			.withSerializedSnapshot(toJsonString(noteEntity2))));
 
 		// Act
-		final var result = revisionService.diff(entityId, source, target);
+		final var result = revisionService.diff(entityId, municipalityId, source, target);
 
 		// Assert
 		assertThat(result).isNotNull();
@@ -210,8 +218,8 @@ class RevisionServiceTest {
 				tuple("replace", "/modifiedBy", "user22", null),
 				tuple("replace", "/body", "changed body", "body"));
 
-		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, source);
-		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, target);
+		verify(revisionRepositoryMock).findByEntityIdAndMunicipalityIdAndVersion(entityId, municipalityId, source);
+		verify(revisionRepositoryMock).findByEntityIdAndMunicipalityIdAndVersion(entityId, municipalityId, target);
 	}
 
 	@Test
@@ -221,27 +229,30 @@ class RevisionServiceTest {
 		final var entityId = UUID.randomUUID().toString();
 		final var source = 1;
 		final var target = 2;
+		final var municipalityId = "municipalityId";
 
-		when(revisionRepositoryMock.findByEntityIdAndVersion(entityId, source)).thenReturn(Optional.of(RevisionEntity.create()
+		when(revisionRepositoryMock.findByEntityIdAndMunicipalityIdAndVersion(entityId, municipalityId, source)).thenReturn(Optional.of(RevisionEntity.create()
 			.withEntityId(entityId)
+			.withMunicipalityId(municipalityId)
 			.withVersion(source)
 			.withSerializedSnapshot("{}")));
 
-		when(revisionRepositoryMock.findByEntityIdAndVersion(entityId, target)).thenReturn(Optional.of(RevisionEntity.create()
+		when(revisionRepositoryMock.findByEntityIdAndMunicipalityIdAndVersion(entityId, municipalityId, target)).thenReturn(Optional.of(RevisionEntity.create()
 			.withEntityId(entityId)
+			.withMunicipalityId(municipalityId)
 			.withVersion(target)
 			.withSerializedSnapshot("{"))); // Faulty json
 
 		// Act
-		final var problem = assertThrows(ThrowableProblem.class, () -> revisionService.diff(entityId, source, target));
+		final var problem = assertThrows(ThrowableProblem.class, () -> revisionService.diff(entityId, municipalityId, source, target));
 
 		// Assert
 		assertThat(problem).isNotNull();
 		assertThat(problem.getMessage()).isEqualTo(String.format("Internal Server Error: An error occurred during diff of entityId '%s' looking at version '%s' and version '%s'!", entityId, source, target));
 		assertThat(problem.getStatus()).isEqualTo(INTERNAL_SERVER_ERROR);
 
-		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, source);
-		verify(revisionRepositoryMock).findByEntityIdAndVersion(entityId, target);
+		verify(revisionRepositoryMock).findByEntityIdAndMunicipalityIdAndVersion(entityId, municipalityId, source);
+		verify(revisionRepositoryMock).findByEntityIdAndMunicipalityIdAndVersion(entityId, municipalityId, target);
 	}
 
 	private NoteEntity createNoteEntity() {

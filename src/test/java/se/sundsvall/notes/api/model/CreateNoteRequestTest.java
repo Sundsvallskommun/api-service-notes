@@ -38,7 +38,6 @@ class CreateNoteRequestTest {
 		final var partyId = randomUUID().toString();
 		final var role = "role";
 		final var subject = "subject";
-		final var municipalityId = "municipalityId";
 
 		final var createNoteRequest = CreateNoteRequest.create()
 			.withBody(body)
@@ -51,8 +50,7 @@ class CreateNoteRequestTest {
 			.withExternalCaseId(externalCaseId)
 			.withPartyId(partyId)
 			.withRole(role)
-			.withSubject(subject)
-			.withMunicipalityId(municipalityId);
+			.withSubject(subject);
 
 		assertThat(createNoteRequest).isNotNull().hasNoNullFieldsOrProperties();
 		assertThat(createNoteRequest.getBody()).isEqualTo(body);
@@ -66,7 +64,6 @@ class CreateNoteRequestTest {
 		assertThat(createNoteRequest.getPartyId()).isEqualTo(partyId);
 		assertThat(createNoteRequest.getRole()).isEqualTo(role);
 		assertThat(createNoteRequest.getSubject()).isEqualTo(subject);
-		assertThat(createNoteRequest.getMunicipalityId()).isEqualTo(municipalityId);
 	}
 
 	@Test

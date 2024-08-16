@@ -26,41 +26,45 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 class UpdateNoteIT extends AbstractAppTest {
 
+	private static final String REQUEST= "request.json";
+	private static final String RESPONSE = "response.json";
+	private static final String MUNICIPALITY_ID = "2281";
+
 	@Autowired
 	private RevisionRepository revisionRepository;
 
 	@Test
-	void test01_updateById() throws Exception {
+	void test01_updateById() {
 
 		final var entityId = "8825bfae-11bc-4436-b1be-e4f0f225c048";
 
 		// Assert that we only have the first version (version zero).
-		assertThat(revisionRepository.findFirstByEntityIdOrderByVersionDesc(entityId).orElseThrow().getVersion()).isZero();
+		assertThat(revisionRepository.findFirstByEntityIdAndMunicipalityIdOrderByVersionDesc(entityId, MUNICIPALITY_ID).orElseThrow().getVersion()).isZero();
 
 		setupCall()
-			.withServicePath("/notes/" + entityId)
+			.withServicePath("/2281/notes/" + entityId)
 			.withHttpMethod(HttpMethod.PATCH)
-			.withRequest("request.json")
+			.withRequest(REQUEST)
 			.withExpectedResponseStatus(HttpStatus.OK)
 			.withExpectedResponseHeader("x-current-revision", List.of("(.*)-(.*)-(.*)-(.*)-(.*)"))
 			.withExpectedResponseHeader("x-current-version", List.of("1"))
 			.withExpectedResponseHeader("x-previous-revision", List.of("6e18bfaf-2480-424a-83c1-fb234c75befc"))
 			.withExpectedResponseHeader("x-previous-version", List.of("0"))
-			.withExpectedResponse("response.json")
+			.withExpectedResponse(RESPONSE)
 			.sendRequestAndVerifyResponse();
 
 		// Assert that a new version was created.
-		assertThat(revisionRepository.findFirstByEntityIdOrderByVersionDesc(entityId).orElseThrow().getVersion()).isEqualTo(1);
+		assertThat(revisionRepository.findFirstByEntityIdAndMunicipalityIdOrderByVersionDesc(entityId, MUNICIPALITY_ID).orElseThrow().getVersion()).isEqualTo(1);
 	}
 
 	@Test
-	void test02_updateByIdNotFound() throws Exception {
+	void test02_updateByIdNotFound() {
 		setupCall()
-			.withServicePath("/notes/9eceeeb1-f939-441c-858f-da3deb05e578") // Id does not exist in DB.
+			.withServicePath("/2281/notes/9eceeeb1-f939-441c-858f-da3deb05e578") // Id does not exist in DB.
 			.withHttpMethod(HttpMethod.PATCH)
-			.withRequest("request.json")
+			.withRequest(REQUEST)
 			.withExpectedResponseStatus(HttpStatus.NOT_FOUND)
-			.withExpectedResponse("response.json")
+			.withExpectedResponse(RESPONSE)
 			.sendRequestAndVerifyResponse();
 	}
 }

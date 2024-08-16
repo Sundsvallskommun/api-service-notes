@@ -5,64 +5,85 @@ info:
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
-  version: "3.1"
+  version: '4.0'
 servers:
-- url: http://localhost:8080
-  description: Generated server url
+  - url: http://localhost:8080
+    description: Generated server url
 tags:
-- name: Notes
-  description: Note operations
-- name: Revisions
-  description: Revision operations
+  - name: Notes
+    description: Note operations
+  - name: Revisions
+    description: Revision operations
 paths:
-  /notes:
+  /{municipalityId}/notes:
     get:
       tags:
-      - Notes
+        - Notes
       summary: Find all notes filtered by incoming parameters
       operationId: findNotes
       parameters:
-      - name: searchParams
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/FindNotesRequest'
+        - name: municipalityId
+          in: path
+          description: Municipality id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: searchParams
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/FindNotesRequest"
       responses:
+        "500":
+          description: Internal Server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FindNotesResponse'
+                $ref: "#/components/schemas/FindNotesResponse"
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/FindNotesResponse'
+                $ref: "#/components/schemas/FindNotesResponse"
         "400":
           description: Bad request
           content:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: '#/components/schemas/Problem'
-                - $ref: '#/components/schemas/ConstraintViolationProblem'
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+    post:
+      tags:
+        - Notes
+      summary: Create new note
+      operationId: createNote
+      parameters:
+        - name: municipalityId
+          in: path
+          description: Municipality id
+          required: true
+          schema:
+            type: string
+          example: 2281
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNoteRequest"
+        required: true
+      responses:
         "500":
           description: Internal Server error
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
-    post:
-      tags:
-      - Notes
-      summary: Create new note
-      operationId: createNote
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateNoteRequest'
-        required: true
-      responses:
+                $ref: "#/components/schemas/Problem"
         "201":
           description: Successful operation
           headers:
@@ -76,158 +97,186 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: '#/components/schemas/Problem'
-                - $ref: '#/components/schemas/ConstraintViolationProblem'
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+  /{municipalityId}/notes/{id}:
+    get:
+      tags:
+        - Notes
+      summary: Get note by ID
+      operationId: getNoteByIdAndMunicipalityId
+      parameters:
+        - name: municipalityId
+          in: path
+          description: Municipality id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: id
+          in: path
+          description: Note ID
+          required: true
+          schema:
+            type: string
+          example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      responses:
         "500":
           description: Internal Server error
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
-  /notes/{id}:
-    get:
-      tags:
-      - Notes
-      summary: Get note by ID
-      operationId: getNoteById
-      parameters:
-      - name: id
-        in: path
-        description: Note ID
-        required: true
-        schema:
-          type: string
-        example: b82bd8ac-1507-4d9a-958d-369261eecc15
-      responses:
+                $ref: "#/components/schemas/Problem"
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Note'
+                $ref: "#/components/schemas/Note"
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Note'
-        "404":
-          description: Not found
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: "#/components/schemas/Note"
         "400":
           description: Bad request
           content:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: '#/components/schemas/Problem'
-                - $ref: '#/components/schemas/ConstraintViolationProblem'
-        "500":
-          description: Internal Server error
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: "#/components/schemas/Problem"
     delete:
       tags:
-      - Notes
+        - Notes
       summary: Delete note by ID
-      operationId: deleteNoteById
+      operationId: deleteNoteByIdAndMunicipalityId
       parameters:
-      - name: id
-        in: path
-        description: Note ID
-        required: true
-        schema:
-          type: string
-        example: b82bd8ac-1507-4d9a-958d-369261eecc15
+        - name: municipalityId
+          in: path
+          description: Municipality id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: id
+          in: path
+          description: Note ID
+          required: true
+          schema:
+            type: string
+          example: b82bd8ac-1507-4d9a-958d-369261eecc15
       responses:
-        "204":
-          description: Successful operation
-        "404":
-          description: Not found
+        "500":
+          description: Internal Server error
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: "#/components/schemas/Problem"
+        "204":
+          description: Successful operation
         "400":
           description: Bad request
           content:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: '#/components/schemas/Problem'
-                - $ref: '#/components/schemas/ConstraintViolationProblem'
-        "500":
-          description: Internal Server error
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: "#/components/schemas/Problem"
     patch:
       tags:
-      - Notes
+        - Notes
       summary: Update note
       operationId: updateNote
       parameters:
-      - name: id
-        in: path
-        description: Note ID
-        required: true
-        schema:
-          type: string
-        example: b82bd8ac-1507-4d9a-958d-369261eecc15
+        - name: municipalityId
+          in: path
+          description: Municipality id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: id
+          in: path
+          description: Note ID
+          required: true
+          schema:
+            type: string
+          example: b82bd8ac-1507-4d9a-958d-369261eecc15
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateNoteRequest'
+              $ref: "#/components/schemas/UpdateNoteRequest"
         required: true
       responses:
+        "500":
+          description: Internal Server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Note'
+                $ref: "#/components/schemas/Note"
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Note'
-        "404":
-          description: Not found
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: "#/components/schemas/Note"
         "400":
           description: Bad request
           content:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: '#/components/schemas/Problem'
-                - $ref: '#/components/schemas/ConstraintViolationProblem'
-        "500":
-          description: Internal Server error
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
-  /notes/{id}/revisions:
+                $ref: "#/components/schemas/Problem"
+  /{municipalityId}/notes/{id}/revisions:
     get:
       tags:
-      - Revisions
+        - Revisions
       summary: Get revisions by note ID
       operationId: getRevisionsByNoteId
       parameters:
-      - name: id
-        in: path
-        description: Note ID
-        required: true
-        schema:
-          type: string
-        example: b82bd8ac-1507-4d9a-958d-369261eecc15
+        - name: municipalityId
+          in: path
+          description: Municipality id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: id
+          in: path
+          description: Note ID
+          required: true
+          schema:
+            type: string
+          example: b82bd8ac-1507-4d9a-958d-369261eecc15
       responses:
+        "500":
+          description: Internal Server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
         "200":
           description: Successful operation
           content:
@@ -235,96 +284,97 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Revision'
+                  $ref: "#/components/schemas/Revision"
             application/problem+json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Revision'
-        "404":
-          description: Not found
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
+                  $ref: "#/components/schemas/Revision"
         "400":
           description: Bad request
           content:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: '#/components/schemas/Problem'
-                - $ref: '#/components/schemas/ConstraintViolationProblem'
-        "500":
-          description: Internal Server error
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
-  /notes/{id}/revisions/difference:
+                $ref: "#/components/schemas/Problem"
+  /{municipalityId}/notes/{id}/revisions/difference:
     get:
       tags:
-      - Revisions
+        - Revisions
       summary: "Diff revisions by noteId, source and target version"
       operationId: getDifferenceByVersions
       parameters:
-      - name: id
-        in: path
-        description: Note ID
-        required: true
-        schema:
-          type: string
-        example: b82bd8ac-1507-4d9a-958d-369261eecc15
-      - name: source
-        in: query
-        description: Source version
-        required: true
-        schema:
-          type: integer
-          format: int32
-        example: 1
-      - name: target
-        in: query
-        description: Target version
-        required: true
-        schema:
-          type: integer
-          format: int32
-        example: 2
+        - name: municipalityId
+          in: path
+          description: Municipality id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: id
+          in: path
+          description: Note ID
+          required: true
+          schema:
+            type: string
+          example: b82bd8ac-1507-4d9a-958d-369261eecc15
+        - name: source
+          in: query
+          description: Source version
+          required: true
+          schema:
+            type: integer
+            format: int32
+          example: 1
+        - name: target
+          in: query
+          description: Target version
+          required: true
+          schema:
+            type: integer
+            format: int32
+          example: 2
       responses:
+        "500":
+          description: Internal Server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DifferenceResponse'
+                $ref: "#/components/schemas/DifferenceResponse"
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/DifferenceResponse'
-        "404":
-          description: Not found
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: "#/components/schemas/DifferenceResponse"
         "400":
           description: Bad request
           content:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: '#/components/schemas/Problem'
-                - $ref: '#/components/schemas/ConstraintViolationProblem'
-        "500":
-          description: Internal Server error
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: "#/components/schemas/Problem"
   /api-docs:
     get:
       tags:
-      - API
+        - API
       summary: OpenAPI
       operationId: getApiDocs
       responses:
@@ -341,13 +391,12 @@ components:
   schemas:
     CreateNoteRequest:
       required:
-      - body
-      - clientId
-      - context
-      - createdBy
-      - municipalityId
-      - role
-      - subject
+        - body
+        - clientId
+        - context
+        - createdBy
+        - role
+        - subject
       type: object
       properties:
         context:
@@ -414,18 +463,10 @@ components:
           type: string
           description: External id for the case
           example: "2229"
-        municipalityId:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Municipality id for the case
-          example: "2229"
       description: CreateNoteRequest model
     Problem:
       type: object
       properties:
-        status:
-          $ref: '#/components/schemas/StatusType'
         instance:
           type: string
           format: uri
@@ -436,9 +477,11 @@ components:
           type: object
           additionalProperties:
             type: object
-        title:
-          type: string
+        status:
+          $ref: "#/components/schemas/StatusType"
         detail:
+          type: string
+        title:
           type: string
     StatusType:
       type: object
@@ -452,7 +495,7 @@ components:
       type: object
       properties:
         cause:
-          $ref: '#/components/schemas/ThrowableProblem'
+          $ref: "#/components/schemas/ThrowableProblem"
         stackTrace:
           type: array
           items:
@@ -479,11 +522,11 @@ components:
           type: string
           format: uri
         status:
-          $ref: '#/components/schemas/StatusType'
+          $ref: "#/components/schemas/StatusType"
         violations:
           type: array
           items:
-            $ref: '#/components/schemas/Violation'
+            $ref: "#/components/schemas/Violation"
         title:
           type: string
         message:
@@ -534,7 +577,7 @@ components:
       type: object
       properties:
         cause:
-          $ref: '#/components/schemas/ThrowableProblem'
+          $ref: "#/components/schemas/ThrowableProblem"
         stackTrace:
           type: array
           items:
@@ -559,8 +602,6 @@ components:
                 type: boolean
         message:
           type: string
-        status:
-          $ref: '#/components/schemas/StatusType'
         instance:
           type: string
           format: uri
@@ -571,9 +612,11 @@ components:
           type: object
           additionalProperties:
             type: object
-        title:
-          type: string
+        status:
+          $ref: "#/components/schemas/StatusType"
         detail:
+          type: string
+        title:
           type: string
         suppressed:
           type: array
@@ -617,7 +660,7 @@ components:
           type: string
     UpdateNoteRequest:
       required:
-      - modifiedBy
+        - modifiedBy
       type: object
       properties:
         subject:
@@ -728,8 +771,6 @@ components:
           format: date-time
       description: Note model
     FindNotesRequest:
-      required:
-      - municipalityId
       type: object
       properties:
         context:
@@ -752,12 +793,6 @@ components:
           type: string
           description: Id for the case
           example: "12345"
-        municipalityId:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Municipality id for the case
-          example: "2229"
         page:
           minimum: 1
           type: integer
@@ -781,9 +816,9 @@ components:
           type: array
           readOnly: true
           items:
-            $ref: '#/components/schemas/Note'
+            $ref: "#/components/schemas/Note"
         _meta:
-          $ref: '#/components/schemas/MetaData'
+          $ref: "#/components/schemas/MetaData"
       description: FindNotesResponse model
     MetaData:
       type: object
@@ -848,7 +883,7 @@ components:
           type: array
           readOnly: true
           items:
-            $ref: '#/components/schemas/Operation'
+            $ref: "#/components/schemas/Operation"
       description: DifferenceResponse model
     Operation:
       type: object
