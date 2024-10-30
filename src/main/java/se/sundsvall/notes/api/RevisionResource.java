@@ -32,7 +32,9 @@ import static org.springframework.http.ResponseEntity.ok;
 @Validated
 @RequestMapping("/{municipalityId}/notes/{id}/revisions")
 @Tag(name = "Revisions", description = "Revision operations")
-@ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(oneOf = { Problem.class, ConstraintViolationProblem.class })))
+@ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(oneOf = {
+	Problem.class, ConstraintViolationProblem.class
+})))
 @ApiResponse(responseCode = "404", description = "Not found", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 @ApiResponse(responseCode = "500", description = "Internal Server error", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 public class RevisionResource {
@@ -43,23 +45,25 @@ public class RevisionResource {
 		this.revisionService = revisionService;
 	}
 
-	@GetMapping(produces = { APPLICATION_JSON_VALUE, APPLICATION_PROBLEM_JSON_VALUE })
+	@GetMapping(produces = {
+		APPLICATION_JSON_VALUE, APPLICATION_PROBLEM_JSON_VALUE
+	})
 	@Operation(summary = "Get revisions by note ID")
 	@ApiResponse(responseCode = "200", description = "Successful operation", useReturnTypeSchema = true)
 	public ResponseEntity<List<Revision>> getRevisionsByNoteId(
-		@Parameter(name = "municipalityId", description = "Municipality id", example = "2281")
-		@PathVariable("municipalityId") @ValidMunicipalityId final String municipalityId,
+		@Parameter(name = "municipalityId", description = "Municipality id", example = "2281") @PathVariable("municipalityId") @ValidMunicipalityId final String municipalityId,
 		@Parameter(name = "id", description = "Note ID", example = "b82bd8ac-1507-4d9a-958d-369261eecc15") @ValidUuid @PathVariable final String id) {
 
 		return ok(revisionService.getRevisions(id, municipalityId));
 	}
 
-	@GetMapping(path = "/difference", produces = { APPLICATION_JSON_VALUE, APPLICATION_PROBLEM_JSON_VALUE })
+	@GetMapping(path = "/difference", produces = {
+		APPLICATION_JSON_VALUE, APPLICATION_PROBLEM_JSON_VALUE
+	})
 	@Operation(summary = "Diff revisions by noteId, source and target version")
 	@ApiResponse(responseCode = "200", description = "Successful operation", useReturnTypeSchema = true)
 	public ResponseEntity<DifferenceResponse> getDifferenceByVersions(
-		@Parameter(name = "municipalityId", description = "Municipality id", example = "2281")
-		@PathVariable("municipalityId") @ValidMunicipalityId final String municipalityId,
+		@Parameter(name = "municipalityId", description = "Municipality id", example = "2281") @PathVariable("municipalityId") @ValidMunicipalityId final String municipalityId,
 		@Parameter(name = "id", description = "Note ID", example = "b82bd8ac-1507-4d9a-958d-369261eecc15") @ValidUuid @PathVariable final String id,
 		@Parameter(name = "source", description = "Source version", example = "1", required = true) @Range(min = 0, max = Integer.MAX_VALUE) @RequestParam final Integer source,
 		@Parameter(name = "target", description = "Target version", example = "2", required = true) @Range(min = 0, max = Integer.MAX_VALUE) @RequestParam final Integer target) {

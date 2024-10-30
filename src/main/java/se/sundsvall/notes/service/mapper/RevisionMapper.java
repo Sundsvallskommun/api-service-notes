@@ -11,8 +11,7 @@ import static java.util.Collections.emptyList;
 
 public class RevisionMapper {
 
-	private RevisionMapper() {
-	}
+	private RevisionMapper() {}
 
 	public static List<Revision> toRevisionList(final List<RevisionEntity> revisionEntityList) {
 		return Optional.ofNullable(revisionEntityList).orElse(emptyList()).stream()

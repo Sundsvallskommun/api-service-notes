@@ -38,7 +38,7 @@ public class FindNotesRequest {
 	@Min(1)
 	@Max(1000)
 	protected int limit = parseInt(DEFAULT_LIMIT);
-	
+
 	public static FindNotesRequest create() {
 		return new FindNotesRequest();
 	}

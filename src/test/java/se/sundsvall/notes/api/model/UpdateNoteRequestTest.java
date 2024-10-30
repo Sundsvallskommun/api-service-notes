@@ -35,13 +35,13 @@ class UpdateNoteRequestTest {
 		final var externalCaseId = "externalCaseId";
 
 		final var updateNoteRequest = UpdateNoteRequest.create()
-				.withBody(body)
-				.withModifiedBy(modifiedBy)
-				.withSubject(subject)
-				.withCaseId(caseId)
-				.withCaseType(caseType)
-				.withCaseLink(caseLink)
-				.withExternalCaseId(externalCaseId);
+			.withBody(body)
+			.withModifiedBy(modifiedBy)
+			.withSubject(subject)
+			.withCaseId(caseId)
+			.withCaseType(caseType)
+			.withCaseLink(caseLink)
+			.withExternalCaseId(externalCaseId);
 
 		assertThat(updateNoteRequest).isNotNull().hasNoNullFieldsOrProperties();
 		assertThat(updateNoteRequest.getBody()).isEqualTo(body);

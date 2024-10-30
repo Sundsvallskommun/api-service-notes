@@ -1,13 +1,13 @@
 {
-	"subject": "Lets make Notes great again",
-	"body": "This is another note",
-	"context": "Context for note",
+	"municipalityId": "2281",
 	"role": "Role of note creator",
 	"clientId": "MyGreatClient",
-	"createdBy": "Jane Doe",
-	"caseId": "54321",
-	"caseType": "caseType",
-	"caseLink": "http://caselink.com/54321",
 	"externalCaseId": "12345",
-	"municipalityId": "2281"
+	"createdBy": "Jane Doe",
+	"subject": "Lets make Notes great again",
+	"caseId": "54321",
+	"context": "Context for note",
+	"caseLink": "http://caselink.com/54321",
+	"body": "This is another note",
+	"caseType": "caseType"
 }

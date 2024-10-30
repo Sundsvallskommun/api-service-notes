@@ -381,7 +381,7 @@ class NoteMapperTest {
 			Note::getCaseType,
 			Note::getCaseLink,
 			Note::getExternalCaseId).containsExactly(
-			tuple(body, context, role, clientId, created, createdBy, id, modified, modifiedBy, partyId, subject, caseId, caseType, caseLink, externalCaseId));
+				tuple(body, context, role, clientId, created, createdBy, id, modified, modifiedBy, partyId, subject, caseId, caseType, caseLink, externalCaseId));
 	}
 
 	@Test

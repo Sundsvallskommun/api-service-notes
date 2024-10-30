@@ -51,12 +51,12 @@ public class RevisionService {
 	 *
 	 * The diff will be performed and returned according to RFC6902.
 	 *
-	 * @see <a href="https://datatracker.ietf.org/doc/html/rfc6902">RFC6902</a>.
-	 * @param noteEntityId the NoteEntity id (uuid).
-	 * @param municipalityId the id of the municipality.
-	 * @param source       the diff source version.
-	 * @param target       the diff target version.
-	 * @return the difference result represented as a DifferenceResponse object.
+	 * @see                   <a href="https://datatracker.ietf.org/doc/html/rfc6902">RFC6902</a>.
+	 * @param  noteEntityId   the NoteEntity id (uuid).
+	 * @param  municipalityId the id of the municipality.
+	 * @param  source         the diff source version.
+	 * @param  target         the diff target version.
+	 * @return                the difference result represented as a DifferenceResponse object.
 	 */
 	public DifferenceResponse diff(final String noteEntityId, final String municipalityId, final int source, final int target) {
 
@@ -89,9 +89,9 @@ public class RevisionService {
 	 * - the last revisions serialized-snapshot differs from the current (i.e. provided) entity.
 	 * - no previous revisions exist for the provided entity.
 	 *
-	 * @param entity the entity that will have a new revision.
-	 * @param municipalityId the id of the municipality.
-	 * @return the created revision.
+	 * @param  entity         the entity that will have a new revision.
+	 * @param  municipalityId the id of the municipality.
+	 * @return                the created revision.
 	 */
 	public Revision createRevision(final NoteEntity entity, final String municipalityId) {
 
