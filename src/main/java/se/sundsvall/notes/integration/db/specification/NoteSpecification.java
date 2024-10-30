@@ -35,9 +35,9 @@ public interface NoteSpecification {
 	 * Method builds an equal filter if value is not null. If value is null, method returns
 	 * an always-true predicate (meaning no filtering will be applied for sent in attribute)
 	 *
-	 * @param attribute name that will be used in filter
-	 * @param value     value (or null) to compare against
-	 * @return {@code Specification<NoteEntity>} matching sent in comparison
+	 * @param  attribute name that will be used in filter
+	 * @param  value     value (or null) to compare against
+	 * @return           {@code Specification<NoteEntity>} matching sent in comparison
 	 */
 	private static Specification<NoteEntity> buildEqualFilter(String attribute, Object value) {
 		return (noteEntity, cq, cb) -> nonNull(value) ? cb.equal(noteEntity.get(attribute), value) : cb.and();

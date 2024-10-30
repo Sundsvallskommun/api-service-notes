@@ -96,7 +96,6 @@ class NoteServiceTest {
 		when(noteRepositoryMock.findByIdAndMunicipalityId(id, MUNICIPALITY_ID)).thenReturn(Optional.of(noteEntityMock));
 		when(revisionServiceMock.createRevision(same(noteEntityMock), eq(MUNICIPALITY_ID))).thenReturn(null);
 
-
 		try (MockedStatic<NoteMapper> mapperMock = Mockito.mockStatic(NoteMapper.class)) {
 			mapperMock.when(() -> NoteMapper.toNoteEntity(any(NoteEntity.class), any(UpdateNoteRequest.class))).thenReturn(noteEntityMock);
 			mapperMock.when(() -> NoteMapper.toNote(any(NoteEntity.class))).thenReturn(noteMock);
@@ -276,7 +275,8 @@ class NoteServiceTest {
 		final var findNotesRequest = FindNotesRequest.create().withPartyId(partyId).withPage(1).withLimit(100);
 
 		// Mock
-		when(noteRepositoryMock.findAllByParameters(findNotesRequest, PageRequest.of(findNotesRequest.getPage() - 1, findNotesRequest.getLimit(), Sort.by("created").descending()), MUNICIPALITY_ID)).thenReturn(new PageImpl<>(List.of(NoteEntity.create().withId(id)
+		when(noteRepositoryMock.findAllByParameters(findNotesRequest, PageRequest.of(findNotesRequest.getPage() - 1, findNotesRequest.getLimit(), Sort.by("created").descending()), MUNICIPALITY_ID)).thenReturn(new PageImpl<>(List.of(NoteEntity.create()
+			.withId(id)
 			.withPartyId(partyId))));
 
 		// Call
@@ -285,8 +285,8 @@ class NoteServiceTest {
 		// Verification
 		assertThat(result).isNotNull();
 		assertThat(result.getNotes()).extracting(
-				Note::getId,
-				Note::getPartyId)
+			Note::getId,
+			Note::getPartyId)
 			.containsExactly(tuple(id, partyId));
 
 		verify(noteRepositoryMock).findAllByParameters(any(), any(), anyString());

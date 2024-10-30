@@ -1,17 +1,17 @@
 {
-	"id": "8825bfae-11bc-4436-b1be-e4f0f225c048",
-	"partyId": "a37b06cc-edda-459d-860c-9f8cd1e24b00",
-	"subject": "This is an updated subject",
-	"body": "This is an updated note",
-	"context": "context1",
 	"role": "role1",
 	"clientId": "clientId1",
-	"createdBy": "createdBy1",
-	"modifiedBy": "Jack the updater",
+	"externalCaseId": "externalCaseIdUpdate",
+	"subject": "This is an updated subject",
 	"created": "2022-01-01T12:14:32.234+01:00",
-	"modified": "${json-unit.any-string}",
-	"caseId": "caseUpdate",
-	"caseType": "caseTypeUpdate",
 	"caseLink": "caseLinkUpdate",
-	"externalCaseId": "externalCaseIdUpdate"
+	"body": "This is an updated note",
+	"caseType": "caseTypeUpdate",
+	"createdBy": "createdBy1",
+	"caseId": "caseUpdate",
+	"context": "context1",
+	"modified": "${json-unit.any-string}",
+	"modifiedBy": "Jack the updater",
+	"id": "8825bfae-11bc-4436-b1be-e4f0f225c048",
+	"partyId": "a37b06cc-edda-459d-860c-9f8cd1e24b00"
 }
