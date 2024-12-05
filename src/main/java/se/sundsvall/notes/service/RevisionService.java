@@ -47,8 +47,8 @@ public class RevisionService {
 	}
 
 	/**
-	 * Performs a diff between to versions of a NoteEtity.
-	 *
+	 * Performs a diff between to versions of a NoteEntity.
+	 * <p>
 	 * The diff will be performed and returned according to RFC6902.
 	 *
 	 * @see                   <a href="https://datatracker.ietf.org/doc/html/rfc6902">RFC6902</a>.
@@ -77,14 +77,14 @@ public class RevisionService {
 			// Return result.
 			return DifferenceResponse.create().withOperations(List.of(objectMapper.readValue(diffResult, Operation[].class)));
 		} catch (final IOException e) {
-			LOG.error("Error occured during diff: ", e);
+			LOG.error("Error occurred during diff: ", e);
 			throw Problem.valueOf(INTERNAL_SERVER_ERROR, format(PROBLEM_DURING_DIFF, noteEntityId, source, target));
 		}
 	}
 
 	/**
 	 * Create a new revision.
-	 *
+	 * <p>
 	 * A new revision will be created if:
 	 * - the last revisions serialized-snapshot differs from the current (i.e. provided) entity.
 	 * - no previous revisions exist for the provided entity.
