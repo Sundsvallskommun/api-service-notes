@@ -1,5 +1,22 @@
 package se.sundsvall.notes.service;
 
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,24 +37,6 @@ import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.service.mapper.NoteMapper;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 class NoteServiceTest {

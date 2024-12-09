@@ -1,5 +1,13 @@
 package se.sundsvall.notes.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
+import static org.zalando.problem.Status.BAD_REQUEST;
+
+import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,15 +19,6 @@ import org.zalando.problem.violations.ConstraintViolationProblem;
 import org.zalando.problem.violations.Violation;
 import se.sundsvall.notes.Application;
 import se.sundsvall.notes.service.RevisionService;
-
-import java.util.Map;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
-import static org.zalando.problem.Status.BAD_REQUEST;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")

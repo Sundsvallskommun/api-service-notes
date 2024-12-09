@@ -1,13 +1,12 @@
 package se.sundsvall.notes.api.model;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
-
 import java.util.Objects;
-
-import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
 
 @Schema(description = "CreateNoteRequest model")
 public class CreateNoteRequest {
