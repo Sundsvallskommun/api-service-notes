@@ -1,13 +1,12 @@
 package se.sundsvall.notes.service.mapper;
 
-import se.sundsvall.notes.api.model.Revision;
-import se.sundsvall.notes.integration.db.model.RevisionEntity;
+import static java.util.Collections.emptyList;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-import static java.util.Collections.emptyList;
+import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.integration.db.model.RevisionEntity;
 
 public class RevisionMapper {
 

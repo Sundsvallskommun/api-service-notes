@@ -1,6 +1,15 @@
 package se.sundsvall.notes.service;
 
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static org.zalando.problem.Status.NOT_FOUND;
+import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
+import static se.sundsvall.notes.service.mapper.NoteMapper.toNote;
+import static se.sundsvall.notes.service.mapper.NoteMapper.toNoteEntity;
+import static se.sundsvall.notes.service.mapper.NoteMapper.toNotes;
+
 import jakarta.transaction.Transactional;
+import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -14,16 +23,6 @@ import se.sundsvall.notes.api.model.Revision;
 import se.sundsvall.notes.api.model.RevisionInformation;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
-
-import java.util.List;
-
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static org.zalando.problem.Status.NOT_FOUND;
-import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
-import static se.sundsvall.notes.service.mapper.NoteMapper.toNote;
-import static se.sundsvall.notes.service.mapper.NoteMapper.toNoteEntity;
-import static se.sundsvall.notes.service.mapper.NoteMapper.toNotes;
 
 @Service
 @Transactional

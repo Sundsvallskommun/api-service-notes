@@ -1,25 +1,5 @@
 package se.sundsvall.notes.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flipkart.zjsonpatch.DiffFlags;
-import com.flipkart.zjsonpatch.JsonDiff;
-import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.zalando.problem.Problem;
-import se.sundsvall.notes.api.model.DifferenceResponse;
-import se.sundsvall.notes.api.model.Operation;
-import se.sundsvall.notes.api.model.Revision;
-import se.sundsvall.notes.integration.db.RevisionRepository;
-import se.sundsvall.notes.integration.db.model.NoteEntity;
-import se.sundsvall.notes.integration.db.model.RevisionEntity;
-
-import java.io.IOException;
-import java.util.EnumSet;
-import java.util.List;
-
 import static com.flipkart.zjsonpatch.DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE;
 import static com.flipkart.zjsonpatch.DiffFlags.OMIT_VALUE_ON_REMOVE;
 import static java.lang.String.format;
@@ -30,6 +10,25 @@ import static se.sundsvall.notes.service.ServiceConstants.PROBLEM_DURING_DIFF;
 import static se.sundsvall.notes.service.ServiceConstants.REVISION_NOT_FOUND_FOR_ID_AND_VERSION;
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevision;
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionList;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flipkart.zjsonpatch.DiffFlags;
+import com.flipkart.zjsonpatch.JsonDiff;
+import jakarta.transaction.Transactional;
+import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.zalando.problem.Problem;
+import se.sundsvall.notes.api.model.DifferenceResponse;
+import se.sundsvall.notes.api.model.Operation;
+import se.sundsvall.notes.api.model.Revision;
+import se.sundsvall.notes.integration.db.RevisionRepository;
+import se.sundsvall.notes.integration.db.model.NoteEntity;
+import se.sundsvall.notes.integration.db.model.RevisionEntity;
 
 @Service
 @Transactional

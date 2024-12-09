@@ -1,12 +1,10 @@
 package se.sundsvall.notes.api.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 import java.util.Objects;
-
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Revision model")
 public class Revision {

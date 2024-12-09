@@ -1,9 +1,9 @@
 package se.sundsvall.notes.integration.db.specification;
 
+import static java.util.Objects.nonNull;
+
 import org.springframework.data.jpa.domain.Specification;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
-
-import static java.util.Objects.nonNull;
 
 public interface NoteSpecification {
 
