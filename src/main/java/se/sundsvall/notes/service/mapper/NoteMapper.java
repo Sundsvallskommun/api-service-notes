@@ -1,17 +1,16 @@
 package se.sundsvall.notes.service.mapper;
 
-import se.sundsvall.notes.api.model.CreateNoteRequest;
-import se.sundsvall.notes.api.model.Note;
-import se.sundsvall.notes.api.model.UpdateNoteRequest;
-import se.sundsvall.notes.integration.db.model.NoteEntity;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-import static java.util.Collections.emptyList;
-import static java.util.Objects.isNull;
-import static java.util.Optional.ofNullable;
+import se.sundsvall.notes.api.model.CreateNoteRequest;
+import se.sundsvall.notes.api.model.Note;
+import se.sundsvall.notes.api.model.UpdateNoteRequest;
+import se.sundsvall.notes.integration.db.model.NoteEntity;
 
 public class NoteMapper {
 
