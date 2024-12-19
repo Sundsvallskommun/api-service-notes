@@ -17,9 +17,10 @@ _The service provides functionality for storing and retrieving notes linked to a
 1. **Clone the repository:**
 
 ```bash
-    git clone https://github.com/Sundsvallskommun/api-service-notes.git
-    cd api-service-notes
+git clone https://github.com/Sundsvallskommun/api-service-notes.git
+cd api-service-notes
 ```
+
 2. **Configure the application:**
 
    Before running the application, you need to set up configuration settings.
@@ -36,12 +37,13 @@ _The service provides functionality for storing and retrieving notes linked to a
    - Using Maven:
 
 ```bash
-    mvn spring-boot:run
+mvn spring-boot:run
 ```
-   - Using Gradle:
+
+- Using Gradle:
 
 ```bash
-    gradle bootRun
+gradle bootRun
 ```
 
 ## Dependencies
@@ -75,24 +77,25 @@ Configuration is crucial for the application to run successfully. Ensure all nec
 - **Server Port:**
 
 ```yaml
-  server:
-    port: 8080
+server:
+  port: 8080
 ```
+
 - **Database Settings**
 
 ```yaml
-  spring:
-    datasource:
-      url: jdbc:mysql://database_server:port/your_database
-      username: your_db_username
-      password: your_db_password
-    jpa:
-      properties:
-        jakarta: 
-          persistence:
-            schema-generation:
-              database:
-                action: jpa database action on startup (should be set to 'validate' in production env)
+spring:
+  datasource:
+    url: jdbc:mysql://database_server:port/your_database
+    username: your_db_username
+    password: your_db_password
+  jpa:
+    properties:
+      jakarta: 
+        persistence:
+          schema-generation:
+            database:
+              action: jpa database action on startup (should be set to 'validate' in production env)
 ```
 
 ### Database Initialization
@@ -100,9 +103,9 @@ Configuration is crucial for the application to run successfully. Ensure all nec
 The project is set up with [Flyway](https://github.com/flyway/flyway) for database migrations. Flyway is disabled by default so you will have to enable it to automatically populate the database schema upon application startup.
 
 ```yaml
-  spring:
-    flyway:
-      enabled: true
+spring:
+  flyway:
+    enabled: true
 ```
 
 - **No additional setup is required** for database initialization, as long as the database connection settings are correctly configured.
