@@ -2,6 +2,8 @@ package se.sundsvall.notes.integration.db.model;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
+import static org.hibernate.Length.LONG32;
+import static org.hibernate.annotations.TimeZoneStorageType.NORMALIZE;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,9 +14,7 @@ import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
-import org.hibernate.Length;
 import org.hibernate.annotations.TimeZoneStorage;
-import org.hibernate.annotations.TimeZoneStorageType;
 import org.hibernate.annotations.UuidGenerator;
 
 @Entity
@@ -40,14 +40,14 @@ public class RevisionEntity {
 	@Column(name = "version")
 	private Integer version;
 
-	@Column(name = "serialized_snapshot", length = Length.LONG32)
+	@Column(name = "serialized_snapshot", length = LONG32)
 	private String serializedSnapshot;
 
 	@Column(name = "municipality_id", nullable = false)
 	private String municipalityId;
 
 	@Column(name = "created")
-	@TimeZoneStorage(TimeZoneStorageType.NORMALIZE)
+	@TimeZoneStorage(NORMALIZE)
 	private OffsetDateTime created;
 
 	public static RevisionEntity create() {

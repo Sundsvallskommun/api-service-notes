@@ -8,7 +8,7 @@ import java.util.Optional;
 import se.sundsvall.notes.api.model.Revision;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
 
-public class RevisionMapper {
+public final class RevisionMapper {
 
 	private RevisionMapper() {}
 

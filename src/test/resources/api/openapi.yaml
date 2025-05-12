@@ -1,47 +1,44 @@
 openapi: 3.0.1
 info:
   title: api-notes
-  contact: { }
+  contact: {}
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
-  version: "4.0"
+  version: "4.1"
 servers:
-  - url: http://localhost:50271
-    description: Generated server url
+- url: http://localhost:59200
+  description: Generated server url
 tags:
-  - name: Notes
-    description: Note operations
-  - name: Revisions
-    description: Revision operations
+- name: Notes
+  description: Note operations
+- name: Revisions
+  description: Revision operations
 paths:
   /{municipalityId}/notes:
     get:
       tags:
-        - Notes
+      - Notes
       summary: Find all notes filtered by incoming parameters
       operationId: findNotes
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: searchParams
-          in: query
-          required: true
-          schema:
-            $ref: "#/components/schemas/FindNotesRequest"
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: searchParams
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/FindNotesRequest"
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/FindNotesResponse"
-            application/problem+json:
               schema:
                 $ref: "#/components/schemas/FindNotesResponse"
         "400":
@@ -50,8 +47,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "500":
           description: Internal Server error
           content:
@@ -60,17 +57,17 @@ paths:
                 $ref: "#/components/schemas/Problem"
     post:
       tags:
-        - Notes
+      - Notes
       summary: Create new note
       operationId: createNote
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
       requestBody:
         content:
           application/json:
@@ -91,8 +88,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "500":
           description: Internal Server error
           content:
@@ -102,24 +99,24 @@ paths:
   /{municipalityId}/notes/{id}:
     get:
       tags:
-        - Notes
+      - Notes
       summary: Get note by ID
       operationId: getNoteByIdAndMunicipalityId
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: id
-          in: path
-          description: Note ID
-          required: true
-          schema:
-            type: string
-          example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: id
+        in: path
+        description: Note ID
+        required: true
+        schema:
+          type: string
+        example: b82bd8ac-1507-4d9a-958d-369261eecc15
       responses:
         "200":
           description: Successful operation
@@ -127,23 +124,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Note"
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Note"
-        "404":
-          description: Not found
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
         "400":
           description: Bad request
           content:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
         "500":
           description: Internal Server error
           content:
@@ -152,41 +146,41 @@ paths:
                 $ref: "#/components/schemas/Problem"
     delete:
       tags:
-        - Notes
+      - Notes
       summary: Delete note by ID
       operationId: deleteNoteByIdAndMunicipalityId
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: id
-          in: path
-          description: Note ID
-          required: true
-          schema:
-            type: string
-          example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: id
+        in: path
+        description: Note ID
+        required: true
+        schema:
+          type: string
+        example: b82bd8ac-1507-4d9a-958d-369261eecc15
       responses:
         "204":
           description: Successful operation
-        "404":
-          description: Not found
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
         "400":
           description: Bad request
           content:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
         "500":
           description: Internal Server error
           content:
@@ -195,24 +189,24 @@ paths:
                 $ref: "#/components/schemas/Problem"
     patch:
       tags:
-        - Notes
+      - Notes
       summary: Update note
       operationId: updateNote
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: id
-          in: path
-          description: Note ID
-          required: true
-          schema:
-            type: string
-          example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: id
+        in: path
+        description: Note ID
+        required: true
+        schema:
+          type: string
+        example: b82bd8ac-1507-4d9a-958d-369261eecc15
       requestBody:
         content:
           application/json:
@@ -226,23 +220,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Note"
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Note"
-        "404":
-          description: Not found
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
         "400":
           description: Bad request
           content:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
         "500":
           description: Internal Server error
           content:
@@ -252,34 +243,29 @@ paths:
   /{municipalityId}/notes/{id}/revisions:
     get:
       tags:
-        - Revisions
+      - Revisions
       summary: Get revisions by note ID
       operationId: getRevisionsByNoteId
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: id
-          in: path
-          description: Note ID
-          required: true
-          schema:
-            type: string
-          example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: id
+        in: path
+        description: Note ID
+        required: true
+        schema:
+          type: string
+        example: b82bd8ac-1507-4d9a-958d-369261eecc15
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Revision"
-            application/problem+json:
               schema:
                 type: array
                 items:
@@ -290,8 +276,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "404":
           description: Not found
           content:
@@ -307,52 +293,49 @@ paths:
   /{municipalityId}/notes/{id}/revisions/difference:
     get:
       tags:
-        - Revisions
+      - Revisions
       summary: "Diff revisions by noteId, source and target version"
       operationId: getDifferenceByVersions
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: id
-          in: path
-          description: Note ID
-          required: true
-          schema:
-            type: string
-          example: b82bd8ac-1507-4d9a-958d-369261eecc15
-        - name: source
-          in: query
-          description: Source version
-          required: true
-          schema:
-            maximum: 9223372036854775807
-            minimum: 0
-            type: integer
-            format: int32
-          example: 1
-        - name: target
-          in: query
-          description: Target version
-          required: true
-          schema:
-            maximum: 9223372036854775807
-            minimum: 0
-            type: integer
-            format: int32
-          example: 2
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: id
+        in: path
+        description: Note ID
+        required: true
+        schema:
+          type: string
+        example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      - name: source
+        in: query
+        description: Source version
+        required: true
+        schema:
+          maximum: 9223372036854775807
+          minimum: 0
+          type: integer
+          format: int32
+        example: 1
+      - name: target
+        in: query
+        description: Target version
+        required: true
+        schema:
+          maximum: 9223372036854775807
+          minimum: 0
+          type: integer
+          format: int32
+        example: 2
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/DifferenceResponse"
-            application/problem+json:
               schema:
                 $ref: "#/components/schemas/DifferenceResponse"
         "400":
@@ -361,8 +344,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "404":
           description: Not found
           content:
@@ -378,7 +361,7 @@ paths:
   /api-docs:
     get:
       tags:
-        - API
+      - API
       summary: OpenAPI
       operationId: getApiDocs
       responses:
@@ -393,82 +376,6 @@ paths:
       x-wso2-mutual-ssl: Optional
 components:
   schemas:
-    CreateNoteRequest:
-      required:
-        - body
-        - clientId
-        - context
-        - createdBy
-        - role
-        - subject
-      type: object
-      properties:
-        context:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Context for note
-          example: SUPPORT
-        role:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Role of note creator
-          example: FIRST_LINE_SUPPORT
-        clientId:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Id of the client who is the owner of the note
-          example: SUPPORT_MGMT
-        partyId:
-          type: string
-          description: Party id (e.g. a personId or an organizationId)
-          example: 81471222-5798-11e9-ae24-57fa13b361e1
-        subject:
-          maximum: 255
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: The note subject
-          example: This is a subject
-        body:
-          maximum: 2048
-          maxLength: 2048
-          minLength: 1
-          type: string
-          description: The note body
-          example: This is a note
-        createdBy:
-          minLength: 1
-          type: string
-          description: Created by
-          example: John Doe
-        caseId:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Id for the case
-          example: "12345"
-        caseType:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Type of the case
-          example: Byggärende
-        caseLink:
-          maxLength: 512
-          minLength: 1
-          type: string
-          description: Link to the case
-          example: http://caselink.com/12345
-        externalCaseId:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: External id for the case
-          example: "2229"
-      description: CreateNoteRequest model
     Problem:
       type: object
       properties:
@@ -484,9 +391,9 @@ components:
             type: object
         status:
           $ref: "#/components/schemas/StatusType"
-        title:
-          type: string
         detail:
+          type: string
+        title:
           type: string
     StatusType:
       type: object
@@ -619,9 +526,9 @@ components:
             type: object
         status:
           $ref: "#/components/schemas/StatusType"
-        title:
-          type: string
         detail:
+          type: string
+        title:
           type: string
         suppressed:
           type: array
@@ -663,9 +570,85 @@ components:
           type: string
         message:
           type: string
+    CreateNoteRequest:
+      required:
+      - body
+      - clientId
+      - context
+      - createdBy
+      - role
+      - subject
+      type: object
+      properties:
+        context:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: Context for note
+          example: SUPPORT
+        role:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: Role of note creator
+          example: FIRST_LINE_SUPPORT
+        clientId:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: Id of the client who is the owner of the note
+          example: SUPPORT_MGMT
+        partyId:
+          type: string
+          description: Party id (e.g. a personId or an organizationId)
+          example: 81471222-5798-11e9-ae24-57fa13b361e1
+        subject:
+          maximum: 255
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: The note subject
+          example: This is a subject
+        body:
+          maximum: 2048
+          maxLength: 2048
+          minLength: 1
+          type: string
+          description: The note body
+          example: This is a note
+        createdBy:
+          minLength: 1
+          type: string
+          description: Created by
+          example: John Doe
+        caseId:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: Id for the case
+          example: "12345"
+        caseType:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: Type of the case
+          example: Byggärende
+        caseLink:
+          maxLength: 512
+          minLength: 1
+          type: string
+          description: Link to the case
+          example: http://caselink.com/12345
+        externalCaseId:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: External id for the case
+          example: "2229"
+      description: CreateNoteRequest model
     UpdateNoteRequest:
       required:
-        - modifiedBy
+      - modifiedBy
       type: object
       properties:
         subject:
@@ -912,4 +895,4 @@ components:
           example: John
       description: Operation model
       readOnly: true
-  securitySchemes: { }
+  securitySchemes: {}

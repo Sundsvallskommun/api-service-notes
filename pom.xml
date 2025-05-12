@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>se.sundsvall</groupId>
 	<artifactId>api-service-notes</artifactId>
-	<version>4.0</version>
+	<version>4.1</version>
 	<name>api-service-notes</name>
 	<description>Service for handling notes</description>
 	<properties>
