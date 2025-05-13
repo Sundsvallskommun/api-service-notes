@@ -2,6 +2,8 @@ package se.sundsvall.notes.integration.db.model;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
+import static org.hibernate.Length.LONG32;
+import static org.hibernate.annotations.TimeZoneStorageType.NORMALIZE;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,9 +16,7 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
-import org.hibernate.Length;
 import org.hibernate.annotations.TimeZoneStorage;
-import org.hibernate.annotations.TimeZoneStorageType;
 import org.hibernate.annotations.UuidGenerator;
 
 @Entity
@@ -53,20 +53,20 @@ public class NoteEntity implements Serializable {
 	private String createdBy;
 
 	@Column(name = "created")
-	@TimeZoneStorage(TimeZoneStorageType.NORMALIZE)
+	@TimeZoneStorage(NORMALIZE)
 	private OffsetDateTime created;
 
 	@Column(name = "modified_by")
 	private String modifiedBy;
 
 	@Column(name = "modified")
-	@TimeZoneStorage(TimeZoneStorageType.NORMALIZE)
+	@TimeZoneStorage(NORMALIZE)
 	private OffsetDateTime modified;
 
 	@Column(name = "subject")
 	private String subject;
 
-	@Column(name = "body", length = Length.LONG32)
+	@Column(name = "body", length = LONG32)
 	private String body;
 
 	@Column(name = "case_id")

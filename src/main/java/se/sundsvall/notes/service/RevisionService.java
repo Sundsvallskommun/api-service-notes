@@ -2,7 +2,6 @@ package se.sundsvall.notes.service;
 
 import static com.flipkart.zjsonpatch.DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE;
 import static com.flipkart.zjsonpatch.DiffFlags.OMIT_VALUE_ON_REMOVE;
-import static java.lang.String.format;
 import static org.apache.commons.lang3.ObjectUtils.anyNull;
 import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 import static org.zalando.problem.Status.NOT_FOUND;
@@ -62,9 +61,9 @@ public class RevisionService {
 		try {
 			// Fetch revisions from DB.
 			final var revisionEntity1 = revisionRepository.findByEntityIdAndMunicipalityIdAndVersion(noteEntityId, municipalityId, source)
-				.orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(REVISION_NOT_FOUND_FOR_ID_AND_VERSION, noteEntityId, source)));
+				.orElseThrow(() -> Problem.valueOf(NOT_FOUND, REVISION_NOT_FOUND_FOR_ID_AND_VERSION.formatted(noteEntityId, source)));
 			final var revisionEntity2 = revisionRepository.findByEntityIdAndMunicipalityIdAndVersion(noteEntityId, municipalityId, target)
-				.orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(REVISION_NOT_FOUND_FOR_ID_AND_VERSION, noteEntityId, target)));
+				.orElseThrow(() -> Problem.valueOf(NOT_FOUND, REVISION_NOT_FOUND_FOR_ID_AND_VERSION.formatted(noteEntityId, target)));
 
 			// Deserialize revision JSON into a JsonNode.
 			final var sourceJson = objectMapper.readTree(revisionEntity1.getSerializedSnapshot());
@@ -77,7 +76,7 @@ public class RevisionService {
 			return DifferenceResponse.create().withOperations(List.of(objectMapper.readValue(diffResult, Operation[].class)));
 		} catch (final IOException e) {
 			LOG.error("Error occurred during diff: ", e);
-			throw Problem.valueOf(INTERNAL_SERVER_ERROR, format(PROBLEM_DURING_DIFF, noteEntityId, source, target));
+			throw Problem.valueOf(INTERNAL_SERVER_ERROR, PROBLEM_DURING_DIFF.formatted(noteEntityId, source, target));
 		}
 	}
 

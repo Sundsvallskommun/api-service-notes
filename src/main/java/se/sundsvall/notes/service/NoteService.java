@@ -1,6 +1,5 @@
 package se.sundsvall.notes.service;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.zalando.problem.Status.NOT_FOUND;
 import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
@@ -48,7 +47,7 @@ public class NoteService {
 	}
 
 	public RevisionInformation updateNote(final String id, final UpdateNoteRequest updateNoteRequest, final String municipalityId) {
-		final var noteEntity = noteRepository.findByIdAndMunicipalityId(id, municipalityId).orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
+		final var noteEntity = noteRepository.findByIdAndMunicipalityId(id, municipalityId).orElseThrow(() -> Problem.valueOf(NOT_FOUND, ERROR_NOTE_NOT_FOUND.formatted(id)));
 
 		toNoteEntity(noteEntity, updateNoteRequest);
 		noteRepository.flush();
@@ -67,7 +66,7 @@ public class NoteService {
 	}
 
 	public Note getNoteByIdAndMunicipalityId(final String id, final String municipalityId) {
-		final var noteEntity = noteRepository.findByIdAndMunicipalityId(id, municipalityId).orElseThrow(() -> Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id)));
+		final var noteEntity = noteRepository.findByIdAndMunicipalityId(id, municipalityId).orElseThrow(() -> Problem.valueOf(NOT_FOUND, ERROR_NOTE_NOT_FOUND.formatted(id)));
 
 		return toNote(noteEntity);
 	}
@@ -91,7 +90,7 @@ public class NoteService {
 
 	public RevisionInformation deleteNoteByIdAndMunicipalityId(final String id, final String municipalityId) {
 		if (!noteRepository.existsByIdAndMunicipalityId(id, municipalityId)) {
-			throw Problem.valueOf(NOT_FOUND, format(ERROR_NOTE_NOT_FOUND, id));
+			throw Problem.valueOf(NOT_FOUND, ERROR_NOTE_NOT_FOUND.formatted(id));
 		}
 
 		noteRepository.deleteByIdAndMunicipalityId(id, municipalityId);

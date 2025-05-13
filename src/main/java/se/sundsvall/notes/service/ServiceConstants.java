@@ -1,6 +1,6 @@
 package se.sundsvall.notes.service;
 
-public class ServiceConstants {
+public final class ServiceConstants {
 
 	public static final String KEY_CURRENT_REVISION = "x-current-revision";
 
