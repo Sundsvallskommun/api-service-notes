@@ -10,6 +10,7 @@ import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
 
 @Schema(description = "FindNotesRequest model")
 public class FindNotesRequest {
+
 	private static final String DEFAULT_PAGE = "1";
 	private static final String DEFAULT_LIMIT = "100";
 
