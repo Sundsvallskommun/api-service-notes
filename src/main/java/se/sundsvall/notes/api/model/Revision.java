@@ -1,10 +1,11 @@
 package se.sundsvall.notes.api.model;
 
+import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 @Schema(description = "Revision model")
 public class Revision {
@@ -22,7 +23,7 @@ public class Revision {
 	private Integer version;
 
 	@Schema(description = "Created timestamp")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
+	@DateTimeFormat(iso = DATE_TIME)
 	private OffsetDateTime created;
 
 	public static Revision create() {

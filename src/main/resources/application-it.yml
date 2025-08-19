@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:tc:mariadb:10.6.4:///
+    url: jdbc:tc:mariadb:10.6:///
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
   flyway:
     enabled: true
