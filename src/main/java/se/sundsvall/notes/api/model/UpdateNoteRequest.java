@@ -10,31 +10,31 @@ import java.util.Objects;
 @Schema(description = "UpdateNoteRequest model")
 public class UpdateNoteRequest {
 
-	@Schema(description = "The note subject", example = "This is a subject", maximum = "255")
+	@Schema(description = "The note subject", examples = "This is a subject", exclusiveMaximumValue = 256)
 	@Size(min = 1, max = 255)
 	private String subject;
 
-	@Schema(description = "The note nody", example = "This is a note", maximum = "2048")
+	@Schema(description = "The note body", examples = "This is a note", exclusiveMaximumValue = 2049)
 	@Size(min = 1, max = 2048)
 	private String body;
 
-	@Schema(description = "Modified by", example = "John Doe", requiredMode = REQUIRED)
+	@Schema(description = "Modified by", examples = "John Doe", requiredMode = REQUIRED)
 	@NotBlank
 	private String modifiedBy;
 
-	@Schema(description = "Id for the case", example = "12345")
+	@Schema(description = "Id for the case", examples = "12345")
 	@Size(min = 1, max = 255)
 	private String caseId;
 
-	@Schema(description = "Type of the case", example = "Byggärende")
+	@Schema(description = "Type of the case", examples = "Byggärende")
 	@Size(min = 1, max = 255)
 	private String caseType;
 
-	@Schema(description = "Link to the case", example = "http://caselink.com/12345")
+	@Schema(description = "Link to the case", examples = "http://caselink.com/12345")
 	@Size(min = 1, max = 512)
 	private String caseLink;
 
-	@Schema(description = "External id for the case", example = "2229")
+	@Schema(description = "External id for the case", examples = "2229")
 	@Size(min = 1, max = 255)
 	private String externalCaseId;
 
