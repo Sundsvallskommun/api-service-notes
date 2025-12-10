@@ -6,7 +6,7 @@ _The service provides functionality for storing and retrieving notes linked to a
 
 ### Prerequisites
 
-- **Java 21 or higher**
+- **Java 25 or higher**
 - **Maven**
 - **MariaDB**
 - **Git**

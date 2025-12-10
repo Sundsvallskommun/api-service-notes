@@ -11,52 +11,52 @@ import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
 @Schema(description = "CreateNoteRequest model")
 public class CreateNoteRequest {
 
-	@Schema(description = "Context for note", example = "SUPPORT", requiredMode = REQUIRED)
+	@Schema(description = "Context for note", examples = "SUPPORT", requiredMode = REQUIRED)
 	@NotBlank
 	@Size(min = 1, max = 255)
 	private String context;
 
-	@Schema(description = "Role of note creator", example = "FIRST_LINE_SUPPORT", requiredMode = REQUIRED)
+	@Schema(description = "Role of note creator", examples = "FIRST_LINE_SUPPORT", requiredMode = REQUIRED)
 	@NotBlank
 	@Size(min = 1, max = 255)
 	private String role;
 
-	@Schema(description = "Id of the client who is the owner of the note", example = "SUPPORT_MGMT", requiredMode = REQUIRED)
+	@Schema(description = "Id of the client who is the owner of the note", examples = "SUPPORT_MGMT", requiredMode = REQUIRED)
 	@NotBlank
 	@Size(min = 1, max = 255)
 	private String clientId;
 
-	@Schema(description = "Party id (e.g. a personId or an organizationId)", example = "81471222-5798-11e9-ae24-57fa13b361e1")
+	@Schema(description = "Party id (e.g. a personId or an organizationId)", examples = "81471222-5798-11e9-ae24-57fa13b361e1")
 	@ValidUuid(nullable = true)
 	private String partyId;
 
-	@Schema(description = "The note subject", example = "This is a subject", maximum = "255", requiredMode = REQUIRED)
+	@Schema(description = "The note subject", examples = "This is a subject", exclusiveMaximumValue = 256, requiredMode = REQUIRED)
 	@NotBlank
 	@Size(min = 1, max = 255)
 	private String subject;
 
-	@Schema(description = "The note body", example = "This is a note", maximum = "2048", requiredMode = REQUIRED)
+	@Schema(description = "The note body", examples = "This is a note", exclusiveMaximumValue = 2049, requiredMode = REQUIRED)
 	@NotBlank
 	@Size(min = 1, max = 2048)
 	private String body;
 
-	@Schema(description = "Created by", example = "John Doe", requiredMode = REQUIRED)
+	@Schema(description = "Created by", examples = "John Doe", requiredMode = REQUIRED)
 	@NotBlank
 	private String createdBy;
 
-	@Schema(description = "Id for the case", example = "12345")
+	@Schema(description = "Id for the case", examples = "12345")
 	@Size(min = 1, max = 255)
 	private String caseId;
 
-	@Schema(description = "Type of the case", example = "Byggärende")
+	@Schema(description = "Type of the case", examples = "Byggärende")
 	@Size(min = 1, max = 255)
 	private String caseType;
 
-	@Schema(description = "Link to the case", example = "http://caselink.com/12345")
+	@Schema(description = "Link to the case", examples = "http://caselink.com/12345")
 	@Size(min = 1, max = 512)
 	private String caseLink;
 
-	@Schema(description = "External id for the case", example = "2229")
+	@Schema(description = "External id for the case", examples = "2229")
 	@Size(min = 1, max = 255)
 	private String externalCaseId;
 

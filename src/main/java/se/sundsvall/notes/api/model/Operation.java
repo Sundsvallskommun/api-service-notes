@@ -6,16 +6,16 @@ import java.util.Objects;
 @Schema(description = "Operation model")
 public class Operation {
 
-	@Schema(description = "Type of operation", example = "replace")
+	@Schema(description = "Type of operation", examples = "replace")
 	private String op;
 
-	@Schema(description = "Path to attribute", example = "/name/firstName")
+	@Schema(description = "Path to attribute", examples = "/name/firstName")
 	private String path;
 
-	@Schema(description = "Value of attribute", example = "John")
+	@Schema(description = "Value of attribute", examples = "John")
 	private String value;
 
-	@Schema(description = "Previous value of attribute", example = "John")
+	@Schema(description = "Previous value of attribute", examples = "John")
 	private String fromValue;
 
 	public static Operation create() {
