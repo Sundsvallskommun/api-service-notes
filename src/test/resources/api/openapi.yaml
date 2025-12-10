@@ -1,13 +1,13 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: api-notes
   contact: { }
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
-  version: '@project.version@'
+  version: "4.1"
 servers:
-  - url: http://localhost:56161
+  - url: http://localhost:52513
     description: Generated server url
 tags:
   - name: Notes
@@ -316,20 +316,20 @@ paths:
           description: Source version
           required: true
           schema:
-            maximum: 9223372036854775807
-            minimum: 0
             type: integer
             format: int32
+            maximum: 9223372036854775807
+            minimum: 0
           example: 1
         - name: target
           in: query
           description: Target version
           required: true
           schema:
-            maximum: 9223372036854775807
-            minimum: 0
             type: integer
             format: int32
+            maximum: 9223372036854775807
+            minimum: 0
           example: 2
       responses:
         "200":
@@ -379,6 +379,12 @@ components:
     Problem:
       type: object
       properties:
+        title:
+          type: string
+        detail:
+          type: string
+        status:
+          $ref: "#/components/schemas/StatusType"
         instance:
           type: string
           format: uri
@@ -387,14 +393,7 @@ components:
           format: uri
         parameters:
           type: object
-          additionalProperties:
-            type: object
-        status:
-          $ref: "#/components/schemas/StatusType"
-        title:
-          type: string
-        detail:
-          type: string
+          additionalProperties: { }
     StatusType:
       type: object
       properties:
@@ -443,15 +442,14 @@ components:
           type: string
         message:
           type: string
+        detail:
+          type: string
         instance:
           type: string
           format: uri
         parameters:
           type: object
-          additionalProperties:
-            type: object
-        detail:
-          type: string
+          additionalProperties: { }
         suppressed:
           type: array
           items:
@@ -488,8 +486,7 @@ components:
     ThrowableProblem:
       type: object
       properties:
-        cause:
-          $ref: "#/components/schemas/ThrowableProblem"
+        cause: { }
         stackTrace:
           type: array
           items:
@@ -514,6 +511,12 @@ components:
                 type: boolean
         message:
           type: string
+        title:
+          type: string
+        detail:
+          type: string
+        status:
+          $ref: "#/components/schemas/StatusType"
         instance:
           type: string
           format: uri
@@ -522,14 +525,7 @@ components:
           format: uri
         parameters:
           type: object
-          additionalProperties:
-            type: object
-        status:
-          $ref: "#/components/schemas/StatusType"
-        title:
-          type: string
-        detail:
-          type: string
+          additionalProperties: { }
         suppressed:
           type: array
           items:
@@ -571,6 +567,85 @@ components:
         message:
           type: string
     CreateNoteRequest:
+      type: object
+      description: CreateNoteRequest model
+      properties:
+        context:
+          type: string
+          description: Context for note
+          examples:
+            - SUPPORT
+          maxLength: 255
+          minLength: 1
+        role:
+          type: string
+          description: Role of note creator
+          examples:
+            - FIRST_LINE_SUPPORT
+          maxLength: 255
+          minLength: 1
+        clientId:
+          type: string
+          description: Id of the client who is the owner of the note
+          examples:
+            - SUPPORT_MGMT
+          maxLength: 255
+          minLength: 1
+        partyId:
+          type: string
+          description: Party id (e.g. a personId or an organizationId)
+          examples:
+            - 81471222-5798-11e9-ae24-57fa13b361e1
+        subject:
+          type: string
+          description: The note subject
+          examples:
+            - This is a subject
+          exclusiveMaximum: 256
+          maxLength: 255
+          minLength: 1
+        body:
+          type: string
+          description: The note body
+          examples:
+            - This is a note
+          exclusiveMaximum: 2049
+          maxLength: 2048
+          minLength: 1
+        createdBy:
+          type: string
+          description: Created by
+          examples:
+            - John Doe
+          minLength: 1
+        caseId:
+          type: string
+          description: Id for the case
+          examples:
+            - "12345"
+          maxLength: 255
+          minLength: 1
+        caseType:
+          type: string
+          description: Type of the case
+          examples:
+            - Byggärende
+          maxLength: 255
+          minLength: 1
+        caseLink:
+          type: string
+          description: Link to the case
+          examples:
+            - http://caselink.com/12345
+          maxLength: 512
+          minLength: 1
+        externalCaseId:
+          type: string
+          description: External id for the case
+          examples:
+            - "2229"
+          maxLength: 255
+          minLength: 1
       required:
         - body
         - clientId
@@ -578,227 +653,240 @@ components:
         - createdBy
         - role
         - subject
-      type: object
-      properties:
-        context:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Context for note
-        role:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Role of note creator
-        clientId:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Id of the client who is the owner of the note
-        partyId:
-          type: string
-          description: Party id (e.g. a personId or an organizationId)
-        subject:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: The note subject
-        body:
-          maxLength: 2048
-          minLength: 1
-          type: string
-          description: The note body
-        createdBy:
-          minLength: 1
-          type: string
-          description: Created by
-        caseId:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Id for the case
-        caseType:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: Type of the case
-        caseLink:
-          maxLength: 512
-          minLength: 1
-          type: string
-          description: Link to the case
-        externalCaseId:
-          maxLength: 255
-          minLength: 1
-          type: string
-          description: External id for the case
-      description: CreateNoteRequest model
     UpdateNoteRequest:
-      required:
-        - modifiedBy
       type: object
+      description: UpdateNoteRequest model
       properties:
         subject:
-          maxLength: 255
-          minLength: 1
           type: string
           description: The note subject
-        body:
-          maxLength: 2048
+          examples:
+            - This is a subject
+          exclusiveMaximum: 256
+          maxLength: 255
           minLength: 1
+        body:
           type: string
           description: The note body
-        modifiedBy:
+          examples:
+            - This is a note
+          exclusiveMaximum: 2049
+          maxLength: 2048
           minLength: 1
+        modifiedBy:
           type: string
           description: Modified by
-        caseId:
-          maxLength: 255
+          examples:
+            - John Doe
           minLength: 1
+        caseId:
           type: string
           description: Id for the case
-        caseType:
+          examples:
+            - "12345"
           maxLength: 255
           minLength: 1
+        caseType:
           type: string
           description: Type of the case
-        caseLink:
-          maxLength: 512
-          minLength: 1
-          type: string
-          description: Link to the case
-        externalCaseId:
+          examples:
+            - Byggärende
           maxLength: 255
           minLength: 1
+        caseLink:
+          type: string
+          description: Link to the case
+          examples:
+            - http://caselink.com/12345
+          maxLength: 512
+          minLength: 1
+        externalCaseId:
           type: string
           description: External id for the case
-      description: UpdateNoteRequest model
+          examples:
+            - "2229"
+          maxLength: 255
+          minLength: 1
+      required:
+        - modifiedBy
     Note:
       type: object
+      description: Note model
       properties:
         id:
           type: string
           description: Note ID
+          examples:
+            - b82bd8ac-1507-4d9a-958d-369261eecc15
         context:
           type: string
           description: Context for note
+          examples:
+            - SUPPORT
         role:
           type: string
           description: Role of note creator
+          examples:
+            - FIRST_LINE_SUPPORT
         clientId:
           type: string
           description: Id of the client who is the owner of the note
+          examples:
+            - SUPPORT_MGMT
         partyId:
           type: string
           description: Party ID (e.g. a personId or an organizationId)
+          examples:
+            - 81471222-5798-11e9-ae24-57fa13b361e1
         subject:
           type: string
           description: The note subject
+          examples:
+            - This is a subject
         body:
           type: string
           description: The note body
+          examples:
+            - This is a note
         caseId:
           type: string
           description: Id for the case
+          examples:
+            - "12345"
         caseType:
           type: string
           description: Type of the case
+          examples:
+            - Byggärende
         caseLink:
           type: string
           description: Link to the case
+          examples:
+            - http://caselink.com/12345
         externalCaseId:
           type: string
           description: External id for the case
+          examples:
+            - "2229"
         createdBy:
           type: string
           description: Created by
+          examples:
+            - John Doe
         modifiedBy:
           type: string
           description: Modified by
+          examples:
+            - John Doe
         created:
           type: string
-          description: Created timestamp
           format: date-time
+          description: Created timestamp
         modified:
           type: string
-          description: Modified timestamp
           format: date-time
-      description: Note model
+          description: Modified timestamp
     FindNotesRequest:
       type: object
+      description: FindNotesRequest model
       properties:
         context:
           type: string
           description: Context for note
+          examples:
+            - SUPPORT
         role:
           type: string
           description: Role of note creator
+          examples:
+            - FIRST_LINE_SUPPORT
         clientId:
           type: string
           description: Id of the client who is the owner of the note
+          examples:
+            - SUPPORT_MGMT
         partyId:
           type: string
           description: Party id (e.g. a personId or an organizationId)
+          examples:
+            - 81471222-5798-11e9-ae24-57fa13b361e1
         caseId:
           type: string
           description: Id for the case
+          examples:
+            - "12345"
         page:
-          minimum: 1
           type: integer
-          description: Page number
           format: int32
           default: 1
-        limit:
-          maximum: 1000
+          description: Page number
+          examples:
+            - "1"
           minimum: 1
+        limit:
           type: integer
-          description: Result size per page
           format: int32
           default: 100
-      description: FindNotesRequest model
+          description: Result size per page
+          examples:
+            - "100"
+          maximum: 1000
+          minimum: 1
     FindNotesResponse:
       type: object
+      description: FindNotesResponse model
       properties:
         notes:
           type: array
-          readOnly: true
           items:
             $ref: "#/components/schemas/Note"
+            readOnly: true
+          readOnly: true
         _meta:
           $ref: "#/components/schemas/MetaData"
-      description: FindNotesResponse model
+          readOnly: true
     MetaData:
       type: object
+      description: Metadata model
       properties:
         page:
           type: integer
-          description: Current page
           format: int32
+          description: Current page
+          examples:
+            - "5"
           readOnly: true
         limit:
           type: integer
-          description: Displayed objects per page
           format: int32
+          description: Displayed objects per page
+          examples:
+            - "20"
           readOnly: true
         count:
           type: integer
-          description: Displayed objects on current page
           format: int32
+          description: Displayed objects on current page
+          examples:
+            - "13"
           readOnly: true
         totalRecords:
           type: integer
-          description: Total amount of hits based on provided search parameters
           format: int64
+          description: Total amount of hits based on provided search parameters
+          examples:
+            - "98"
           readOnly: true
         totalPages:
           type: integer
-          description: Total amount of pages based on provided search parameters
           format: int32
+          description: Total amount of pages based on provided search parameters
+          examples:
+            - "23"
           readOnly: true
-      description: Metadata model
-      readOnly: true
     Revision:
       type: object
+      description: Revision model
       properties:
         id:
           type: string
@@ -811,37 +899,44 @@ components:
           description: Type of entity connected to the created revision
         version:
           type: integer
-          description: Revision version
           format: int32
+          description: Revision version
         created:
           type: string
-          description: Created timestamp
           format: date-time
-      description: Revision model
+          description: Created timestamp
     DifferenceResponse:
       type: object
+      description: DifferenceResponse model
       properties:
         operations:
           type: array
-          readOnly: true
           items:
             $ref: "#/components/schemas/Operation"
-      description: DifferenceResponse model
+            readOnly: true
+          readOnly: true
     Operation:
       type: object
+      description: Operation model
       properties:
         op:
           type: string
           description: Type of operation
+          examples:
+            - replace
         path:
           type: string
           description: Path to attribute
+          examples:
+            - /name/firstName
         value:
           type: string
           description: Value of attribute
+          examples:
+            - John
         fromValue:
           type: string
           description: Previous value of attribute
-      description: Operation model
-      readOnly: true
+          examples:
+            - John
   securitySchemes: { }
