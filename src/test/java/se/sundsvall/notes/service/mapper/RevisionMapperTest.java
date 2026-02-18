@@ -1,10 +1,5 @@
 package se.sundsvall.notes.service.mapper;
 
-import static java.time.OffsetDateTime.now;
-import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -14,6 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import se.sundsvall.notes.api.model.Revision;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
+
+import static java.time.OffsetDateTime.now;
+import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 @ExtendWith(MockitoExtension.class)
 class RevisionMapperTest {

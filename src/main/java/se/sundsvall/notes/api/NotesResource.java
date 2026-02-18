@@ -1,19 +1,5 @@
 package se.sundsvall.notes.api;
 
-import static java.util.Optional.ofNullable;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpHeaders.LOCATION;
-import static org.springframework.http.MediaType.ALL_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
-import static org.springframework.http.ResponseEntity.created;
-import static org.springframework.http.ResponseEntity.noContent;
-import static org.springframework.http.ResponseEntity.ok;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_REVISION;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_VERSION;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_REVISION;
-import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_VERSION;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -46,6 +32,20 @@ import se.sundsvall.notes.api.model.Note;
 import se.sundsvall.notes.api.model.RevisionInformation;
 import se.sundsvall.notes.api.model.UpdateNoteRequest;
 import se.sundsvall.notes.service.NoteService;
+
+import static java.util.Optional.ofNullable;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpHeaders.LOCATION;
+import static org.springframework.http.MediaType.ALL_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
+import static org.springframework.http.ResponseEntity.created;
+import static org.springframework.http.ResponseEntity.noContent;
+import static org.springframework.http.ResponseEntity.ok;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_REVISION;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_CURRENT_VERSION;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_REVISION;
+import static se.sundsvall.notes.service.ServiceConstants.KEY_PREVIOUS_VERSION;
 
 @RestController
 @Validated
