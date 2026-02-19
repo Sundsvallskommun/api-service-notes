@@ -1,9 +1,5 @@
 package se.sundsvall.notes.api;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
-import static org.springframework.http.ResponseEntity.ok;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,6 +22,10 @@ import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
 import se.sundsvall.notes.api.model.DifferenceResponse;
 import se.sundsvall.notes.api.model.Revision;
 import se.sundsvall.notes.service.RevisionService;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
+import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @Validated

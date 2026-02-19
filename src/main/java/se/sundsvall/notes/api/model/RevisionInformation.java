@@ -1,8 +1,8 @@
 package se.sundsvall.notes.api.model;
 
-import static java.util.Objects.nonNull;
-
 import java.util.Objects;
+
+import static java.util.Objects.nonNull;
 
 public class RevisionInformation {
 

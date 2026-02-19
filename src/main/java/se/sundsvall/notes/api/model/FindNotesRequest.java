@@ -1,12 +1,12 @@
 package se.sundsvall.notes.api.model;
 
-import static java.lang.Integer.parseInt;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.Objects;
 import se.sundsvall.dept44.common.validators.annotation.ValidUuid;
+
+import static java.lang.Integer.parseInt;
 
 @Schema(description = "FindNotesRequest model")
 public class FindNotesRequest {

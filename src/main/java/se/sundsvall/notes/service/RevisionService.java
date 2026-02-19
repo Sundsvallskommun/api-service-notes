@@ -1,15 +1,5 @@
 package se.sundsvall.notes.service;
 
-import static com.flipkart.zjsonpatch.DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE;
-import static com.flipkart.zjsonpatch.DiffFlags.OMIT_VALUE_ON_REMOVE;
-import static org.apache.commons.lang3.ObjectUtils.anyNull;
-import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
-import static org.zalando.problem.Status.NOT_FOUND;
-import static se.sundsvall.notes.service.ServiceConstants.PROBLEM_DURING_DIFF;
-import static se.sundsvall.notes.service.ServiceConstants.REVISION_NOT_FOUND_FOR_ID_AND_VERSION;
-import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevision;
-import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionList;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.zjsonpatch.DiffFlags;
@@ -28,6 +18,16 @@ import se.sundsvall.notes.api.model.Revision;
 import se.sundsvall.notes.integration.db.RevisionRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
+
+import static com.flipkart.zjsonpatch.DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE;
+import static com.flipkart.zjsonpatch.DiffFlags.OMIT_VALUE_ON_REMOVE;
+import static org.apache.commons.lang3.ObjectUtils.anyNull;
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
+import static org.zalando.problem.Status.NOT_FOUND;
+import static se.sundsvall.notes.service.ServiceConstants.PROBLEM_DURING_DIFF;
+import static se.sundsvall.notes.service.ServiceConstants.REVISION_NOT_FOUND_FOR_ID_AND_VERSION;
+import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevision;
+import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevisionList;
 
 @Service
 @Transactional
