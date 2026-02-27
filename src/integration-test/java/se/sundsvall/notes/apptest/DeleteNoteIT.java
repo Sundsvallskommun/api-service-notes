@@ -3,7 +3,6 @@ package se.sundsvall.notes.apptest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
@@ -13,6 +12,8 @@ import se.sundsvall.notes.integration.db.NoteRepository;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 /**
  * Delete note apptests.
@@ -39,7 +40,7 @@ class DeleteNoteIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath("/2281/notes/".concat(id))
 			.withHttpMethod(HttpMethod.DELETE)
-			.withExpectedResponseStatus(HttpStatus.NO_CONTENT)
+			.withExpectedResponseStatus(NO_CONTENT)
 			.withExpectedResponseHeader("x-current-revision", List.of("2103ac13-1691-4017-b6c6-78fa75ff68fc"))
 			.withExpectedResponseHeader("x-current-version", List.of("1"))
 			.sendRequestAndVerifyResponse();
@@ -56,7 +57,7 @@ class DeleteNoteIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath("/2281/notes/".concat(id))
 			.withHttpMethod(HttpMethod.DELETE)
-			.withExpectedResponseStatus(HttpStatus.NOT_FOUND)
+			.withExpectedResponseStatus(NOT_FOUND)
 			.withExpectedResponse("response.json")
 			.sendRequestAndVerifyResponse();
 	}

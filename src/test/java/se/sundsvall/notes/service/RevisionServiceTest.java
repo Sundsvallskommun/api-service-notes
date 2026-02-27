@@ -1,13 +1,9 @@
 package se.sundsvall.notes.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -16,12 +12,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.zalando.problem.ThrowableProblem;
+import se.sundsvall.dept44.problem.ThrowableProblem;
 import se.sundsvall.notes.api.model.Operation;
 import se.sundsvall.notes.api.model.Revision;
 import se.sundsvall.notes.integration.db.RevisionRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
+import tools.jackson.databind.ObjectMapper;
 
 import static java.time.OffsetDateTime.now;
 import static java.util.Optional.empty;
@@ -33,7 +30,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ExtendWith(MockitoExtension.class)
 class RevisionServiceTest {
@@ -50,13 +47,8 @@ class RevisionServiceTest {
 	@Captor
 	private ArgumentCaptor<RevisionEntity> revisionEntityCaptor;
 
-	@BeforeEach
-	void setup() {
-		objectMapperSpy.registerModule(new JavaTimeModule());
-	}
-
 	@Test
-	void createRevision() throws JsonProcessingException {
+	void createRevision() {
 
 		// Arrange
 		final var noteEntity = createNoteEntity();
@@ -112,7 +104,7 @@ class RevisionServiceTest {
 	}
 
 	@Test
-	void createRevisionNoChangeFromPreviousVersionDetected() throws JsonProcessingException {
+	void createRevisionNoChangeFromPreviousVersionDetected() {
 
 		// Arrange
 		final var noteEntity = createNoteEntity();
@@ -133,7 +125,7 @@ class RevisionServiceTest {
 	}
 
 	@Test
-	void createRevisionSnapshotIsInvalidJson() throws JsonProcessingException {
+	void createRevisionSnapshotIsInvalidJson() {
 
 		// Arrange
 		final var noteEntity = createNoteEntity();
@@ -181,7 +173,7 @@ class RevisionServiceTest {
 	}
 
 	@Test
-	void diff() throws JsonProcessingException {
+	void diff() {
 
 		// Arrange
 		final var entityId = UUID.randomUUID().toString();
@@ -213,7 +205,7 @@ class RevisionServiceTest {
 				Operation::getPath,
 				Operation::getValue,
 				Operation::getFromValue)
-			.containsExactly(
+			.containsExactlyInAnyOrder(
 				tuple("replace", "/modifiedBy", "user22", null),
 				tuple("replace", "/body", "changed body", "body"));
 
@@ -274,9 +266,9 @@ class RevisionServiceTest {
 			.withSubject("subject");
 	}
 
-	private String toJsonString(final NoteEntity entity) throws JsonProcessingException {
+	private String toJsonString(final NoteEntity entity) {
 		return new ObjectMapper()
-			.registerModule(new JavaTimeModule())
+
 			.writeValueAsString(entity);
 	}
 }

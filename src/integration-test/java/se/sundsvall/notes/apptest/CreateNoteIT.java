@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.notes.Application;
@@ -18,6 +17,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 import static org.springframework.http.HttpHeaders.LOCATION;
+import static org.springframework.http.HttpStatus.CREATED;
 
 /**
  * Create note apptests.
@@ -45,7 +45,7 @@ class CreateNoteIT extends AbstractAppTest {
 			.withServicePath("/2281/notes")
 			.withHttpMethod(HttpMethod.POST)
 			.withRequest(REQUEST)
-			.withExpectedResponseStatus(HttpStatus.CREATED)
+			.withExpectedResponseStatus(CREATED)
 			.withExpectedResponseHeader(LOCATION, List.of("^/2281/notes/(.*)$"))
 			.withExpectedResponseHeader("x-current-revision", List.of("(.*)-(.*)-(.*)-(.*)-(.*)"))
 			.withExpectedResponseHeader("x-current-version", List.of("0"))
@@ -79,7 +79,7 @@ class CreateNoteIT extends AbstractAppTest {
 			.withServicePath("/2281/notes")
 			.withHttpMethod(HttpMethod.POST)
 			.withRequest(REQUEST)
-			.withExpectedResponseStatus(HttpStatus.CREATED)
+			.withExpectedResponseStatus(CREATED)
 			.withExpectedResponseHeader(LOCATION, List.of("^/2281/notes/(.*)$"))
 			.withExpectedResponseHeader("x-current-revision", List.of("(.*)-(.*)-(.*)-(.*)-(.*)"))
 			.withExpectedResponseHeader("x-current-version", List.of("0"))

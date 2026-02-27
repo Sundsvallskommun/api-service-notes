@@ -13,8 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.zalando.problem.Status;
-import org.zalando.problem.ThrowableProblem;
+import se.sundsvall.dept44.problem.ThrowableProblem;
 import se.sundsvall.notes.api.model.CreateNoteRequest;
 import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.api.model.Note;
@@ -36,6 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static se.sundsvall.notes.service.ServiceConstants.ERROR_NOTE_NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
@@ -171,8 +171,8 @@ class NoteServiceTest {
 
 		// Verification
 		assertThat(problem).isNotNull();
-		assertThat(problem.getTitle()).isEqualTo(Status.NOT_FOUND.getReasonPhrase());
-		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
+		assertThat(problem.getTitle()).isEqualTo(NOT_FOUND.getReasonPhrase());
+		assertThat(problem.getStatus()).isEqualTo(NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
 		verify(noteRepositoryMock).findByIdAndMunicipalityId(id, MUNICIPALITY_ID);
 		verifyNoInteractions(revisionServiceMock);
@@ -213,8 +213,8 @@ class NoteServiceTest {
 
 		// Verification
 		assertThat(problem).isNotNull();
-		assertThat(problem.getTitle()).isEqualTo(Status.NOT_FOUND.getReasonPhrase());
-		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
+		assertThat(problem.getTitle()).isEqualTo(NOT_FOUND.getReasonPhrase());
+		assertThat(problem.getStatus()).isEqualTo(NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
 		verifyNoInteractions(revisionServiceMock);
 	}
@@ -258,8 +258,8 @@ class NoteServiceTest {
 
 		// Verification
 		assertThat(problem).isNotNull();
-		assertThat(problem.getTitle()).isEqualTo(Status.NOT_FOUND.getReasonPhrase());
-		assertThat(problem.getStatus()).isEqualTo(Status.NOT_FOUND);
+		assertThat(problem.getTitle()).isEqualTo(NOT_FOUND.getReasonPhrase());
+		assertThat(problem.getStatus()).isEqualTo(NOT_FOUND);
 		assertThat(problem.getDetail()).isEqualTo(format(ERROR_NOTE_NOT_FOUND, id));
 		verify(noteRepositoryMock).findByIdAndMunicipalityId(id, MUNICIPALITY_ID);
 		verifyNoInteractions(revisionServiceMock);

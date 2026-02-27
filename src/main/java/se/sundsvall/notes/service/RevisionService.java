@@ -1,29 +1,28 @@
 package se.sundsvall.notes.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.zjsonpatch.DiffFlags;
-import com.flipkart.zjsonpatch.JsonDiff;
-import java.io.IOException;
+import com.flipkart.zjsonpatch.Jackson3JsonDiff;
 import java.util.EnumSet;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.problem.Problem;
+import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.notes.api.model.DifferenceResponse;
 import se.sundsvall.notes.api.model.Operation;
 import se.sundsvall.notes.api.model.Revision;
 import se.sundsvall.notes.integration.db.RevisionRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
 import se.sundsvall.notes.integration.db.model.RevisionEntity;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import static com.flipkart.zjsonpatch.DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE;
 import static com.flipkart.zjsonpatch.DiffFlags.OMIT_VALUE_ON_REMOVE;
 import static org.apache.commons.lang3.ObjectUtils.anyNull;
-import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
-import static org.zalando.problem.Status.NOT_FOUND;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static se.sundsvall.notes.service.ServiceConstants.PROBLEM_DURING_DIFF;
 import static se.sundsvall.notes.service.ServiceConstants.REVISION_NOT_FOUND_FOR_ID_AND_VERSION;
 import static se.sundsvall.notes.service.mapper.RevisionMapper.toRevision;
@@ -65,16 +64,14 @@ public class RevisionService {
 			final var revisionEntity2 = revisionRepository.findByEntityIdAndMunicipalityIdAndVersion(noteEntityId, municipalityId, target)
 				.orElseThrow(() -> Problem.valueOf(NOT_FOUND, REVISION_NOT_FOUND_FOR_ID_AND_VERSION.formatted(noteEntityId, target)));
 
-			// Deserialize revision JSON into a JsonNode.
 			final var sourceJson = objectMapper.readTree(revisionEntity1.getSerializedSnapshot());
 			final var targetJson = objectMapper.readTree(revisionEntity2.getSerializedSnapshot());
 
-			// Perform diff of the two JsonNodes.
-			final var diffResult = JsonDiff.asJson(sourceJson, targetJson, DIFF_FLAGS).toString();
+			final var diffResult = Jackson3JsonDiff.asJson(sourceJson, targetJson, DIFF_FLAGS).toString();
 
 			// Return result.
 			return DifferenceResponse.create().withOperations(List.of(objectMapper.readValue(diffResult, Operation[].class)));
-		} catch (final IOException e) {
+		} catch (final Exception e) {
 			LOG.error("Error occurred during diff: ", e);
 			throw Problem.valueOf(INTERNAL_SERVER_ERROR, PROBLEM_DURING_DIFF.formatted(noteEntityId, source, target));
 		}
@@ -139,7 +136,7 @@ public class RevisionService {
 	private String toJsonString(final NoteEntity entity) {
 		try {
 			return objectMapper.writeValueAsString(entity);
-		} catch (final JsonProcessingException e) {
+		} catch (final JacksonException e) {
 			LOG.error("Error during serialization of entity into JSON string!", e);
 		}
 

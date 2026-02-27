@@ -1,39 +1,39 @@
 openapi: 3.1.0
 info:
   title: api-notes
-  contact: { }
+  contact: {}
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
   version: "4.1"
 servers:
-  - url: http://localhost:52513
-    description: Generated server url
+- url: http://localhost:62446
+  description: Generated server url
 tags:
-  - name: Notes
-    description: Note operations
-  - name: Revisions
-    description: Revision operations
+- name: Notes
+  description: Note operations
+- name: Revisions
+  description: Revision operations
 paths:
   /{municipalityId}/notes:
     get:
       tags:
-        - Notes
+      - Notes
       summary: Find all notes filtered by incoming parameters
       operationId: findNotes
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: searchParams
-          in: query
-          required: true
-          schema:
-            $ref: "#/components/schemas/FindNotesRequest"
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: searchParams
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/FindNotesRequest"
       responses:
         "200":
           description: Successful operation
@@ -47,8 +47,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "500":
           description: Internal Server error
           content:
@@ -57,17 +57,17 @@ paths:
                 $ref: "#/components/schemas/Problem"
     post:
       tags:
-        - Notes
+      - Notes
       summary: Create new note
       operationId: createNote
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
       requestBody:
         content:
           application/json:
@@ -88,8 +88,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "500":
           description: Internal Server error
           content:
@@ -99,24 +99,24 @@ paths:
   /{municipalityId}/notes/{id}:
     get:
       tags:
-        - Notes
+      - Notes
       summary: Get note by ID
       operationId: getNoteByIdAndMunicipalityId
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: id
-          in: path
-          description: Note ID
-          required: true
-          schema:
-            type: string
-          example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: id
+        in: path
+        description: Note ID
+        required: true
+        schema:
+          type: string
+        example: b82bd8ac-1507-4d9a-958d-369261eecc15
       responses:
         "200":
           description: Successful operation
@@ -130,8 +130,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "404":
           description: Not found
           content:
@@ -146,24 +146,24 @@ paths:
                 $ref: "#/components/schemas/Problem"
     delete:
       tags:
-        - Notes
+      - Notes
       summary: Delete note by ID
       operationId: deleteNoteByIdAndMunicipalityId
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: id
-          in: path
-          description: Note ID
-          required: true
-          schema:
-            type: string
-          example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: id
+        in: path
+        description: Note ID
+        required: true
+        schema:
+          type: string
+        example: b82bd8ac-1507-4d9a-958d-369261eecc15
       responses:
         "204":
           description: Successful operation
@@ -173,8 +173,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "404":
           description: Not found
           content:
@@ -189,24 +189,24 @@ paths:
                 $ref: "#/components/schemas/Problem"
     patch:
       tags:
-        - Notes
+      - Notes
       summary: Update note
       operationId: updateNote
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: id
-          in: path
-          description: Note ID
-          required: true
-          schema:
-            type: string
-          example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: id
+        in: path
+        description: Note ID
+        required: true
+        schema:
+          type: string
+        example: b82bd8ac-1507-4d9a-958d-369261eecc15
       requestBody:
         content:
           application/json:
@@ -226,8 +226,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "404":
           description: Not found
           content:
@@ -243,24 +243,24 @@ paths:
   /{municipalityId}/notes/{id}/revisions:
     get:
       tags:
-        - Revisions
+      - Revisions
       summary: Get revisions by note ID
       operationId: getRevisionsByNoteId
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: id
-          in: path
-          description: Note ID
-          required: true
-          schema:
-            type: string
-          example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: id
+        in: path
+        description: Note ID
+        required: true
+        schema:
+          type: string
+        example: b82bd8ac-1507-4d9a-958d-369261eecc15
       responses:
         "200":
           description: Successful operation
@@ -276,8 +276,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "404":
           description: Not found
           content:
@@ -293,44 +293,44 @@ paths:
   /{municipalityId}/notes/{id}/revisions/difference:
     get:
       tags:
-        - Revisions
+      - Revisions
       summary: "Diff revisions by noteId, source and target version"
       operationId: getDifferenceByVersions
       parameters:
-        - name: municipalityId
-          in: path
-          description: Municipality id
-          required: true
-          schema:
-            type: string
-          example: 2281
-        - name: id
-          in: path
-          description: Note ID
-          required: true
-          schema:
-            type: string
-          example: b82bd8ac-1507-4d9a-958d-369261eecc15
-        - name: source
-          in: query
-          description: Source version
-          required: true
-          schema:
-            type: integer
-            format: int32
-            maximum: 9223372036854775807
-            minimum: 0
-          example: 1
-        - name: target
-          in: query
-          description: Target version
-          required: true
-          schema:
-            type: integer
-            format: int32
-            maximum: 9223372036854775807
-            minimum: 0
-          example: 2
+      - name: municipalityId
+        in: path
+        description: Municipality id
+        required: true
+        schema:
+          type: string
+        example: 2281
+      - name: id
+        in: path
+        description: Note ID
+        required: true
+        schema:
+          type: string
+        example: b82bd8ac-1507-4d9a-958d-369261eecc15
+      - name: source
+        in: query
+        description: Source version
+        required: true
+        schema:
+          type: integer
+          format: int32
+          maximum: 9223372036854775807
+          minimum: 0
+        example: 1
+      - name: target
+        in: query
+        description: Target version
+        required: true
+        schema:
+          type: integer
+          format: int32
+          maximum: 9223372036854775807
+          minimum: 0
+        example: 2
       responses:
         "200":
           description: Successful operation
@@ -344,8 +344,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Problem"
-                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+                - $ref: "#/components/schemas/Problem"
+                - $ref: "#/components/schemas/ConstraintViolationProblem"
         "404":
           description: Not found
           content:
@@ -361,7 +361,7 @@ paths:
   /api-docs:
     get:
       tags:
-        - API
+      - API
       summary: OpenAPI
       operationId: getApiDocs
       responses:
@@ -383,182 +383,54 @@ components:
           type: string
         detail:
           type: string
-        status:
-          $ref: "#/components/schemas/StatusType"
         instance:
           type: string
           format: uri
         type:
           type: string
           format: uri
-        parameters:
-          type: object
-          additionalProperties: { }
-    StatusType:
-      type: object
-      properties:
-        statusCode:
+        status:
           type: integer
           format: int32
-        reasonPhrase:
-          type: string
     ConstraintViolationProblem:
       type: object
       properties:
-        cause:
-          $ref: "#/components/schemas/ThrowableProblem"
-        stackTrace:
-          type: array
-          items:
-            type: object
-            properties:
-              classLoaderName:
-                type: string
-              moduleName:
-                type: string
-              moduleVersion:
-                type: string
-              methodName:
-                type: string
-              fileName:
-                type: string
-              lineNumber:
-                type: integer
-                format: int32
-              className:
-                type: string
-              nativeMethod:
-                type: boolean
         type:
           type: string
           format: uri
         status:
-          $ref: "#/components/schemas/StatusType"
+          type: integer
+          format: int32
         violations:
           type: array
           items:
             $ref: "#/components/schemas/Violation"
         title:
           type: string
-        message:
-          type: string
         detail:
           type: string
+        causeAsProblem:
+          $ref: "#/components/schemas/ThrowableProblem"
         instance:
           type: string
           format: uri
-        parameters:
-          type: object
-          additionalProperties: { }
-        suppressed:
-          type: array
-          items:
-            type: object
-            properties:
-              stackTrace:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    classLoaderName:
-                      type: string
-                    moduleName:
-                      type: string
-                    moduleVersion:
-                      type: string
-                    methodName:
-                      type: string
-                    fileName:
-                      type: string
-                    lineNumber:
-                      type: integer
-                      format: int32
-                    className:
-                      type: string
-                    nativeMethod:
-                      type: boolean
-              message:
-                type: string
-              localizedMessage:
-                type: string
-        localizedMessage:
-          type: string
     ThrowableProblem:
       type: object
       properties:
-        cause: { }
-        stackTrace:
-          type: array
-          items:
-            type: object
-            properties:
-              classLoaderName:
-                type: string
-              moduleName:
-                type: string
-              moduleVersion:
-                type: string
-              methodName:
-                type: string
-              fileName:
-                type: string
-              lineNumber:
-                type: integer
-                format: int32
-              className:
-                type: string
-              nativeMethod:
-                type: boolean
-        message:
-          type: string
-        title:
-          type: string
-        detail:
-          type: string
-        status:
-          $ref: "#/components/schemas/StatusType"
-        instance:
-          type: string
-          format: uri
         type:
           type: string
           format: uri
-        parameters:
-          type: object
-          additionalProperties: { }
-        suppressed:
-          type: array
-          items:
-            type: object
-            properties:
-              stackTrace:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    classLoaderName:
-                      type: string
-                    moduleName:
-                      type: string
-                    moduleVersion:
-                      type: string
-                    methodName:
-                      type: string
-                    fileName:
-                      type: string
-                    lineNumber:
-                      type: integer
-                      format: int32
-                    className:
-                      type: string
-                    nativeMethod:
-                      type: boolean
-              message:
-                type: string
-              localizedMessage:
-                type: string
-        localizedMessage:
+        title:
           type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        causeAsProblem: {}
     Violation:
       type: object
       properties:
@@ -574,33 +446,33 @@ components:
           type: string
           description: Context for note
           examples:
-            - SUPPORT
+          - SUPPORT
           maxLength: 255
           minLength: 1
         role:
           type: string
           description: Role of note creator
           examples:
-            - FIRST_LINE_SUPPORT
+          - FIRST_LINE_SUPPORT
           maxLength: 255
           minLength: 1
         clientId:
           type: string
           description: Id of the client who is the owner of the note
           examples:
-            - SUPPORT_MGMT
+          - SUPPORT_MGMT
           maxLength: 255
           minLength: 1
         partyId:
           type: string
           description: Party id (e.g. a personId or an organizationId)
           examples:
-            - 81471222-5798-11e9-ae24-57fa13b361e1
+          - 81471222-5798-11e9-ae24-57fa13b361e1
         subject:
           type: string
           description: The note subject
           examples:
-            - This is a subject
+          - This is a subject
           exclusiveMaximum: 256
           maxLength: 255
           minLength: 1
@@ -608,7 +480,7 @@ components:
           type: string
           description: The note body
           examples:
-            - This is a note
+          - This is a note
           exclusiveMaximum: 2049
           maxLength: 2048
           minLength: 1
@@ -616,43 +488,42 @@ components:
           type: string
           description: Created by
           examples:
-            - John Doe
-          minLength: 1
+          - John Doe
         caseId:
           type: string
           description: Id for the case
           examples:
-            - "12345"
+          - "12345"
           maxLength: 255
           minLength: 1
         caseType:
           type: string
           description: Type of the case
           examples:
-            - Byggärende
+          - Byggärende
           maxLength: 255
           minLength: 1
         caseLink:
           type: string
           description: Link to the case
           examples:
-            - http://caselink.com/12345
+          - http://caselink.com/12345
           maxLength: 512
           minLength: 1
         externalCaseId:
           type: string
           description: External id for the case
           examples:
-            - "2229"
+          - "2229"
           maxLength: 255
           minLength: 1
       required:
-        - body
-        - clientId
-        - context
-        - createdBy
-        - role
-        - subject
+      - body
+      - clientId
+      - context
+      - createdBy
+      - role
+      - subject
     UpdateNoteRequest:
       type: object
       description: UpdateNoteRequest model
@@ -661,7 +532,7 @@ components:
           type: string
           description: The note subject
           examples:
-            - This is a subject
+          - This is a subject
           exclusiveMaximum: 256
           maxLength: 255
           minLength: 1
@@ -669,7 +540,7 @@ components:
           type: string
           description: The note body
           examples:
-            - This is a note
+          - This is a note
           exclusiveMaximum: 2049
           maxLength: 2048
           minLength: 1
@@ -677,38 +548,37 @@ components:
           type: string
           description: Modified by
           examples:
-            - John Doe
-          minLength: 1
+          - John Doe
         caseId:
           type: string
           description: Id for the case
           examples:
-            - "12345"
+          - "12345"
           maxLength: 255
           minLength: 1
         caseType:
           type: string
           description: Type of the case
           examples:
-            - Byggärende
+          - Byggärende
           maxLength: 255
           minLength: 1
         caseLink:
           type: string
           description: Link to the case
           examples:
-            - http://caselink.com/12345
+          - http://caselink.com/12345
           maxLength: 512
           minLength: 1
         externalCaseId:
           type: string
           description: External id for the case
           examples:
-            - "2229"
+          - "2229"
           maxLength: 255
           minLength: 1
       required:
-        - modifiedBy
+      - modifiedBy
     Note:
       type: object
       description: Note model
@@ -717,67 +587,67 @@ components:
           type: string
           description: Note ID
           examples:
-            - b82bd8ac-1507-4d9a-958d-369261eecc15
+          - b82bd8ac-1507-4d9a-958d-369261eecc15
         context:
           type: string
           description: Context for note
           examples:
-            - SUPPORT
+          - SUPPORT
         role:
           type: string
           description: Role of note creator
           examples:
-            - FIRST_LINE_SUPPORT
+          - FIRST_LINE_SUPPORT
         clientId:
           type: string
           description: Id of the client who is the owner of the note
           examples:
-            - SUPPORT_MGMT
+          - SUPPORT_MGMT
         partyId:
           type: string
           description: Party ID (e.g. a personId or an organizationId)
           examples:
-            - 81471222-5798-11e9-ae24-57fa13b361e1
+          - 81471222-5798-11e9-ae24-57fa13b361e1
         subject:
           type: string
           description: The note subject
           examples:
-            - This is a subject
+          - This is a subject
         body:
           type: string
           description: The note body
           examples:
-            - This is a note
+          - This is a note
         caseId:
           type: string
           description: Id for the case
           examples:
-            - "12345"
+          - "12345"
         caseType:
           type: string
           description: Type of the case
           examples:
-            - Byggärende
+          - Byggärende
         caseLink:
           type: string
           description: Link to the case
           examples:
-            - http://caselink.com/12345
+          - http://caselink.com/12345
         externalCaseId:
           type: string
           description: External id for the case
           examples:
-            - "2229"
+          - "2229"
         createdBy:
           type: string
           description: Created by
           examples:
-            - John Doe
+          - John Doe
         modifiedBy:
           type: string
           description: Modified by
           examples:
-            - John Doe
+          - John Doe
         created:
           type: string
           format: date-time
@@ -794,34 +664,34 @@ components:
           type: string
           description: Context for note
           examples:
-            - SUPPORT
+          - SUPPORT
         role:
           type: string
           description: Role of note creator
           examples:
-            - FIRST_LINE_SUPPORT
+          - FIRST_LINE_SUPPORT
         clientId:
           type: string
           description: Id of the client who is the owner of the note
           examples:
-            - SUPPORT_MGMT
+          - SUPPORT_MGMT
         partyId:
           type: string
           description: Party id (e.g. a personId or an organizationId)
           examples:
-            - 81471222-5798-11e9-ae24-57fa13b361e1
+          - 81471222-5798-11e9-ae24-57fa13b361e1
         caseId:
           type: string
           description: Id for the case
           examples:
-            - "12345"
+          - "12345"
         page:
           type: integer
           format: int32
           default: 1
           description: Page number
           examples:
-            - "1"
+          - "1"
           minimum: 1
         limit:
           type: integer
@@ -829,7 +699,7 @@ components:
           default: 100
           description: Result size per page
           examples:
-            - "100"
+          - "100"
           maximum: 1000
           minimum: 1
     FindNotesResponse:
@@ -841,7 +711,6 @@ components:
           items:
             $ref: "#/components/schemas/Note"
             readOnly: true
-          readOnly: true
         _meta:
           $ref: "#/components/schemas/MetaData"
           readOnly: true
@@ -854,35 +723,35 @@ components:
           format: int32
           description: Current page
           examples:
-            - "5"
+          - "5"
           readOnly: true
         limit:
           type: integer
           format: int32
           description: Displayed objects per page
           examples:
-            - "20"
+          - "20"
           readOnly: true
         count:
           type: integer
           format: int32
           description: Displayed objects on current page
           examples:
-            - "13"
+          - "13"
           readOnly: true
         totalRecords:
           type: integer
           format: int64
           description: Total amount of hits based on provided search parameters
           examples:
-            - "98"
+          - "98"
           readOnly: true
         totalPages:
           type: integer
           format: int32
           description: Total amount of pages based on provided search parameters
           examples:
-            - "23"
+          - "23"
           readOnly: true
     Revision:
       type: object
@@ -914,7 +783,6 @@ components:
           items:
             $ref: "#/components/schemas/Operation"
             readOnly: true
-          readOnly: true
     Operation:
       type: object
       description: Operation model
@@ -923,20 +791,20 @@ components:
           type: string
           description: Type of operation
           examples:
-            - replace
+          - replace
         path:
           type: string
           description: Path to attribute
           examples:
-            - /name/firstName
+          - /name/firstName
         value:
           type: string
           description: Value of attribute
           examples:
-            - John
+          - John
         fromValue:
           type: string
           description: Previous value of attribute
           examples:
-            - John
-  securitySchemes: { }
+          - John
+  securitySchemes: {}
