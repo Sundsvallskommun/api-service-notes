@@ -3,7 +3,6 @@ package se.sundsvall.notes.apptest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
@@ -13,6 +12,8 @@ import se.sundsvall.notes.integration.db.RevisionRepository;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  * Update note apptests.
@@ -45,7 +46,7 @@ class UpdateNoteIT extends AbstractAppTest {
 			.withServicePath("/2281/notes/" + entityId)
 			.withHttpMethod(HttpMethod.PATCH)
 			.withRequest(REQUEST)
-			.withExpectedResponseStatus(HttpStatus.OK)
+			.withExpectedResponseStatus(OK)
 			.withExpectedResponseHeader("x-current-revision", List.of("(.*)-(.*)-(.*)-(.*)-(.*)"))
 			.withExpectedResponseHeader("x-current-version", List.of("1"))
 			.withExpectedResponseHeader("x-previous-revision", List.of("6e18bfaf-2480-424a-83c1-fb234c75befc"))
@@ -63,7 +64,7 @@ class UpdateNoteIT extends AbstractAppTest {
 			.withServicePath("/2281/notes/9eceeeb1-f939-441c-858f-da3deb05e578") // Id does not exist in DB.
 			.withHttpMethod(HttpMethod.PATCH)
 			.withRequest(REQUEST)
-			.withExpectedResponseStatus(HttpStatus.NOT_FOUND)
+			.withExpectedResponseStatus(NOT_FOUND)
 			.withExpectedResponse(RESPONSE)
 			.sendRequestAndVerifyResponse();
 	}

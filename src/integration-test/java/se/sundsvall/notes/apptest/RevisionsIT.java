@@ -2,11 +2,11 @@ package se.sundsvall.notes.apptest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.notes.Application;
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  * Note revisions apptests.
@@ -27,7 +27,7 @@ class RevisionsIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(REVISIONS_PATH)
 			.withHttpMethod(HttpMethod.GET)
-			.withExpectedResponseStatus(HttpStatus.OK)
+			.withExpectedResponseStatus(OK)
 			.withExpectedResponse("response.json")
 			.sendRequestAndVerifyResponse();
 	}
@@ -37,7 +37,7 @@ class RevisionsIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(REVISIONS_PATH + "/difference?source=1&target=2")
 			.withHttpMethod(HttpMethod.GET)
-			.withExpectedResponseStatus(HttpStatus.OK)
+			.withExpectedResponseStatus(OK)
 			.withExpectedResponse("response.json")
 			.sendRequestAndVerifyResponse();
 	}
@@ -47,7 +47,7 @@ class RevisionsIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(REVISIONS_PATH + "/difference?source=3&target=4")
 			.withHttpMethod(HttpMethod.GET)
-			.withExpectedResponseStatus(HttpStatus.OK)
+			.withExpectedResponseStatus(OK)
 			.withExpectedResponse("response.json")
 			.sendRequestAndVerifyResponse();
 	}
