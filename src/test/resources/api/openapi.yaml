@@ -489,6 +489,7 @@ components:
           description: Created by
           examples:
           - John Doe
+          minLength: 1
         caseId:
           type: string
           description: Id for the case
@@ -549,6 +550,7 @@ components:
           description: Modified by
           examples:
           - John Doe
+          minLength: 1
         caseId:
           type: string
           description: Id for the case
