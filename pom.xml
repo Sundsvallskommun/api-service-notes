@@ -15,7 +15,7 @@
 	<description>Service for handling notes</description>
 	<properties>
 		<!-- Service properties -->
-		<zjsonpatch.version>0.6.2</zjsonpatch.version>
+		<zjsonpatch.version>0.6.3</zjsonpatch.version>
 	</properties>
 	<dependencies>
 		<dependency>
