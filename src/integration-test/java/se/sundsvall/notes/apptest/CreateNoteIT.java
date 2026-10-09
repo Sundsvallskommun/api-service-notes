@@ -1,5 +1,6 @@
 package se.sundsvall.notes.apptest;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -11,8 +12,6 @@ import se.sundsvall.notes.api.model.FindNotesRequest;
 import se.sundsvall.notes.integration.db.NoteRepository;
 import se.sundsvall.notes.integration.db.RevisionRepository;
 import se.sundsvall.notes.integration.db.model.NoteEntity;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -26,7 +25,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 class CreateNoteIT extends AbstractAppTest {
 
 	private static final String MUNICIPALITY_ID = "2281";
-	private static final String REQUEST= "request.json";
+	private static final String REQUEST = "request.json";
 
 	@Autowired
 	private NoteRepository noteRepository;
